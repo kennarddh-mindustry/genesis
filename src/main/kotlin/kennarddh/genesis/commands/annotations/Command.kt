@@ -1,6 +1,6 @@
-package kennarddh.genisis.commands.annotations
+package kennarddh.genesis.commands.annotations
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
-annotation class ClientSide
+annotation class Command(val name: String)

@@ -17,7 +17,9 @@ val jabelVersion by extra { "93fde537c7" }
 dependencies {
     compileOnly("com.github.Anuken.Arc:arc-core:$mindustryVersion")
     compileOnly("com.github.Anuken.Mindustry:core:$mindustryVersion")
+    compileOnly("com.github.Anuken.Mindustry:server:$mindustryVersion")
     annotationProcessor("com.github.Anuken:jabel:$jabelVersion")
+    implementation(kotlin("reflect"))
 }
 
 kotlin {
@@ -34,5 +36,6 @@ tasks.register<Jar>("buildJAR") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     from(sourceSets.main.get().output)
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
     from(rootProject.fileTree("src/main/resources/"))
 }
