@@ -4,12 +4,14 @@ import arc.Core
 import arc.util.Log
 import arc.util.Reflect
 import arc.util.Timer
+import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.core.GameState
 import mindustry.game.Gamemode
+import mindustry.gen.Player
 import mindustry.maps.Map
 import mindustry.maps.MapException
 import mindustry.net.Administration
@@ -60,5 +62,11 @@ class ServerHandler : Handler() {
         } catch (e: MapException) {
             Log.err("@: @", e.map.plainName(), e.message)
         }
+    }
+
+    @Command("ping")
+    @ClientSide
+    fun ping(player: Player) {
+        player.sendMessage("Pong!")
     }
 }

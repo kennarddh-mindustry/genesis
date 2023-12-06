@@ -6,6 +6,7 @@ import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
+import mindustry.gen.Player
 import mindustry.server.ServerControl
 
 class CommandRegistry {
@@ -18,7 +19,7 @@ class CommandRegistry {
         })
 
         Reflect.set(Vars.netServer, "clientCommands", InterceptedCommandHandler("/") { command, player ->
-            parseClientCommand(command)
+            parseClientCommand(command, player!!)
         })
     }
 
@@ -42,7 +43,7 @@ class CommandRegistry {
         }
     }
 
-    fun parseServerCommand(commandString: String) {
+    private fun parseServerCommand(commandString: String) {
         val command = commands[commandString]
 
         if (!commands.contains(commandString)) {
@@ -58,7 +59,7 @@ class CommandRegistry {
         command!!.method.invoke(command.handler)
     }
 
-    fun parseClientCommand(commandString: String) {
+    private fun parseClientCommand(commandString: String, player: Player) {
         val command = commands[commandString]
 
         if (!commands.contains(commandString)) {
@@ -71,6 +72,6 @@ class CommandRegistry {
             return
         }
 
-        command!!.method.invoke(command.handler)
+        command!!.method.invoke(command.handler, player)
     }
 }
