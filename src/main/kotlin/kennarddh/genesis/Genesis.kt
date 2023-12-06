@@ -1,25 +1,10 @@
 package kennarddh.genesis
 
-import arc.util.CommandHandler
 import arc.util.Log
 import arc.util.Reflect
+import kennarddh.genesis.commands.InterceptedCommandHandler
 import mindustry.mod.Plugin
 import mindustry.server.ServerControl
-
-class CustomCommandHandler(prefix: String?) : CommandHandler(prefix) {
-    override fun handleMessage(message: String?, params: Any?): CommandResponse {
-        println("message: $message")
-        println("params: $params")
-
-        val result = super.handleMessage(message, params)
-
-        println("result.command: ${result.command}")
-        println("result.runCommand: ${result.runCommand}")
-        println("result.type: ${result.type}")
-
-        return result
-    }
-}
 
 @SuppressWarnings("unused")
 class Genesis : Plugin() {
@@ -28,7 +13,10 @@ class Genesis : Plugin() {
 
 //        println(ServerControl.instance.handler.handleMessage("mods"))
 
-        Reflect.set(ServerControl.instance, "handler", CustomCommandHandler(""))
+        Reflect.set(ServerControl.instance, "handler", InterceptedCommandHandler("") { command, player ->
+            println(command)
+            println(player)
+        })
 //        println(ServerControl.instance.handler.handleMessage("mods"))
 //        ServerControl.instance.handler = CustomCommandHandler("")
 
