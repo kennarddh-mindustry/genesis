@@ -3,9 +3,17 @@ package kennarddh.genesis.commands
 import arc.util.CommandHandler
 import mindustry.gen.Player
 
-val DummyValidCommandResponse = CommandHandler.CommandResponse(
+val dummyCommand = CommandHandler.Command("", "", "") { _, _ -> }
+
+val dummyValidCommandResponse = CommandHandler.CommandResponse(
     CommandHandler.ResponseType.valid,
-    CommandHandler.Command("", "", "") { _, _ -> },
+    dummyCommand,
+    ""
+)
+
+val dummyNoCommandResponse = CommandHandler.CommandResponse(
+    CommandHandler.ResponseType.noCommand,
+    dummyCommand,
     ""
 )
 
@@ -13,12 +21,12 @@ class InterceptedCommandHandler(prefix: String?, private val onIntercept: (Strin
     CommandHandler(prefix) {
     override fun handleMessage(commandWithPrefix: String, params: Any?): CommandResponse {
         if (!commandWithPrefix.startsWith(prefix))
-            return DummyValidCommandResponse
+            return dummyNoCommandResponse
 
         val command = commandWithPrefix.substring(prefix.length)
 
         onIntercept(command, if (params is Player) params else null)
 
-        return DummyValidCommandResponse
+        return dummyValidCommandResponse
     }
 }
