@@ -72,6 +72,9 @@ class CommandRegistry {
             return
         }
 
-        command!!.method.invoke(command.handler, player)
+        if (command!!.method.parameterCount > 0)
+            command.method.invoke(command.handler, player)
+        else
+            command.method.invoke(command.handler)
     }
 }

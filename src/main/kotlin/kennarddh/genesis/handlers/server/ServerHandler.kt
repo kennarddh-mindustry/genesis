@@ -69,4 +69,11 @@ class ServerHandler : Handler() {
     fun ping(player: Player) {
         player.sendMessage("Pong!")
     }
+
+    @Command("log")
+    @ClientSide
+    @ServerSide
+    fun log() {
+        Log.info("Log!")
+    }
 }
