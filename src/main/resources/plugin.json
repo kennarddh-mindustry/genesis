@@ -1,7 +1,7 @@
 {
-    "name": "MindustryPluginBoilerplate",
+    "name": "genesis",
     "author": "Kennarddh",
-    "main": "kennarddh.Main",
-    "description": "Description",
+    "main": "kennarddh.genesis.Genesis",
+    "description": "Plugin",
     "version": 1.0
 }
