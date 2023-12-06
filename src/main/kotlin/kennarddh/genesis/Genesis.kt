@@ -3,6 +3,7 @@ package kennarddh.genesis
 import arc.util.Log
 import kennarddh.genesis.commands.CommandRegistry
 import kennarddh.genesis.common.AbstractPlugin
+import kennarddh.genesis.handlers.server.ServerHandler
 
 @SuppressWarnings("unused")
 class Genesis : AbstractPlugin() {
@@ -12,5 +13,7 @@ class Genesis : AbstractPlugin() {
         val commandRegistry = CommandRegistry()
 
         commandRegistry.init()
+
+        commandRegistry.addHandler(ServerHandler())
     }
 }
