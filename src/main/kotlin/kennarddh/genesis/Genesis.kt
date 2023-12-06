@@ -2,11 +2,10 @@ package kennarddh.genesis
 
 import arc.util.Log
 import kennarddh.genesis.commands.CommandRegistry
-import mindustry.mod.Plugin
+import kennarddh.genesis.common.AbstractPlugin
 
 @SuppressWarnings("unused")
-class Genesis : Plugin() {
-
+class Genesis : AbstractPlugin() {
     override fun init() {
         Log.info("[Genesis] Loaded")
 
