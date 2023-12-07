@@ -5,6 +5,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
 data class CommandData(
+    val name: String,
     val sides: Array<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,

@@ -110,20 +110,35 @@ class CommandRegistry {
                 val parameterTypeKClass = commandFunctionParameter.type.classifier
 
                 if (parameterConverters.contains(parameterTypeKClass)) {
-                    parametersType.add(parameterConverters[parameterTypeKClass] as KClass<*>)
+                    parametersType.add(parameterTypeKClass as KClass<*>)
                 }
             }
 
-            commands[name] = CommandData(sides, handler, function, parametersType.toTypedArray())
+            commands[name] = CommandData(name, sides, handler, function, parametersType.toTypedArray())
         }
     }
 
-    private fun parseServerCommand(commandString: String) {
-        val command = commands[commandString]
+    private fun getCommandFromCommandString(commandString: String): CommandData? {
+        val splitted = commandString.split(" ")
 
-        val result = if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Server)) {
+        if (splitted.isEmpty()) return null
+
+        return commands[splitted[0]]
+    }
+
+    private fun removeCommandNameFromCommandString(command: CommandData, commandString: String): String {
+        return commandString.substring(command.name.length + 1)
+    }
+
+    private fun parseServerCommand(commandString: String) {
+        val command = getCommandFromCommandString(commandString)
+
+        val result = if (command == null || !command.sides.contains(CommandSide.Server)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
+            val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
+
+//            println("\"$commandStringWithoutCommandName\"")
             command.function.call(command.handler)
         }
 
@@ -131,11 +146,13 @@ class CommandRegistry {
     }
 
     private fun parseClientCommand(commandString: String, player: Player) {
-        val command = commands[commandString]
+        val command = getCommandFromCommandString(commandString)
 
-        val result = if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Client)) {
+        val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
+            val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
+
             if (!command.sides.contains(CommandSide.Server))
                 command.function.call(command.handler, player)
             else
