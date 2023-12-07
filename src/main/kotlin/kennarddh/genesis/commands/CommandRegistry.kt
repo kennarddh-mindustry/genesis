@@ -6,7 +6,20 @@ import arc.util.Reflect
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
+import kennarddh.genesis.commands.parameters.BooleanParameterConverter
+import kennarddh.genesis.commands.parameters.CharParameterConverter
+import kennarddh.genesis.commands.parameters.StringParameterConverter
 import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.signed.floating.DoubleParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.signed.floating.FloatParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.signed.integer.ByteParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.signed.integer.IntParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.signed.integer.LongParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.signed.integer.ShortParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.unsigned.integer.UByteParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.unsigned.integer.UIntParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.unsigned.integer.ULongParameterConverter
+import kennarddh.genesis.commands.parameters.numbers.unsigned.integer.UShortParameterConverter
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.handlers.Handler
@@ -29,6 +42,23 @@ class CommandRegistry {
         Reflect.set(Vars.netServer, "clientCommands", InterceptedCommandHandler("/") { command, player ->
             parseClientCommand(command, player!!)
         })
+
+        registerParameterConverter(Boolean::class, BooleanParameterConverter())
+        registerParameterConverter(Char::class, CharParameterConverter())
+        registerParameterConverter(String::class, StringParameterConverter())
+
+        registerParameterConverter(Float::class, FloatParameterConverter())
+        registerParameterConverter(Double::class, DoubleParameterConverter())
+
+        registerParameterConverter(Byte::class, ByteParameterConverter())
+        registerParameterConverter(Short::class, ShortParameterConverter())
+        registerParameterConverter(Int::class, IntParameterConverter())
+        registerParameterConverter(Long::class, LongParameterConverter())
+
+        registerParameterConverter(UByte::class, UByteParameterConverter())
+        registerParameterConverter(UShort::class, UShortParameterConverter())
+        registerParameterConverter(UInt::class, UIntParameterConverter())
+        registerParameterConverter(ULong::class, ULongParameterConverter())
     }
 
     fun registerParameterConverter(from: KClass<*>, parameterConverter: CommandParameterConverter<*>) {
