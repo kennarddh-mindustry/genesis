@@ -1,3 +1,3 @@
 # Genesis
 
-- General Purpose Mindustry Plugin Base
+- General Purpose Mindustry Plugin Library
