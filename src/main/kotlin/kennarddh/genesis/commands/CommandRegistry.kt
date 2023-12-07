@@ -89,13 +89,18 @@ class CommandRegistry {
         if (result.status == CommandResultStatus.Empty) return
 
         if (player != null) {
-            val colorString = when (result.status) {
-                CommandResultStatus.Failed -> "#ff0000"
-                CommandResultStatus.Success -> "#00ff00"
-                else -> "#ffffff"
-            }
+            val colorString = if (result.colorDependsOnStatus)
+                when (result.status) {
+                    CommandResultStatus.Failed -> "[#ff0000]"
+                    CommandResultStatus.Success -> "[#00ff00]"
+                    else -> {
+                        Log.warn("Unknown CommandResultStatus ${result.status}")
+                        "[#ffffff]"
+                    }
+                } else
+                ""
 
-            player.sendMessage("[${colorString}]${result.response}")
+            player.sendMessage("${colorString}${result.response}")
         } else {
             when (result.status) {
                 CommandResultStatus.Failed -> Log.err(result.response)

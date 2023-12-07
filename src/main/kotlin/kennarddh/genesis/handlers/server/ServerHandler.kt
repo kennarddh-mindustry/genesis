@@ -78,7 +78,7 @@ class ServerHandler : Handler() {
     @ServerSide
     fun log(): CommandResult {
         Log.info("Log.")
-        
-        return CommandResult("Log sucess.")
+
+        return CommandResult("Log sucess.", colorDependsOnStatus = false)
     }
 }
