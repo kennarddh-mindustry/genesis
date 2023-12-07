@@ -34,45 +34,45 @@ class CommandRegistry {
             val clientSideAnnotation = method.getAnnotation(ClientSide::class.java)
             val serverSideAnnotation = method.getAnnotation(ServerSide::class.java)
 
-            if (clientSideAnnotation == null && serverSideAnnotation == null)
-                throw Exception("Command need to have either ServerSide or ClientSide or both annotation")
-
             val name = commandAnnotation.name
 
-            commands[name] = CommandData(serverSideAnnotation != null, clientSideAnnotation != null, handler, method)
+            val isServerSide = serverSideAnnotation != null
+            val isClientSide = clientSideAnnotation != null
+
+            val sides: Array<CommandSide> = if (isServerSide && isClientSide) {
+                arrayOf(CommandSide.Server, CommandSide.Client)
+            } else if (isServerSide) {
+                arrayOf(CommandSide.Server)
+            } else if (isClientSide) {
+                arrayOf(CommandSide.Client)
+            } else {
+                throw Exception("Command need to have either ServerSide or ClientSide or both annotation")
+            }
+
+            commands[name] = CommandData(sides, handler, method)
         }
     }
 
     private fun parseServerCommand(commandString: String) {
         val command = commands[commandString]
 
-        if (!commands.contains(commandString)) {
+        if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Server)) {
             println("No command found with the name $commandString")
             return
         }
 
-        if (!commands[commandString]!!.isServerSide) {
-            println("No command found with the name $commandString")
-            return
-        }
-
-        command!!.method.invoke(command.handler)
+        command.method.invoke(command.handler)
     }
 
     private fun parseClientCommand(commandString: String, player: Player) {
         val command = commands[commandString]
 
-        if (!commands.contains(commandString)) {
+        if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Client)) {
             println("No command found with the name $commandString")
             return
         }
 
-        if (!commands[commandString]!!.isClientSide) {
-            println("No command found with the name $commandString")
-            return
-        }
-
-        if (command!!.method.parameterCount > 0)
+        if (command.method.parameterCount > 0)
             command.method.invoke(command.handler, player)
         else
             command.method.invoke(command.handler)
