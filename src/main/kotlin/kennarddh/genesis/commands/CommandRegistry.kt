@@ -6,16 +6,20 @@ import arc.util.Reflect
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
+import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.gen.Player
 import mindustry.server.ServerControl
+import kotlin.reflect.KClass
 
 class CommandRegistry {
     private val handlers: MutableList<Handler> = mutableListOf()
     private val commands: MutableMap<String, CommandData> = mutableMapOf()
+
+    private val parameterConverters: MutableMap<KClass<*>, CommandParameterConverter<*>> = mutableMapOf()
 
     fun init() {
         Reflect.set(ServerControl.instance, "handler", InterceptedCommandHandler("") { command, _ ->
@@ -25,6 +29,10 @@ class CommandRegistry {
         Reflect.set(Vars.netServer, "clientCommands", InterceptedCommandHandler("/") { command, player ->
             parseClientCommand(command, player!!)
         })
+    }
+
+    fun registerParameterConverter(from: KClass<*>, parameterConverter: CommandParameterConverter<*>) {
+        parameterConverters[from] = parameterConverter
     }
 
     fun addHandler(handler: Handler) {
@@ -100,7 +108,7 @@ class CommandRegistry {
                     }
                 } else
                 ""
-            
+
             Core.app.post {
                 player.sendMessage("${colorString}${result.response}")
             }

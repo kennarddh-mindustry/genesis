@@ -1,6 +1,6 @@
 package kennarddh.genesis.commands
 
-import kennarddh.genesis.commands.parameters.base.CommandParameter
+import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
 import kennarddh.genesis.handlers.Handler
 import java.lang.reflect.Method
 
@@ -8,7 +8,7 @@ data class CommandData(
     val sides: Array<CommandSide>,
     val handler: Handler,
     val method: Method,
-    val parameters: Array<CommandParameter<*>>
+    val parameters: Array<CommandParameterConverter<*>>
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

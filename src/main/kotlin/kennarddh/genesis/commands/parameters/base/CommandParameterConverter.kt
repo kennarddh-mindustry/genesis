@@ -1,5 +1,5 @@
 package kennarddh.genesis.commands.parameters.base
 
-interface CommandParameter<T> {
+interface CommandParameterConverter<T> {
     fun parse(input: String): T
 }
