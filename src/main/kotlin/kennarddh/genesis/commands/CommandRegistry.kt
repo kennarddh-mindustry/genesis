@@ -100,6 +100,7 @@ class CommandRegistry {
                     }
                 } else
                 ""
+            
             Core.app.post {
                 player.sendMessage("${colorString}${result.response}")
             }
