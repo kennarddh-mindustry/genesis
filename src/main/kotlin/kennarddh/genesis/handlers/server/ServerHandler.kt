@@ -7,6 +7,8 @@ import arc.util.Timer
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
+import kennarddh.genesis.commands.result.CommandResult
+import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.core.GameState
@@ -24,10 +26,9 @@ class ServerHandler : Handler() {
 
     @Command("host")
     @ServerSide
-    fun host() {
+    fun host(): CommandResult {
         if (Vars.state.isGame) {
-            Log.err("Already hosting. Type 'stop' to stop hosting first.")
-            return
+            return CommandResult("Already hosting. Type 'stop' to stop hosting first.", CommandResultStatus.Failed)
         }
 
         // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
@@ -59,21 +60,23 @@ class ServerHandler : Handler() {
 
                 Reflect.set(ServerControl.instance, "autoPaused", true)
             }
+
+            return CommandResult("Host success")
         } catch (e: MapException) {
-            Log.err("@: @", e.map.plainName(), e.message)
+            return CommandResult("${e.map.plainName()}: ${e.message}", CommandResultStatus.Failed)
         }
     }
 
     @Command("ping")
     @ClientSide
-    fun ping(player: Player) {
-        player.sendMessage("Pong!")
+    fun ping(player: Player): CommandResult {
+        return CommandResult("Pong!")
     }
 
     @Command("log")
     @ClientSide
     @ServerSide
-    fun log() {
-        Log.info("Log!")
+    fun log(): CommandResult {
+        return CommandResult("Log.")
     }
 }
