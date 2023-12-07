@@ -72,7 +72,7 @@ class CommandRegistry {
             return
         }
 
-        if (command.method.parameterCount > 0)
+        if (command.method.parameterCount > 0 && !command.sides.contains(CommandSide.Server))
             command.method.invoke(command.handler, player)
         else
             command.method.invoke(command.handler)
