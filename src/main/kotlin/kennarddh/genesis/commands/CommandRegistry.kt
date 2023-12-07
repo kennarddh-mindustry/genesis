@@ -88,10 +88,19 @@ class CommandRegistry {
             } else if (isClientSide) {
                 arrayOf(CommandSide.Client)
             } else {
-                throw Exception("Command need to have either ServerSide or ClientSide or both annotation")
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${method.name} need to have either ServerSide or ClientSide or both annotation")
             }
 
-            commands[name] = CommandData(sides, handler, method)
+            val methodParameters = method.parameters
+
+            val parameters: MutableList<KClass<*>> = mutableListOf()
+
+            val isClientSideOnly = sides.contains(CommandSide.Client) && !sides.contains(CommandSide.Server)
+
+            if (isClientSideOnly && (methodParameters.isEmpty() || methodParameters[0].type != Player::class.java))
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${method.name} is client only it must accept player as the first parameter")
+
+            commands[name] = CommandData(sides, handler, method, parameters)
         }
     }
 
