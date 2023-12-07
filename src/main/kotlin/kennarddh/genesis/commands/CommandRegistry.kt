@@ -1,5 +1,6 @@
 package kennarddh.genesis.commands
 
+import arc.Core
 import arc.util.Log
 import arc.util.Reflect
 import kennarddh.genesis.commands.annotations.ClientSide
@@ -99,8 +100,9 @@ class CommandRegistry {
                     }
                 } else
                 ""
-
-            player.sendMessage("${colorString}${result.response}")
+            Core.app.post {
+                player.sendMessage("${colorString}${result.response}")
+            }
         } else {
             when (result.status) {
                 CommandResultStatus.Failed -> Log.err(result.response)
