@@ -1,9 +1,12 @@
 package kennarddh.genesis.commands
 
+import arc.util.Log
 import arc.util.Reflect
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
+import kennarddh.genesis.commands.result.CommandResult
+import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.gen.Player
@@ -56,25 +59,49 @@ class CommandRegistry {
     private fun parseServerCommand(commandString: String) {
         val command = commands[commandString]
 
-        if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Server)) {
-            println("No command found with the name $commandString")
-            return
+        val result = if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Server)) {
+            CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
+        } else {
+            command.method.invoke(command.handler)
         }
 
-        command.method.invoke(command.handler)
+        handleCommandHandlerResult(result, null)
     }
 
     private fun parseClientCommand(commandString: String, player: Player) {
         val command = commands[commandString]
 
-        if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Client)) {
-            println("No command found with the name $commandString")
-            return
+        val result = if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Client)) {
+            CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
+        } else {
+            if (command.method.parameterCount > 0 && !command.sides.contains(CommandSide.Server))
+                command.method.invoke(command.handler, player)
+            else
+                command.method.invoke(command.handler)
         }
 
-        if (command.method.parameterCount > 0 && !command.sides.contains(CommandSide.Server))
-            command.method.invoke(command.handler, player)
-        else
-            command.method.invoke(command.handler)
+        handleCommandHandlerResult(result, player)
+    }
+
+    private fun handleCommandHandlerResult(result: Any, player: Player?) {
+        if (result !is CommandResult) return
+
+        if (result.status == CommandResultStatus.Empty) return
+
+        if (player != null) {
+            val colorString = when (result.status) {
+                CommandResultStatus.Failed -> "#ff0000"
+                CommandResultStatus.Success -> "#00ff00"
+                else -> "#ffffff"
+            }
+
+            player.sendMessage("[${colorString}]${result.response}")
+        } else {
+            when (result.status) {
+                CommandResultStatus.Failed -> Log.err(result.response)
+                CommandResultStatus.Success -> Log.info(result.response)
+                else -> Log.warn("Unknown CommandResultStatus ${result.status}: ${result.response}")
+            }
+        }
     }
 }

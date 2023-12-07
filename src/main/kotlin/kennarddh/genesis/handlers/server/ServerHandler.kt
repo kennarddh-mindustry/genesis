@@ -77,6 +77,8 @@ class ServerHandler : Handler() {
     @ClientSide
     @ServerSide
     fun log(): CommandResult {
-        return CommandResult("Log.")
+        Log.info("Log.")
+        
+        return CommandResult("Log sucess.")
     }
 }
