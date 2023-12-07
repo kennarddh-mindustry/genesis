@@ -27,6 +27,10 @@ import mindustry.Vars
 import mindustry.gen.Player
 import mindustry.server.ServerControl
 import kotlin.reflect.KClass
+import kotlin.reflect.full.declaredFunctions
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.jvm.isAccessible
+import kotlin.reflect.typeOf
 
 class CommandRegistry {
     private val handlers: MutableList<Handler> = mutableListOf()
@@ -68,13 +72,13 @@ class CommandRegistry {
     fun addHandler(handler: Handler) {
         handlers.add(handler)
 
-        for (method in handler::class.java.declaredMethods) {
-            method.isAccessible = true
+        for (function in handler::class.declaredFunctions) {
+            function.isAccessible = true
 
-            val commandAnnotation = method.getAnnotation(Command::class.java) ?: continue
+            val commandAnnotation = function.findAnnotation<Command>() ?: continue
 
-            val clientSideAnnotation = method.getAnnotation(ClientSide::class.java)
-            val serverSideAnnotation = method.getAnnotation(ServerSide::class.java)
+            val clientSideAnnotation = function.findAnnotation<ClientSide>()
+            val serverSideAnnotation = function.findAnnotation<ServerSide>()
 
             val name = commandAnnotation.name
 
@@ -88,19 +92,19 @@ class CommandRegistry {
             } else if (isClientSide) {
                 arrayOf(CommandSide.Client)
             } else {
-                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${method.name} need to have either ServerSide or ClientSide or both annotation")
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} need to have either ServerSide or ClientSide or both annotation")
             }
 
-            val methodParameters = method.parameters
+            val functionParameters = function.parameters.drop(1)
 
             val parameters: MutableList<KClass<*>> = mutableListOf()
 
             val isClientSideOnly = sides.contains(CommandSide.Client) && !sides.contains(CommandSide.Server)
 
-            if (isClientSideOnly && (methodParameters.isEmpty() || methodParameters[0].type != Player::class.java))
-                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${method.name} is client only it must accept player as the first parameter")
+            if (isClientSideOnly && (functionParameters.isEmpty() || functionParameters[0].type != typeOf<Player>()))
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} is client only it must accept player as the first parameter")
 
-            commands[name] = CommandData(sides, handler, method, parameters)
+            commands[name] = CommandData(sides, handler, function, parameters)
         }
     }
 
@@ -110,7 +114,7 @@ class CommandRegistry {
         val result = if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Server)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
-            command.method.invoke(command.handler)
+            command.function.call(command.handler)
         }
 
         handleCommandHandlerResult(result, null)
@@ -122,16 +126,16 @@ class CommandRegistry {
         val result = if (!commands.contains(commandString) || !command!!.sides.contains(CommandSide.Client)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
-            if (command.method.parameterCount > 0 && !command.sides.contains(CommandSide.Server))
-                command.method.invoke(command.handler, player)
+            if (!command.sides.contains(CommandSide.Server))
+                command.function.call(command.handler, player)
             else
-                command.method.invoke(command.handler)
+                command.function.call(command.handler)
         }
 
         handleCommandHandlerResult(result, player)
     }
 
-    private fun handleCommandHandlerResult(result: Any, player: Player?) {
+    private fun handleCommandHandlerResult(result: Any?, player: Player?) {
         if (result !is CommandResult) return
 
         if (result.status == CommandResultStatus.Empty) return
