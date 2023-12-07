@@ -1,4 +1,4 @@
-package kennarddh.genesis.commands.parameters.numbers
+package kennarddh.genesis.commands.parameters.numbers.signed.integer
 
 import kennarddh.genesis.commands.parameters.base.CommandParameter
 import kennarddh.genesis.commands.parameters.base.CommandParameterParsingException
