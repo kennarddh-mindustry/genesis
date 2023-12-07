@@ -97,14 +97,24 @@ class CommandRegistry {
 
             val functionParameters = function.parameters.drop(1)
 
-            val parameters: MutableList<KClass<*>> = mutableListOf()
-
             val isClientSideOnly = sides.contains(CommandSide.Client) && !sides.contains(CommandSide.Server)
 
             if (isClientSideOnly && (functionParameters.isEmpty() || functionParameters[0].type != typeOf<Player>()))
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} is client only it must accept player as the first parameter")
 
-            commands[name] = CommandData(sides, handler, function, parameters)
+            val parametersType: MutableList<KClass<*>> = mutableListOf()
+
+            val commandFunctionParameters = if (isClientSideOnly) functionParameters.drop(1) else functionParameters
+
+            for (commandFunctionParameter in commandFunctionParameters) {
+                val parameterTypeKClass = commandFunctionParameter.type.classifier
+
+                if (parameterConverters.contains(parameterTypeKClass)) {
+                    parametersType.add(parameterConverters[parameterTypeKClass] as KClass<*>)
+                }
+            }
+
+            commands[name] = CommandData(sides, handler, function, parametersType.toTypedArray())
         }
     }
 

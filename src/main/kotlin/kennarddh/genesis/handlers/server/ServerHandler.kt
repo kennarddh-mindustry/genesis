@@ -13,6 +13,7 @@ import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.core.GameState
 import mindustry.game.Gamemode
+import mindustry.gen.Call
 import mindustry.gen.Player
 import mindustry.maps.Map
 import mindustry.maps.MapException
@@ -79,6 +80,19 @@ class ServerHandler : Handler() {
     fun log(): CommandResult {
         Log.info("Log.")
 
-        return CommandResult("Log sucess.", colorDependsOnStatus = false)
+        return CommandResult("Log success.", colorDependsOnStatus = false)
+    }
+
+    @Command("say")
+    @ClientSide
+    fun say(player: Player, message: String): CommandResult {
+        if (!Vars.state.isGame)
+            return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
+
+        Core.app.post {
+            Call.sendMessage("[scarlet][[Server]:[] $message")
+        }
+
+        return CommandResult("Say success.")
     }
 }

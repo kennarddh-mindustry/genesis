@@ -8,7 +8,7 @@ data class CommandData(
     val sides: Array<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,
-    val parameters: List<KClass<*>>
+    val parametersType: Array<KClass<*>>
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -19,7 +19,7 @@ data class CommandData(
         if (!sides.contentEquals(other.sides)) return false
         if (handler != other.handler) return false
         if (function != other.function) return false
-        if (parameters != other.parameters) return false
+        if (!parametersType.contentEquals(other.parametersType)) return false
 
         return true
     }
@@ -28,7 +28,7 @@ data class CommandData(
         var result = sides.contentHashCode()
         result = 31 * result + handler.hashCode()
         result = 31 * result + function.hashCode()
-        result = 31 * result + parameters.hashCode()
+        result = 31 * result + parametersType.contentHashCode()
         return result
     }
 }
