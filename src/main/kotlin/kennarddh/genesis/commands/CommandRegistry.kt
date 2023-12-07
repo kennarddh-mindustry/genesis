@@ -138,8 +138,7 @@ class CommandRegistry {
         } else {
             val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
 
-//            println("\"$commandStringWithoutCommandName\"")
-            command.function.call(command.handler)
+            command.function.call(command.handler, *parseCommandParameters(commandStringWithoutCommandName))
         }
 
         handleCommandHandlerResult(result, null)
@@ -154,12 +153,18 @@ class CommandRegistry {
             val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
 
             if (!command.sides.contains(CommandSide.Server))
-                command.function.call(command.handler, player)
+                command.function.call(command.handler, player, *parseCommandParameters(commandStringWithoutCommandName))
             else
-                command.function.call(command.handler)
+                command.function.call(command.handler, *parseCommandParameters(commandStringWithoutCommandName))
         }
 
         handleCommandHandlerResult(result, player)
+    }
+
+    private fun parseCommandParameters(commandStringWithoutCommandName: String): Array<Any> {
+        val parameters: MutableList<Any> = mutableListOf()
+
+        return parameters.toTypedArray()
     }
 
     private fun handleCommandHandlerResult(result: Any?, player: Player?) {
