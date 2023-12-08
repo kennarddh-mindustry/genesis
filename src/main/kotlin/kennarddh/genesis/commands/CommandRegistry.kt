@@ -277,6 +277,7 @@ class CommandRegistry {
                 parameter.validator.forEach {
                     val validator = parameterValidator[parameter.type]!![it.annotationClass]
 
+                    @Suppress("UNCHECKED_CAST")
                     val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output!!)
 
                     // TODO: Add better description by using @Description(":parameterName: must be greater than :value:") annotation on parameter validation annotation. :string: is replaced based on annotation property name
