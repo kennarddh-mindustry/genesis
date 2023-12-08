@@ -3,5 +3,8 @@
     "author": "Kennarddh",
     "main": "kennarddh.genesis.Genesis",
     "description": "Plugin",
-    "version": 1.0
+    "version": 1.0,
+    "dependencies": [
+        "kotlin-runtime"
+    ]
 }
