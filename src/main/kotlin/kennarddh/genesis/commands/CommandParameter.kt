@@ -6,6 +6,7 @@ typealias CommandParameterValidator<T> = (annotation: Annotation, value: T) -> B
 
 data class CommandParameter(
     val type: KClass<*>,
+    val name: String,
     val validator: Array<Annotation>
 ) {
     override fun equals(other: Any?): Boolean {

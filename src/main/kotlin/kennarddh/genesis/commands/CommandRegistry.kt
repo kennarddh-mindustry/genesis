@@ -157,6 +157,7 @@ class CommandRegistry {
                     parameters.add(
                         CommandParameter(
                             parameterTypeKClass as KClass<*>,
+                            commandFunctionParameter.name ?: "Unknown Parameter",
                             // TODO: Validate all validator is registered
                             commandFunctionParameter.annotations.toTypedArray()
                         )
@@ -248,7 +249,8 @@ class CommandRegistry {
                 CommandResultStatus.Failed
             )
         } catch (error: Exception) {
-            // TODO: Add logging
+            // TODO: Add proper logging
+            error.printStackTrace()
             CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
         }
     }
@@ -273,18 +275,18 @@ class CommandRegistry {
                 val output = parameterConverters[parameter.type]!!.parse(parameterAsString)
 
                 parameter.validator.forEach {
-                    val validator = parameterValidator[parameter.type]!![it::class]
+                    val validator = parameterValidator[parameter.type]!![it.annotationClass]
 
-                    val isValid = (validator!! as CommandParameterValidator<Any>).invoke(it, output!!)
+                    val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output!!)
 
+                    // TODO: Add better description by using @Description(":parameterName: must be greater than :value:") annotation on parameter validation annotation. :string: is replaced based on annotation property name
                     if (!isValid)
-                        throw CommandParameterValidationException("Parameter validation for parameter Soon failed.")
+                        throw CommandParameterValidationException("Parameter validation for parameter ${parameter.name} failed.")
                 }
 
                 parameters.add(output!!)
             } catch (error: CommandParameterConverterParsingException) {
-                // TODO: Parameterized exception
-                throw CommandParameterConverterParsingException(error.toParametrizedString("Soon"))
+                throw CommandParameterConverterParsingException(error.toParametrizedString(parameter.name))
             }
         }
 
