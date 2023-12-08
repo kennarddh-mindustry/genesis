@@ -5,7 +5,7 @@ import kennarddh.genesis.commands.CommandRegistry
 import kennarddh.genesis.common.AbstractPlugin
 import kennarddh.genesis.handlers.server.ServerHandler
 
-@SuppressWarnings("unused")
+@Suppress("unused")
 class Genesis : AbstractPlugin() {
     override fun init() {
         Log.info("[Genesis] Loaded")
