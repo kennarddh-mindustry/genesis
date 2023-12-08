@@ -1,9 +1,13 @@
 {
     "name": "genesis",
+    "displayName": "Genesis",
     "author": "Kennarddh",
-    "main": "kennarddh.genesis.Genesis",
     "description": "Plugin",
+    "minGameVersion": "146",
+    "java": true,
+    "main": "kennarddh.genesis.Genesis",
     "version": 1.0,
+    "repo": "kennarddh-mindustry/genesis",
     "dependencies": [
         "kotlin-runtime"
     ]
