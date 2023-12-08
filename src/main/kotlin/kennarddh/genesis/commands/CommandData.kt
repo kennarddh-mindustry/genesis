@@ -1,7 +1,6 @@
 package kennarddh.genesis.commands
 
 import kennarddh.genesis.handlers.Handler
-import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
 data class CommandData(
@@ -9,7 +8,7 @@ data class CommandData(
     val sides: Array<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,
-    val parametersType: Array<KClass<*>>
+    val parametersType: Array<CommandParameter>
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

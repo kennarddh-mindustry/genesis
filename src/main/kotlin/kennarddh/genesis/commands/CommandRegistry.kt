@@ -9,6 +9,10 @@ import kennarddh.genesis.commands.annotations.ServerSide
 import kennarddh.genesis.commands.parameters.BooleanParameterConverter
 import kennarddh.genesis.commands.parameters.CharParameterConverter
 import kennarddh.genesis.commands.parameters.StringParameterConverter
+import kennarddh.genesis.commands.parameters.annotations.numbers.Max
+import kennarddh.genesis.commands.parameters.annotations.numbers.Min
+import kennarddh.genesis.commands.parameters.annotations.numbers.validateMax
+import kennarddh.genesis.commands.parameters.annotations.numbers.validateMin
 import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
 import kennarddh.genesis.commands.parameters.base.CommandParameterConverterParsingException
 import kennarddh.genesis.commands.parameters.numbers.signed.floating.DoubleParameterConverter
@@ -42,6 +46,8 @@ class CommandRegistry {
     private val commands: MutableMap<String, CommandData> = mutableMapOf()
 
     private val parameterConverters: MutableMap<KClass<*>, CommandParameterConverter<*>> = mutableMapOf()
+    private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
+        mutableMapOf()
 
     fun init() {
         Reflect.set(ServerControl.instance, "handler", InterceptedCommandHandler("") { command, _ ->
@@ -68,6 +74,39 @@ class CommandRegistry {
         registerParameterConverter(UShort::class, UShortParameterConverter())
         registerParameterConverter(UInt::class, UIntParameterConverter())
         registerParameterConverter(ULong::class, ULongParameterConverter())
+
+        registerValidationAnnotation(
+            Min::class, listOf(
+                Float::class,
+                Double::class,
+                Byte::class,
+                Short::class,
+                Int::class,
+                Long::class,
+            ), ::validateMin
+        )
+        registerValidationAnnotation(
+            Max::class, listOf(
+                Float::class,
+                Double::class,
+                Byte::class,
+                Short::class,
+                Int::class,
+                Long::class,
+            ), ::validateMax
+        )
+    }
+
+    fun <T : Any, V : Any> registerValidationAnnotation(
+        annotation: KClass<T>,
+        parametersType: List<KClass<out V>>,
+        validator: CommandParameterValidator<V>
+    ) {
+        parametersType.forEach {
+            if (!parameterValidator.contains(it)) parameterValidator[it] = mutableMapOf()
+
+            parameterValidator[it]!![annotation] = validator
+        }
     }
 
     fun registerParameterConverter(from: KClass<*>, parameterConverter: CommandParameterConverter<*>) {
@@ -107,7 +146,7 @@ class CommandRegistry {
             if (isClientSideOnly && (functionParameters.isEmpty() || functionParameters[0].type != typeOf<Player>()))
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} is client only it must accept player as the first parameter")
 
-            val parametersType: MutableList<KClass<*>> = mutableListOf()
+            val parameters: MutableList<CommandParameter> = mutableListOf()
 
             val commandFunctionParameters = if (isClientSideOnly) functionParameters.drop(1) else functionParameters
 
@@ -115,13 +154,14 @@ class CommandRegistry {
                 val parameterTypeKClass = commandFunctionParameter.type.classifier
 
                 if (parameterConverters.contains(parameterTypeKClass)) {
-                    parametersType.add(parameterTypeKClass as KClass<*>)
+                    // TODO: Validator
+                    parameters.add(CommandParameter(parameterTypeKClass as KClass<*>, arrayOf()))
                 } else {
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandFunctionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
                 }
             }
 
-            commands[name] = CommandData(name, sides, handler, function, parametersType.toTypedArray())
+            commands[name] = CommandData(name, sides, handler, function, parameters.toTypedArray())
         }
     }
 
@@ -217,10 +257,10 @@ class CommandRegistry {
 
         for (i in 0..<command.parametersType.size) {
             val parameterAsString = parsedString[i]
-            val parameterType = command.parametersType[i]
+            val parameter = command.parametersType[i]
 
             try {
-                val output = parameterConverters[parameterType]!!.parse(parameterAsString)
+                val output = parameterConverters[parameter.type]!!.parse(parameterAsString)
 
                 parameters.add(output!!)
             } catch (error: CommandParameterConverterParsingException) {

@@ -7,6 +7,8 @@ import arc.util.Timer
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
+import kennarddh.genesis.commands.parameters.annotations.numbers.Max
+import kennarddh.genesis.commands.parameters.annotations.numbers.Min
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.handlers.Handler
@@ -70,7 +72,7 @@ class ServerHandler : Handler() {
 
     @Command("ping")
     @ClientSide
-    fun ping(player: Player): CommandResult {
+    fun ping(@Suppress("UNUSED_PARAMETER") player: Player): CommandResult {
         return CommandResult("Pong!")
     }
 
@@ -102,7 +104,7 @@ class ServerHandler : Handler() {
     @Command("add")
     @ClientSide
     @ServerSide
-    fun add(number1: Int, number2: Int): CommandResult {
+    fun add(@Min(0) @Max(100) number1: Int, @Min(-10) @Max(10) number2: Int): CommandResult {
         return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
     }
 }
