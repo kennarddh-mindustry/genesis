@@ -153,18 +153,17 @@ class CommandRegistry {
             for (commandFunctionParameter in commandFunctionParameters) {
                 val parameterTypeKClass = commandFunctionParameter.type.classifier
 
-                if (parameterConverters.contains(parameterTypeKClass)) {
-                    parameters.add(
-                        CommandParameter(
-                            parameterTypeKClass as KClass<*>,
-                            commandFunctionParameter.name ?: "Unknown Parameter",
-                            // TODO: Validate all validator is registered
-                            commandFunctionParameter.annotations.toTypedArray()
-                        )
-                    )
-                } else {
+                if (!parameterConverters.contains(parameterTypeKClass))
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandFunctionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
-                }
+
+                parameters.add(
+                    CommandParameter(
+                        parameterTypeKClass as KClass<*>,
+                        commandFunctionParameter.name ?: "Unknown Parameter",
+                        // TODO: Validate all validator is registered
+                        commandFunctionParameter.annotations.toTypedArray()
+                    )
+                )
             }
 
             commands[name] = CommandData(name, sides, handler, function, parameters.toTypedArray())
