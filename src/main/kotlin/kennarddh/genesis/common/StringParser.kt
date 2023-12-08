@@ -35,6 +35,8 @@ class StringParser {
                         yield(output.toString())
 
                         output.clear()
+                    } else if (char == ' ' && output.isEmpty()) {
+                        continue
                     } else if (char == ' ' && !isInQuote) {
                         yield(output.toString())
 
