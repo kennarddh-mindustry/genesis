@@ -94,6 +94,8 @@ class ServerHandler : Handler() {
             Call.sendMessage("[scarlet][[Server]:[] $message")
         }
 
+        Log.info("Server: $message")
+
         return CommandResult("Say success.")
     }
 }
