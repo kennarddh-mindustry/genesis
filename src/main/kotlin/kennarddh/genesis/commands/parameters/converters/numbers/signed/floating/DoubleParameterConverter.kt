@@ -1,7 +1,7 @@
-package kennarddh.genesis.commands.parameters.numbers.signed.floating
+package kennarddh.genesis.commands.parameters.converters.numbers.signed.floating
 
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverterParsingException
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverter
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverterParsingException
 
 class DoubleParameterConverter : CommandParameterConverter<Double> {
     override fun parse(input: String): Double {

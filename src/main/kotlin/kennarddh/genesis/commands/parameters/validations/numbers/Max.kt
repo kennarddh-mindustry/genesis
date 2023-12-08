@@ -1,4 +1,6 @@
-package kennarddh.genesis.commands.parameters.annotations.numbers
+package kennarddh.genesis.commands.parameters.validations.numbers
+
+import kennarddh.genesis.commands.parameters.validations.ParameterValidation
 
 fun <T : Number> validateMax(annotation: Annotation, value: T): Boolean {
     val max = (annotation as Max).value

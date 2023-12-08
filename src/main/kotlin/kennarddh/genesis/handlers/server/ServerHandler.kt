@@ -7,8 +7,8 @@ import arc.util.Timer
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
-import kennarddh.genesis.commands.parameters.annotations.numbers.Max
-import kennarddh.genesis.commands.parameters.annotations.numbers.Min
+import kennarddh.genesis.commands.parameters.validations.numbers.Max
+import kennarddh.genesis.commands.parameters.validations.numbers.Min
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.handlers.Handler

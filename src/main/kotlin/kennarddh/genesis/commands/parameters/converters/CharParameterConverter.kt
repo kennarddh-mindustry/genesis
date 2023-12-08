@@ -1,7 +1,7 @@
-package kennarddh.genesis.commands.parameters
+package kennarddh.genesis.commands.parameters.converters
 
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverterParsingException
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverter
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverterParsingException
 
 class CharParameterConverter : CommandParameterConverter<Char> {
     override fun parse(input: String): Char {

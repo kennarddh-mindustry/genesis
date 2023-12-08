@@ -1,3 +1,3 @@
-package kennarddh.genesis.commands
+package kennarddh.genesis.commands.exceptions
 
 class InvalidCommandParameterException(message: String) : Exception(message)

@@ -1,5 +1,6 @@
 package kennarddh.genesis.commands
 
+import kennarddh.genesis.commands.parameters.CommandParameter
 import kennarddh.genesis.handlers.Handler
 import kotlin.reflect.KFunction
 

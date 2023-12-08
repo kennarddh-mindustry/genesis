@@ -1,4 +1,4 @@
-package kennarddh.genesis.commands.parameters.annotations.numbers
+package kennarddh.genesis.commands.parameters.validations
 
 
 @Target(AnnotationTarget.ANNOTATION_CLASS)

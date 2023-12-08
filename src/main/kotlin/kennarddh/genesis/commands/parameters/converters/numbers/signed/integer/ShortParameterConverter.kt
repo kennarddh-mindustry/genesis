@@ -1,7 +1,7 @@
-package kennarddh.genesis.commands.parameters.numbers.signed.integer
+package kennarddh.genesis.commands.parameters.converters.numbers.signed.integer
 
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverterParsingException
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverter
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverterParsingException
 
 class ShortParameterConverter : CommandParameterConverter<Short> {
     override fun parse(input: String): Short {

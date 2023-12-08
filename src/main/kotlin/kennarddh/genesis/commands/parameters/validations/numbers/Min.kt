@@ -1,4 +1,6 @@
-package kennarddh.genesis.commands.parameters.annotations.numbers
+package kennarddh.genesis.commands.parameters.validations.numbers
+
+import kennarddh.genesis.commands.parameters.validations.ParameterValidation
 
 fun <T : Number> validateMin(annotation: Annotation, value: T): Boolean {
     val min = (annotation as Min).value

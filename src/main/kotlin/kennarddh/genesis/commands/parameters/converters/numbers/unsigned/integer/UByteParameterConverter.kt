@@ -1,7 +1,7 @@
-package kennarddh.genesis.commands.parameters.numbers.unsigned.integer
+package kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer
 
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
-import kennarddh.genesis.commands.parameters.base.CommandParameterConverterParsingException
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverter
+import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverterParsingException
 
 class UByteParameterConverter : CommandParameterConverter<UByte> {
     override fun parse(input: String): UByte {
