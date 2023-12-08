@@ -24,6 +24,7 @@ import kennarddh.genesis.commands.parameters.numbers.unsigned.integer.UShortPara
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.common.InvalidEscapedCharacterException
+import kennarddh.genesis.common.InvalidStringParsingException
 import kennarddh.genesis.common.StringParser
 import kennarddh.genesis.common.UnterminatedStringException
 import kennarddh.genesis.handlers.Handler
@@ -188,6 +189,8 @@ class CommandRegistry {
         } catch (error: UnterminatedStringException) {
             CommandResult(error.message ?: "Unknown Unterminated String Exception Occurred", CommandResultStatus.Failed)
         } catch (error: InvalidEscapedCharacterException) {
+            CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
+        } catch (error: InvalidStringParsingException) {
             CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
         } catch (error: CommandParameterConverterParsingException) {
             CommandResult(
