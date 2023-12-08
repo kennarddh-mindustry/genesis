@@ -74,7 +74,7 @@ class CommandRegistry {
         parameterConverters[from] = parameterConverter
     }
 
-    fun addHandler(handler: Handler) {
+    fun registerHandler(handler: Handler) {
         handlers.add(handler)
 
         for (function in handler::class.declaredFunctions) {

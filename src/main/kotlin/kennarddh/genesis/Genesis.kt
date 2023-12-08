@@ -14,6 +14,6 @@ class Genesis : AbstractPlugin() {
 
         commandRegistry.init()
 
-        commandRegistry.addHandler(ServerHandler())
+        commandRegistry.registerHandler(ServerHandler())
     }
 }
