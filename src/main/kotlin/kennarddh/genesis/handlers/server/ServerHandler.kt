@@ -98,4 +98,11 @@ class ServerHandler : Handler() {
 
         return CommandResult("Say success.")
     }
+
+    @Command("add")
+    @ClientSide
+    @ServerSide
+    fun add(number1: Int, number2: Int): CommandResult {
+        return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
+    }
 }
