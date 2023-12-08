@@ -84,8 +84,6 @@ class StringParser {
                 output.add(it)
             }
 
-            println("Output: ${output.toTypedArray().contentToString()}")
-
             return output.toTypedArray()
         }
     }
