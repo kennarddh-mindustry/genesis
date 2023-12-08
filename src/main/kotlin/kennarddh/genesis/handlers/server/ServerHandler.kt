@@ -85,7 +85,8 @@ class ServerHandler : Handler() {
 
     @Command("say")
     @ClientSide
-    fun say(player: Player, message: String): CommandResult {
+    @ServerSide
+    fun say(message: String): CommandResult {
         if (!Vars.state.isGame)
             return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
 
