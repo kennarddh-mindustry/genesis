@@ -47,7 +47,7 @@ class StringParser {
                 if (isEscaping) {
                     throw InvalidEscapedCharacterException("No character provided after escape character")
                 } else if (output.isNotBlank() && isInQuote) {
-                    throw UnterminatedStringException("String $output is not ended by a double quote")
+                    throw UnterminatedStringException("Double quoted string $output is not terminated")
                 } else if (output.isNotBlank()) {
                     yield(output.toString())
                 }

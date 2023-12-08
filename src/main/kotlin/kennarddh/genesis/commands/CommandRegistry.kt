@@ -22,6 +22,9 @@ import kennarddh.genesis.commands.parameters.numbers.unsigned.integer.ULongParam
 import kennarddh.genesis.commands.parameters.numbers.unsigned.integer.UShortParameterConverter
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
+import kennarddh.genesis.common.InvalidEscapedCharacterException
+import kennarddh.genesis.common.StringParser
+import kennarddh.genesis.common.UnterminatedStringException
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.gen.Player
@@ -111,6 +114,8 @@ class CommandRegistry {
 
                 if (parameterConverters.contains(parameterTypeKClass)) {
                     parametersType.add(parameterTypeKClass as KClass<*>)
+                } else {
+                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandFunctionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
                 }
             }
 
@@ -127,6 +132,8 @@ class CommandRegistry {
     }
 
     private fun removeCommandNameFromCommandString(command: CommandData, commandString: String): String {
+        if (command.name.length == commandString.length) return ""
+
         return commandString.substring(command.name.length + 1)
     }
 
@@ -136,9 +143,9 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Server)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
-            val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
-
-            command.function.call(command.handler, *parseCommandParameters(commandStringWithoutCommandName))
+            invokeCommand(command, commandString) { parameters ->
+                command.function.call(command.handler, *parameters) as CommandResult
+            }
         }
 
         handleCommandHandlerResult(result, null)
@@ -150,19 +157,60 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
-            val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
-
-            if (!command.sides.contains(CommandSide.Server))
-                command.function.call(command.handler, player, *parseCommandParameters(commandStringWithoutCommandName))
-            else
-                command.function.call(command.handler, *parseCommandParameters(commandStringWithoutCommandName))
+            invokeCommand(command, commandString) { parameters ->
+                if (!command.sides.contains(CommandSide.Server))
+                    command.function.call(command.handler, player, *parameters) as CommandResult
+                else
+                    command.function.call(command.handler, *parameters) as CommandResult
+            }
         }
 
         handleCommandHandlerResult(result, player)
     }
 
-    private fun parseCommandParameters(commandStringWithoutCommandName: String): Array<Any> {
+    private fun invokeCommand(
+        command: CommandData,
+        commandString: String,
+        invoke: (Array<Any>) -> CommandResult
+    ): CommandResult {
+        val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
+
+        return try {
+            val parameters = parseCommandParameters(command, commandStringWithoutCommandName)
+
+            invoke(parameters)
+        } catch (error: InvalidCommandParameterException) {
+            CommandResult(error.message ?: "Unknown Error Occurred", CommandResultStatus.Failed)
+        } catch (error: UnterminatedStringException) {
+            CommandResult(error.message ?: "Unknown Error Occurred", CommandResultStatus.Failed)
+        } catch (error: InvalidEscapedCharacterException) {
+            CommandResult(error.message ?: "Unknown Error Occurred", CommandResultStatus.Failed)
+        } catch (error: Exception) {
+            // TODO: Add logging
+            CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
+        }
+    }
+
+    private fun parseCommandParameters(command: CommandData, commandStringWithoutCommandName: String): Array<Any> {
         val parameters: MutableList<Any> = mutableListOf()
+
+        val parsedString = StringParser.parseToArray(commandStringWithoutCommandName)
+
+        // TODO: Add Command Usage
+        if (command.parametersType.size > parsedString.size) {
+            throw InvalidCommandParameterException("Too few parameters supplied. Usage: soon")
+        } else if (command.parametersType.size < parsedString.size) {
+            throw InvalidCommandParameterException("Too much parameters supplied. Usage: soon")
+        }
+
+        for (i in 0..<command.parametersType.size) {
+            val parameterAsString = parsedString[i]
+            val parameterType = command.parametersType[i]
+
+            val output = parameterConverters[parameterType]!!.parse(parameterAsString)
+
+            parameters.add(output!!)
+        }
 
         return parameters.toTypedArray()
     }
