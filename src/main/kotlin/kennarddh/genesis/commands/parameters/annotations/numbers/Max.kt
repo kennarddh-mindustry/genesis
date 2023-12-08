@@ -6,8 +6,8 @@ fun <T : Number> validateMax(annotation: Annotation, value: T): Boolean {
     return value.toLong() < max
 }
 
-
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
+@ParameterValidation
 annotation class Max(val value: Long)

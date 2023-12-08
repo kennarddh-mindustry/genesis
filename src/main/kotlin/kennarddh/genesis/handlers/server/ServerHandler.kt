@@ -21,6 +21,7 @@ import mindustry.maps.Map
 import mindustry.maps.MapException
 import mindustry.net.Administration
 import mindustry.server.ServerControl
+import org.jetbrains.annotations.NotNull
 
 class ServerHandler : Handler() {
     override fun onInit() {
@@ -104,7 +105,9 @@ class ServerHandler : Handler() {
     @Command("add")
     @ClientSide
     @ServerSide
-    fun add(@Min(0) @Max(100) number1: Int, @Min(-10) @Max(10) number2: Int): CommandResult {
+    fun add(
+        @NotNull @Min(0) @Max(100) number1: Int, @Min(-10) @Max(10) number2: Int
+    ): CommandResult {
         return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
     }
 }

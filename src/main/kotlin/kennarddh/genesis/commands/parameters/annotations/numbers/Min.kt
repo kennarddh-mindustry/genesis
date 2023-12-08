@@ -6,8 +6,8 @@ fun <T : Number> validateMin(annotation: Annotation, value: T): Boolean {
     return value.toLong() > min
 }
 
-
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
+@ParameterValidation
 annotation class Min(val value: Long)

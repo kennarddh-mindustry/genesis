@@ -9,10 +9,7 @@ import kennarddh.genesis.commands.annotations.ServerSide
 import kennarddh.genesis.commands.parameters.BooleanParameterConverter
 import kennarddh.genesis.commands.parameters.CharParameterConverter
 import kennarddh.genesis.commands.parameters.StringParameterConverter
-import kennarddh.genesis.commands.parameters.annotations.numbers.Max
-import kennarddh.genesis.commands.parameters.annotations.numbers.Min
-import kennarddh.genesis.commands.parameters.annotations.numbers.validateMax
-import kennarddh.genesis.commands.parameters.annotations.numbers.validateMin
+import kennarddh.genesis.commands.parameters.annotations.numbers.*
 import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
 import kennarddh.genesis.commands.parameters.base.CommandParameterConverterParsingException
 import kennarddh.genesis.commands.parameters.numbers.signed.floating.DoubleParameterConverter
@@ -38,6 +35,7 @@ import mindustry.server.ServerControl
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.typeOf
 
@@ -156,12 +154,19 @@ class CommandRegistry {
                 if (!parameterConverters.contains(parameterTypeKClass))
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandFunctionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
 
+                val validationsAnnotation: MutableList<Annotation> = mutableListOf()
+
+                commandFunctionParameter.annotations.forEach {
+                    if (it.annotationClass.hasAnnotation<ParameterValidation>())
+                        validationsAnnotation.add(it)
+                }
+
                 parameters.add(
                     CommandParameter(
                         parameterTypeKClass as KClass<*>,
                         commandFunctionParameter.name ?: "Unknown Parameter",
                         // TODO: Validate all validator is registered
-                        commandFunctionParameter.annotations.toTypedArray()
+                        validationsAnnotation.toTypedArray()
                     )
                 )
             }
