@@ -10,6 +10,7 @@ import kennarddh.genesis.commands.parameters.BooleanParameterConverter
 import kennarddh.genesis.commands.parameters.CharParameterConverter
 import kennarddh.genesis.commands.parameters.StringParameterConverter
 import kennarddh.genesis.commands.parameters.base.CommandParameterConverter
+import kennarddh.genesis.commands.parameters.base.CommandParameterConverterParsingException
 import kennarddh.genesis.commands.parameters.numbers.signed.floating.DoubleParameterConverter
 import kennarddh.genesis.commands.parameters.numbers.signed.floating.FloatParameterConverter
 import kennarddh.genesis.commands.parameters.numbers.signed.integer.ByteParameterConverter
@@ -180,11 +181,19 @@ class CommandRegistry {
 
             invoke(parameters)
         } catch (error: InvalidCommandParameterException) {
-            CommandResult(error.message ?: "Unknown Error Occurred", CommandResultStatus.Failed)
+            CommandResult(
+                error.message ?: "Unknown Invalid Command Parameter Exception Occurred",
+                CommandResultStatus.Failed
+            )
         } catch (error: UnterminatedStringException) {
-            CommandResult(error.message ?: "Unknown Error Occurred", CommandResultStatus.Failed)
+            CommandResult(error.message ?: "Unknown Unterminated String Exception Occurred", CommandResultStatus.Failed)
         } catch (error: InvalidEscapedCharacterException) {
-            CommandResult(error.message ?: "Unknown Error Occurred", CommandResultStatus.Failed)
+            CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
+        } catch (error: CommandParameterConverterParsingException) {
+            CommandResult(
+                error.message ?: "Unknown Parameter Conversion Exception Occurred",
+                CommandResultStatus.Failed
+            )
         } catch (error: Exception) {
             // TODO: Add logging
             CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
@@ -207,9 +216,14 @@ class CommandRegistry {
             val parameterAsString = parsedString[i]
             val parameterType = command.parametersType[i]
 
-            val output = parameterConverters[parameterType]!!.parse(parameterAsString)
+            try {
+                val output = parameterConverters[parameterType]!!.parse(parameterAsString)
 
-            parameters.add(output!!)
+                parameters.add(output!!)
+            } catch (error: CommandParameterConverterParsingException) {
+                // TODO: Parameterized exception
+                throw CommandParameterConverterParsingException(error.toParametrizedString("Soon"))
+            }
         }
 
         return parameters.toTypedArray()
