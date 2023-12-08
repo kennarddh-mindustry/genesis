@@ -154,8 +154,13 @@ class CommandRegistry {
                 val parameterTypeKClass = commandFunctionParameter.type.classifier
 
                 if (parameterConverters.contains(parameterTypeKClass)) {
-                    // TODO: Validator
-                    parameters.add(CommandParameter(parameterTypeKClass as KClass<*>, arrayOf()))
+                    parameters.add(
+                        CommandParameter(
+                            parameterTypeKClass as KClass<*>,
+                            // TODO: Validate all validator is registered
+                            commandFunctionParameter.annotations.toTypedArray()
+                        )
+                    )
                 } else {
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandFunctionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
                 }
@@ -237,6 +242,11 @@ class CommandRegistry {
                 error.message ?: "Unknown Parameter Conversion Exception Occurred",
                 CommandResultStatus.Failed
             )
+        } catch (error: CommandParameterValidationException) {
+            CommandResult(
+                error.message ?: "Unknown Parameter Validation Exception Occurred",
+                CommandResultStatus.Failed
+            )
         } catch (error: Exception) {
             // TODO: Add logging
             CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
@@ -261,6 +271,15 @@ class CommandRegistry {
 
             try {
                 val output = parameterConverters[parameter.type]!!.parse(parameterAsString)
+
+                parameter.validator.forEach {
+                    val validator = parameterValidator[parameter.type]!![it::class]
+
+                    val isValid = (validator!! as CommandParameterValidator<Any>).invoke(it, output!!)
+
+                    if (!isValid)
+                        throw CommandParameterValidationException("Parameter validation for parameter Soon failed.")
+                }
 
                 parameters.add(output!!)
             } catch (error: CommandParameterConverterParsingException) {
