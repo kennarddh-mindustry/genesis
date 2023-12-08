@@ -165,7 +165,6 @@ class CommandRegistry {
                     CommandParameter(
                         parameterTypeKClass as KClass<*>,
                         commandFunctionParameter.name ?: "Unknown Parameter",
-                        // TODO: Validate all validator is registered
                         validationsAnnotation.toTypedArray()
                     )
                 )
