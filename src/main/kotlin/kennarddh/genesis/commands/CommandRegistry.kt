@@ -15,7 +15,6 @@ import kennarddh.genesis.commands.parameters.converters.CharParameterConverter
 import kennarddh.genesis.commands.parameters.converters.StringParameterConverter
 import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverter
 import kennarddh.genesis.commands.parameters.converters.base.CommandParameterConverterParsingException
-import kennarddh.genesis.commands.parameters.validations.ParameterValidation
 import kennarddh.genesis.commands.parameters.converters.numbers.signed.floating.DoubleParameterConverter
 import kennarddh.genesis.commands.parameters.converters.numbers.signed.floating.FloatParameterConverter
 import kennarddh.genesis.commands.parameters.converters.numbers.signed.integer.ByteParameterConverter
@@ -26,7 +25,13 @@ import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer
 import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer.UIntParameterConverter
 import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer.ULongParameterConverter
 import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer.UShortParameterConverter
-import kennarddh.genesis.commands.parameters.validations.numbers.*
+import kennarddh.genesis.commands.parameters.validations.ParameterValidation
+import kennarddh.genesis.commands.parameters.validations.ParameterValidationDescription
+import kennarddh.genesis.commands.parameters.validations.numbers.Max
+import kennarddh.genesis.commands.parameters.validations.numbers.Min
+import kennarddh.genesis.commands.parameters.validations.numbers.validateMax
+import kennarddh.genesis.commands.parameters.validations.numbers.validateMin
+import kennarddh.genesis.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.common.InvalidEscapedCharacterException
@@ -288,9 +293,16 @@ class CommandRegistry {
                     @Suppress("UNCHECKED_CAST")
                     val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output!!)
 
-                    // TODO: Add better description by using @Description(":parameterName: must be greater than :value:") annotation on parameter validation annotation. :string: is replaced based on annotation property name
-                    if (!isValid)
-                        throw CommandParameterValidationException("Parameter validation for parameter ${parameter.name} failed.")
+                    if (!isValid) {
+                        val descriptionAnnotation = it.annotationClass.findAnnotation<ParameterValidationDescription>()
+
+                        val errorMessage = if (descriptionAnnotation != null)
+                            parameterValidationDescriptionAnnotationToString(descriptionAnnotation, it, parameter.name)
+                        else
+                            "Parameter validation for parameter ${parameter.name} failed."
+
+                        throw CommandParameterValidationException(errorMessage)
+                    }
                 }
 
                 parameters.add(output!!)
