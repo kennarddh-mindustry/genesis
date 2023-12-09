@@ -171,7 +171,8 @@ class CommandRegistry {
                     CommandParameter(
                         parameterTypeKClass as KClass<*>,
                         commandFunctionParameter.name ?: "Unknown Parameter",
-                        validationsAnnotation.toTypedArray()
+                        validationsAnnotation.toTypedArray(),
+                        commandFunctionParameter.isOptional
                     )
                 )
             }
