@@ -258,7 +258,7 @@ class CommandRegistry {
             )
         } catch (error: CommandParameterValidationException) {
             CommandResult(
-                error.message ?: "Unknown Parameter Validation Exception Occurred",
+                error.message,
                 CommandResultStatus.Failed
             )
         } catch (error: Exception) {
@@ -279,6 +279,8 @@ class CommandRegistry {
         } else if (command.parametersType.size < parsedString.size) {
             throw InvalidCommandParameterException("Too much parameters supplied. Usage: soon")
         }
+
+        val errorMessages: MutableList<String> = mutableListOf()
 
         for (i in 0..<command.parametersType.size) {
             val parameterAsString = parsedString[i]
@@ -301,15 +303,19 @@ class CommandRegistry {
                         else
                             "Parameter validation for parameter ${parameter.name} failed."
 
-                        throw CommandParameterValidationException(errorMessage)
+                        errorMessages.add(errorMessage)
                     }
                 }
 
                 parameters.add(output!!)
             } catch (error: CommandParameterConverterParsingException) {
-                throw CommandParameterConverterParsingException(error.toParametrizedString(parameter.name))
+                errorMessages.add(error.toParametrizedString(parameter.name))
             }
         }
+
+
+        if (errorMessages.isNotEmpty())
+            throw CommandParameterValidationException(errorMessages.toTypedArray())
 
         return parameters.toTypedArray()
     }
