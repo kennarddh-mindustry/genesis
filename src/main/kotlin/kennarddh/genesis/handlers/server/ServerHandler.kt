@@ -105,8 +105,8 @@ class ServerHandler : Handler() {
     @ClientSide
     @ServerSide
     fun add(
-        @Min(0) @Max(100) number1: Int, @Min(-10) @Max(10) number2: Int
+        @Min(0) @Max(100) number1: Int? = null, @Min(-10) @Max(10) number2: Int
     ): CommandResult {
-        return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
+        return CommandResult("Result: $number1 + $number2 = ${(number1 ?: 0) + number2}")
     }
 }

@@ -10,6 +10,7 @@ import kennarddh.genesis.commands.exceptions.CommandParameterValidationException
 import kennarddh.genesis.commands.exceptions.InvalidCommandMethodException
 import kennarddh.genesis.commands.exceptions.InvalidCommandParameterException
 import kennarddh.genesis.commands.parameters.CommandParameter
+import kennarddh.genesis.commands.parameters.CommandParameterValidator
 import kennarddh.genesis.commands.parameters.converters.BooleanParameterConverter
 import kennarddh.genesis.commands.parameters.converters.CharParameterConverter
 import kennarddh.genesis.commands.parameters.converters.StringParameterConverter
@@ -43,9 +44,11 @@ import mindustry.Vars
 import mindustry.gen.Player
 import mindustry.server.ServerControl
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.hasAnnotation
+import kotlin.reflect.full.instanceParameter
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.typeOf
 
@@ -169,10 +172,8 @@ class CommandRegistry {
 
                 parameters.add(
                     CommandParameter(
-                        parameterTypeKClass as KClass<*>,
-                        commandFunctionParameter.name ?: "Unknown Parameter",
+                        commandFunctionParameter,
                         validationsAnnotation.toTypedArray(),
-                        commandFunctionParameter.isOptional
                     )
                 )
             }
@@ -201,8 +202,8 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Server)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
-            invokeCommand(command, commandString) { parameters ->
-                command.function.call(command.handler, *parameters) as CommandResult
+            invokeCommand(command, commandString, null) { parameters ->
+                command.function.callBy(parameters) as CommandResult
             }
         }
 
@@ -215,11 +216,11 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
-            invokeCommand(command, commandString) { parameters ->
+            invokeCommand(command, commandString, player) { parameters ->
                 if (!command.sides.contains(CommandSide.Server))
-                    command.function.call(command.handler, player, *parameters) as CommandResult
+                    command.function.callBy(parameters) as CommandResult
                 else
-                    command.function.call(command.handler, *parameters) as CommandResult
+                    command.function.callBy(parameters) as CommandResult
             }
         }
 
@@ -229,12 +230,13 @@ class CommandRegistry {
     private fun invokeCommand(
         command: CommandData,
         commandString: String,
-        invoke: (Array<Any>) -> CommandResult
+        player: Player?,
+        invoke: (Map<KParameter, Any>) -> CommandResult
     ): CommandResult {
         val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
 
         return try {
-            val parameters = parseCommandParameters(command, commandStringWithoutCommandName)
+            val parameters = parseCommandParameters(command, commandStringWithoutCommandName, player)
 
             invoke(parameters)
         } catch (error: InvalidCommandParameterException) {
@@ -265,8 +267,16 @@ class CommandRegistry {
         }
     }
 
-    private fun parseCommandParameters(command: CommandData, commandStringWithoutCommandName: String): Array<Any> {
-        val parameters: MutableList<Any> = mutableListOf()
+    private fun parseCommandParameters(
+        command: CommandData,
+        commandStringWithoutCommandName: String,
+        player: Player?
+    ): Map<KParameter, Any> {
+        val parameters: MutableMap<KParameter, Any> =
+            mutableMapOf(command.function.instanceParameter!! to command.handler)
+
+        if (player != null && command.parametersType.size > 1 && command.parametersType[0].kClass is Player)
+            parameters[command.parametersType[0].kParameter] = player
 
         val parsedString = StringParser.parseToArray(commandStringWithoutCommandName)
 
@@ -284,10 +294,10 @@ class CommandRegistry {
             val parameter = command.parametersType[i]
 
             try {
-                val output = parameterConverters[parameter.type]!!.parse(parameterAsString)
+                val output = parameterConverters[parameter.kClass]!!.parse(parameterAsString)
 
                 parameter.validator.forEach {
-                    val validator = parameterValidator[parameter.type]!![it.annotationClass]
+                    val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
 
                     @Suppress("UNCHECKED_CAST")
                     val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output!!)
@@ -304,17 +314,16 @@ class CommandRegistry {
                     }
                 }
 
-                parameters.add(output!!)
+                parameters[parameter.kParameter] = output!!
             } catch (error: CommandParameterConverterParsingException) {
                 errorMessages.add(error.toParametrizedString(parameter.name))
             }
         }
 
-
         if (errorMessages.isNotEmpty())
             throw CommandParameterValidationException(errorMessages.toTypedArray())
 
-        return parameters.toTypedArray()
+        return parameters.toMap()
     }
 
     private fun handleCommandHandlerResult(result: Any?, player: Player?) {

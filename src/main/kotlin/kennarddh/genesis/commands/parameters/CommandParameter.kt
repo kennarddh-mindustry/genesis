@@ -1,32 +1,38 @@
 package kennarddh.genesis.commands.parameters
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+
+typealias CommandParameterValidator<T> = (annotation: Annotation, value: T) -> Boolean
 
 data class CommandParameter(
-    val type: KClass<*>,
-    val name: String,
+    val kParameter: KParameter,
     val validator: Array<Annotation>,
-    val isOptional: Boolean
 ) {
+    val name: String
+        get() = kParameter.name ?: "Unknown Parameter"
+
+    val isOptional: Boolean
+        get() = kParameter.isOptional
+
+    val kClass: KClass<*>
+        get() = kParameter.type.classifier as KClass<*>
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as CommandParameter
 
-        if (type != other.type) return false
-        if (name != other.name) return false
+        if (kParameter != other.kParameter) return false
         if (!validator.contentEquals(other.validator)) return false
-        if (isOptional != other.isOptional) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = type.hashCode()
-        result = 31 * result + name.hashCode()
+        var result = kParameter.hashCode()
         result = 31 * result + validator.contentHashCode()
-        result = 31 * result + isOptional.hashCode()
         return result
     }
 }
