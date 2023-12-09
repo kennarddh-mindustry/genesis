@@ -164,12 +164,8 @@ class CommandRegistry {
                 if (!parameterConverters.contains(parameterTypeKClass))
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandFunctionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
 
-                val validationsAnnotation: MutableList<Annotation> = mutableListOf()
-
-                commandFunctionParameter.annotations.forEach {
-                    if (it.annotationClass.hasAnnotation<ParameterValidation>())
-                        validationsAnnotation.add(it)
-                }
+                val validationsAnnotation: List<Annotation> =
+                    commandFunctionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
 
                 parameters.add(
                     CommandParameter(
