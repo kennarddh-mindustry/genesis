@@ -4,81 +4,65 @@ class UnterminatedStringException(message: String) : Exception(message)
 
 class InvalidEscapedCharacterException(message: String) : Exception(message)
 
-class InvalidStringParsingException(message: String) : Exception(message)
+open class StringParserToken
+
+class SkipToken : StringParserToken()
+data class StringToken(val value: String) : StringParserToken()
 
 class StringParser {
     companion object {
         private val escapedCharactersMap = mapOf('n' to "\n", '\"' to '\"', '\\' to "\\")
 
-        fun parse(input: String) =
+        fun parse(input: String): Iterator<StringParserToken> =
             iterator {
                 var isEscaping = false
                 var isInQuote = false
-                var isReadyForNext = true
 
                 val output = StringBuilder()
 
-                // TODO: Refactor if else hell
                 for (char in input) {
                     if (isEscaping) {
                         if (escapedCharactersMap.contains(char)) {
                             output.append(escapedCharactersMap[char])
 
                             isEscaping = false
-                        } else {
-                            throw InvalidEscapedCharacterException("$char is not a valid character to escape")
-                        }
-                    } else if (char == '\\') {
-                        isEscaping = true
-                    } else if (char == ' ' && output.isEmpty()) {
-                        isReadyForNext = true
-                    } else if (char == ' ' && !isInQuote) {
-                        isReadyForNext = true
 
-                        yield(output.toString())
-
-                        output.clear()
-                    } else if (char == '"' && !isInQuote && output.isEmpty()) {
-                        if (!isReadyForNext && output.isEmpty()) {
-                            throw InvalidStringParsingException("Parameter must be separated by space")
+                            continue
                         } else {
-                            isInQuote = true
+                            throw InvalidEscapedCharacterException("$char is not a valid character to be escaped")
                         }
-                    } else if (char == '"') {
-                        if (isInQuote) {
-                            isInQuote = false
-                            isReadyForNext = false
+                    }
 
-                            yield(output.toString())
+                    when (char) {
+                        '\\' -> isEscaping = true
+                        '"' -> isInQuote = !isInQuote
+                        ' ' -> {
+                            if (!isInQuote) {
+                                if (output.isNotEmpty()) {
+                                    yield(StringToken(output.toString()))
+                                    output.clear()
+                                }
+                            } else
+                                output.append(char)
+                        }
 
-                            output.clear()
-                        } else {
-                            throw InvalidStringParsingException("Cannot use double quote without being escaped other than for starting quoted string")
-                        }
-                    } else if (char == ' ' && output.isEmpty()) {
-                        continue
-                    } else {
-                        if (!isReadyForNext && output.isEmpty()) {
-                            throw InvalidStringParsingException("Parameter must be separated by space")
-                        } else {
-                            output.append(char)
-                        }
+                        else -> output.append(char)
                     }
                 }
 
                 if (isEscaping) {
                     throw InvalidEscapedCharacterException("No character provided after escape character")
-                } else if (output.isNotBlank() && isInQuote) {
+                } else if (isInQuote) {
                     throw UnterminatedStringException("Double quoted string $output is not terminated")
                 } else if (output.isNotBlank()) {
-                    yield(output.toString())
+                    yield(StringToken(output.toString()))
                 }
             }
 
-        fun parseToArray(input: String): Array<String> {
+        fun parseToArray(input: String): Array<StringParserToken> {
             val parsed = parse(input)
 
-            val output: MutableList<String> = mutableListOf()
+            val output: MutableList<StringParserToken> = mutableListOf()
 
             parsed.forEach {
                 output.add(it)

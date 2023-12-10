@@ -36,8 +36,8 @@ import kennarddh.genesis.commands.parameters.validations.parameterValidationDesc
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
 import kennarddh.genesis.common.InvalidEscapedCharacterException
-import kennarddh.genesis.common.InvalidStringParsingException
 import kennarddh.genesis.common.StringParser
+import kennarddh.genesis.common.StringToken
 import kennarddh.genesis.common.UnterminatedStringException
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
@@ -248,8 +248,6 @@ class CommandRegistry {
             CommandResult(error.message ?: "Unknown Unterminated String Exception Occurred", CommandResultStatus.Failed)
         } catch (error: InvalidEscapedCharacterException) {
             CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
-        } catch (error: InvalidStringParsingException) {
-            CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
         } catch (error: CommandParameterConverterParsingException) {
             CommandResult(
                 error.message ?: "Unknown Parameter Conversion Exception Occurred",
@@ -290,31 +288,38 @@ class CommandRegistry {
         val errorMessages: MutableList<String> = mutableListOf()
 
         for (i in 0..<command.parametersType.size) {
-            val parameterAsString = parsedString[i]
+            val passedParameter = parsedString[i]
             val parameter = command.parametersType[i]
 
             try {
-                val output = parameterConverters[parameter.kClass]!!.parse(parameterAsString)
+                if (passedParameter is StringToken) {
+                    val output = parameterConverters[parameter.kClass]!!.parse(passedParameter.value)
 
-                parameter.validator.forEach {
-                    val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
+                    parameter.validator.forEach {
+                        val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
 
-                    @Suppress("UNCHECKED_CAST")
-                    val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output!!)
+                        @Suppress("UNCHECKED_CAST")
+                        val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output!!)
 
-                    if (!isValid) {
-                        val descriptionAnnotation = it.annotationClass.findAnnotation<ParameterValidationDescription>()
+                        if (!isValid) {
+                            val descriptionAnnotation =
+                                it.annotationClass.findAnnotation<ParameterValidationDescription>()
 
-                        val errorMessage = if (descriptionAnnotation != null)
-                            parameterValidationDescriptionAnnotationToString(descriptionAnnotation, it, parameter.name)
-                        else
-                            "Parameter validation for parameter ${parameter.name} failed."
+                            val errorMessage = if (descriptionAnnotation != null)
+                                parameterValidationDescriptionAnnotationToString(
+                                    descriptionAnnotation,
+                                    it,
+                                    parameter.name
+                                )
+                            else
+                                "Parameter validation for parameter ${parameter.name} failed."
 
-                        errorMessages.add(errorMessage)
+                            errorMessages.add(errorMessage)
+                        }
                     }
-                }
 
-                parameters[parameter.kParameter] = output!!
+                    parameters[parameter.kParameter] = output!!
+                }
             } catch (error: CommandParameterConverterParsingException) {
                 errorMessages.add(error.toParametrizedString(parameter.name))
             }
