@@ -340,7 +340,8 @@ class CommandRegistry {
                         Log.warn("Unknown CommandResultStatus ${result.status}")
                         "[#ffffff]"
                     }
-                } else
+                }
+            else
                 ""
 
             Core.app.post {
