@@ -36,7 +36,13 @@ class StringParser {
                     when (char) {
                         '\\' -> isEscaping = true
                         '"' -> isInQuote = !isInQuote
-                        '*' -> yield(SkipToken())
+                        '*' -> {
+                            if (!isInQuote && output.isEmpty())
+                                yield(SkipToken())
+                            else
+                                output.append(char)
+                        }
+
                         ' ' -> {
                             if (!isInQuote) {
                                 if (output.isNotEmpty()) {
