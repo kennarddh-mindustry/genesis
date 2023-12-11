@@ -3,4 +3,4 @@ services:
     image: genesis
     build: .
     ports:
-      - 6567
+      - 6567:6567
