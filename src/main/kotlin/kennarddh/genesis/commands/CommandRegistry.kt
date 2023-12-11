@@ -50,7 +50,6 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.typeOf
 
 class CommandRegistry {
-    private val handlers: MutableList<Handler> = mutableListOf()
     private val commands: MutableMap<String, CommandData> = mutableMapOf()
 
     private val parameterConverters: MutableMap<KClass<*>, CommandParameterConverter<*>> = mutableMapOf()
@@ -122,8 +121,6 @@ class CommandRegistry {
     }
 
     fun registerHandler(handler: Handler) {
-        handlers.add(handler)
-
         for (function in handler::class.declaredFunctions) {
             function.isAccessible = true
 
