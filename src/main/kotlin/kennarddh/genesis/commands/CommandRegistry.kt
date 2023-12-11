@@ -24,7 +24,6 @@ import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer
 import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer.UIntParameterConverter
 import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer.ULongParameterConverter
 import kennarddh.genesis.commands.parameters.converters.numbers.unsigned.integer.UShortParameterConverter
-import kennarddh.genesis.commands.parameters.exceptions.CommandMissingRequiredParameterException
 import kennarddh.genesis.commands.parameters.exceptions.CommandParameterValidationException
 import kennarddh.genesis.commands.parameters.exceptions.InvalidCommandParameterException
 import kennarddh.genesis.commands.parameters.validations.ParameterValidation
@@ -259,11 +258,6 @@ class CommandRegistry {
             CommandResult(error.message ?: "Unknown Unterminated String Exception Occurred", CommandResultStatus.Failed)
         } catch (error: InvalidEscapedCharacterException) {
             CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
-        } catch (error: CommandMissingRequiredParameterException) {
-            CommandResult(
-                error.message ?: "Unknown Missing Required Parameter Exception Occurred",
-                CommandResultStatus.Failed
-            )
         } catch (error: CommandParameterConverterParsingException) {
             CommandResult(
                 error.message ?: "Unknown Parameter Conversion Exception Occurred",
@@ -321,7 +315,6 @@ class CommandRegistry {
 
             val passedParameter = parsedString[i]
 
-            //TODO: Remove CommandMissingRequiredParameterException
             if (passedParameter is SkipToken) {
                 if (!parameter.isOptional)
                     errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped")
