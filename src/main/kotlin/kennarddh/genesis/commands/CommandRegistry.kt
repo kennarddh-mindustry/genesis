@@ -296,7 +296,6 @@ class CommandRegistry {
                 command.parametersType.size
 
         // TODO: Add Command Usage
-        // TODO: If the rest of parameters is optional no need to pass all as asterisk
         if (actualParametersSize < parsedString.size) {
             throw InvalidCommandParameterException("Too much parameters supplied. Usage: soon")
         }
