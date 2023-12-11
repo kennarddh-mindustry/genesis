@@ -150,27 +150,37 @@ class CommandRegistry {
 
             val functionParameters = function.parameters.drop(1)
 
-            val isClientSideOnly = sides.contains(CommandSide.Client) && !sides.contains(CommandSide.Server)
+            if (isClientSide && !isServerSide && functionParameters.isNotEmpty() && functionParameters[0].type == typeOf<Player?>())
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} support client only must accept non optional player as the first parameter")
 
-            if (isClientSideOnly && (functionParameters.isEmpty() || functionParameters[0].type != typeOf<Player>()))
-                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} is client only it must accept player as the first parameter")
+            if (isClientSide && isServerSide && functionParameters.isNotEmpty() && (!functionParameters[0].isOptional || functionParameters[0].type != typeOf<Player?>()))
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} support client and server must accept optional player as the first parameter")
 
             val parameters: MutableList<CommandParameter> = mutableListOf()
 
-            val commandFunctionParameters = if (isClientSideOnly) functionParameters.drop(1) else functionParameters
+            functionParameters.forEachIndexed { index, functionParameter ->
+                if (isClientSide && index == 0) {
+                    parameters.add(
+                        CommandParameter(
+                            functionParameter,
+                            arrayOf(),
+                        )
+                    )
 
-            for (commandFunctionParameter in commandFunctionParameters) {
-                val parameterTypeKClass = commandFunctionParameter.type.classifier
+                    return@forEachIndexed
+                }
+
+                val parameterTypeKClass = functionParameter.type.classifier
 
                 if (!parameterConverters.contains(parameterTypeKClass))
-                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandFunctionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
+                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
 
                 val validationsAnnotation: List<Annotation> =
-                    commandFunctionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
+                    functionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
 
                 parameters.add(
                     CommandParameter(
-                        commandFunctionParameter,
+                        functionParameter,
                         validationsAnnotation.toTypedArray(),
                     )
                 )
@@ -214,12 +224,8 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
-            // TODO: Check if double side command accept player param too
             invokeCommand(command, commandString, player) { parameters ->
-                if (!command.sides.contains(CommandSide.Server))
-                    command.function.callBy(parameters) as CommandResult
-                else
-                    command.function.callBy(parameters) as CommandResult
+                command.function.callBy(parameters) as CommandResult
             }
         }
 
@@ -230,7 +236,7 @@ class CommandRegistry {
         command: CommandData,
         commandString: String,
         player: Player?,
-        invoke: (Map<KParameter, Any>) -> CommandResult
+        invoke: (Map<KParameter, Any?>) -> CommandResult
     ): CommandResult {
         val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
 
@@ -273,27 +279,35 @@ class CommandRegistry {
         command: CommandData,
         commandStringWithoutCommandName: String,
         player: Player?
-    ): Map<KParameter, Any> {
-        val parameters: MutableMap<KParameter, Any> =
+    ): Map<KParameter, Any?> {
+        val parameters: MutableMap<KParameter, Any?> =
             mutableMapOf(command.function.instanceParameter!! to command.handler)
 
-        if (player != null && command.parametersType.size > 1 && command.parametersType[0].kClass is Player)
+        if (command.sides.contains(CommandSide.Client) && command.parametersType.isNotEmpty()) {
             parameters[command.parametersType[0].kParameter] = player
+        }
 
         val parsedString = StringParser.parseToArray(commandStringWithoutCommandName)
 
+        val actualParametersSize =
+            if (command.sides.contains(CommandSide.Client) && command.parametersType.isNotEmpty())
+                command.parametersType.size - 1
+            else
+                command.parametersType.size
+
         // TODO: Add Command Usage
-        if (command.parametersType.size > parsedString.size) {
+        // TODO: If the rest of parameters is optional no need to pass all as asterisk
+        if (actualParametersSize > parsedString.size) {
             throw InvalidCommandParameterException("Too few parameters supplied. Usage: soon")
-        } else if (command.parametersType.size < parsedString.size) {
+        } else if (actualParametersSize < parsedString.size) {
             throw InvalidCommandParameterException("Too much parameters supplied. Usage: soon")
         }
 
         val errorMessages: MutableList<String> = mutableListOf()
 
-        for (i in 0..<command.parametersType.size) {
+        for (i in 0..<actualParametersSize) {
             val passedParameter = parsedString[i]
-            val parameter = command.parametersType[i]
+            val parameter = command.parametersType[i + 1]
 
             try {
                 if (passedParameter is StringToken) {

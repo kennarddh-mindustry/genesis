@@ -79,8 +79,11 @@ class ServerHandler : Handler() {
     @Command("log")
     @ClientSide
     @ServerSide
-    fun log(): CommandResult {
-        Log.info("Log.")
+    fun log(player: Player? = null): CommandResult {
+        if (player != null)
+            Log.info("Log by ${player.name}.")
+        else
+            Log.info("Log by Server.")
 
         return CommandResult("Log success.", colorDependsOnStatus = false)
     }
@@ -88,7 +91,7 @@ class ServerHandler : Handler() {
     @Command("say")
     @ClientSide
     @ServerSide
-    fun say(message: String): CommandResult {
+    fun say(player: Player? = null, message: String): CommandResult {
         if (!Vars.state.isGame)
             return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
 
@@ -105,7 +108,7 @@ class ServerHandler : Handler() {
     @ClientSide
     @ServerSide
     fun add(
-        @Min(0) @Max(100) number1: Int = 0, @Min(-10) @Max(10) number2: Int
+        player: Player? = null, @Min(0) @Max(100) number1: Int = 0, @Min(-10) @Max(10) number2: Int
     ): CommandResult {
         return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
     }
