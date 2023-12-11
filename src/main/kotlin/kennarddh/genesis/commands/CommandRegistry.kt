@@ -303,17 +303,31 @@ class CommandRegistry {
 
         // TODO: Add Command Usage
         // TODO: If the rest of parameters is optional no need to pass all as asterisk
-        if (actualParametersSize > parsedString.size) {
-            throw InvalidCommandParameterException("Too few parameters supplied. Usage: soon")
-        } else if (actualParametersSize < parsedString.size) {
+        if (actualParametersSize < parsedString.size) {
             throw InvalidCommandParameterException("Too much parameters supplied. Usage: soon")
         }
 
         val errorMessages: MutableList<String> = mutableListOf()
 
         for (i in 0..<actualParametersSize) {
-            val passedParameter = parsedString[i]
             val parameter = command.parametersType[i + 1]
+
+            if (i > parsedString.size - 1) {
+                if (!parameter.isOptional)
+                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped")
+
+                continue
+            }
+
+            val passedParameter = parsedString[i]
+
+            //TODO: Remove CommandMissingRequiredParameterException
+            if (passedParameter is SkipToken) {
+                if (!parameter.isOptional)
+                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped")
+
+                continue
+            }
 
             try {
                 if (passedParameter is StringToken) {
@@ -343,9 +357,6 @@ class CommandRegistry {
                     }
 
                     parameters[parameter.kParameter] = output!!
-                } else if (passedParameter is SkipToken) {
-                    if (!parameter.isOptional)
-                        throw CommandMissingRequiredParameterException("Parameter ${parameter.name} is required and cannot be skipped")
                 }
             } catch (error: CommandParameterConverterParsingException) {
                 errorMessages.add(error.toParametrizedString(parameter.name))
