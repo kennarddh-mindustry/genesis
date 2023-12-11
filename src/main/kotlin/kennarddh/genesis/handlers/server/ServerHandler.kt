@@ -11,9 +11,11 @@ import kennarddh.genesis.commands.parameters.validations.numbers.Max
 import kennarddh.genesis.commands.parameters.validations.numbers.Min
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
+import kennarddh.genesis.events.annotations.EventHandler
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.core.GameState
+import mindustry.game.EventType
 import mindustry.game.Gamemode
 import mindustry.gen.Call
 import mindustry.gen.Player
@@ -113,5 +115,11 @@ class ServerHandler : Handler() {
         @Min(-10) @Max(10) number2: Int = 1
     ): CommandResult {
         return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
+    }
+
+    @EventHandler
+    fun onPlayerJoin(playerJoin: EventType.PlayerJoin) {
+        println("Player join")
+        println(playerJoin)
     }
 }
