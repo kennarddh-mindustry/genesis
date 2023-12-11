@@ -11,7 +11,7 @@ data class StringToken(val value: String) : StringParserToken()
 
 class StringParser {
     companion object {
-        private val escapedCharactersMap = mapOf('n' to "\n", '\"' to "\"", '\\' to "\\")
+        private val escapedCharactersMap = mapOf('n' to "\n", '\"' to "\"", '\\' to "\\", '*' to "*")
 
         fun parse(input: String): Iterator<StringParserToken> =
             iterator {
@@ -36,6 +36,7 @@ class StringParser {
                     when (char) {
                         '\\' -> isEscaping = true
                         '"' -> isInQuote = !isInQuote
+                        '*' -> yield(SkipToken())
                         ' ' -> {
                             if (!isInQuote) {
                                 if (output.isNotEmpty()) {

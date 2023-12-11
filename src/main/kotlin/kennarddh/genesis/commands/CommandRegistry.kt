@@ -6,6 +6,7 @@ import arc.util.Reflect
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
+import kennarddh.genesis.commands.exceptions.CommandMissingRequiredParameterException
 import kennarddh.genesis.commands.exceptions.CommandParameterValidationException
 import kennarddh.genesis.commands.exceptions.InvalidCommandMethodException
 import kennarddh.genesis.commands.exceptions.InvalidCommandParameterException
@@ -35,10 +36,7 @@ import kennarddh.genesis.commands.parameters.validations.numbers.validateMin
 import kennarddh.genesis.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import kennarddh.genesis.commands.result.CommandResult
 import kennarddh.genesis.commands.result.CommandResultStatus
-import kennarddh.genesis.common.InvalidEscapedCharacterException
-import kennarddh.genesis.common.StringParser
-import kennarddh.genesis.common.StringToken
-import kennarddh.genesis.common.UnterminatedStringException
+import kennarddh.genesis.common.*
 import kennarddh.genesis.handlers.Handler
 import mindustry.Vars
 import mindustry.gen.Player
@@ -216,6 +214,7 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
             CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
         } else {
+            // TODO: Check if double side command accept player param too
             invokeCommand(command, commandString, player) { parameters ->
                 if (!command.sides.contains(CommandSide.Server))
                     command.function.callBy(parameters) as CommandResult
@@ -248,6 +247,11 @@ class CommandRegistry {
             CommandResult(error.message ?: "Unknown Unterminated String Exception Occurred", CommandResultStatus.Failed)
         } catch (error: InvalidEscapedCharacterException) {
             CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
+        } catch (error: CommandMissingRequiredParameterException) {
+            CommandResult(
+                error.message ?: "Unknown Missing Required Parameter Exception Occurred",
+                CommandResultStatus.Failed
+            )
         } catch (error: CommandParameterConverterParsingException) {
             CommandResult(
                 error.message ?: "Unknown Parameter Conversion Exception Occurred",
@@ -319,6 +323,9 @@ class CommandRegistry {
                     }
 
                     parameters[parameter.kParameter] = output!!
+                } else if (passedParameter is SkipToken) {
+                    if (!parameter.isOptional)
+                        throw CommandMissingRequiredParameterException("Parameter ${parameter.name} is required and cannot be skipped")
                 }
             } catch (error: CommandParameterConverterParsingException) {
                 errorMessages.add(error.toParametrizedString(parameter.name))
