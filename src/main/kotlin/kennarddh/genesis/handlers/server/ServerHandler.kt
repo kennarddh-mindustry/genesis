@@ -91,7 +91,7 @@ class ServerHandler : Handler() {
     @Command("say")
     @ClientSide
     @ServerSide
-    fun say(player: Player? = null, message: String): CommandResult {
+    fun say(@Suppress("UNUSED_PARAMETER") player: Player? = null, message: String): CommandResult {
         if (!Vars.state.isGame)
             return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
 
@@ -108,7 +108,9 @@ class ServerHandler : Handler() {
     @ClientSide
     @ServerSide
     fun add(
-        player: Player? = null, @Min(0) @Max(100) number1: Int, @Min(-10) @Max(10) number2: Int = 1
+        @Suppress("UNUSED_PARAMETER") player: Player? = null,
+        @Min(0) @Max(100) number1: Int,
+        @Min(-10) @Max(10) number2: Int = 1
     ): CommandResult {
         return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
     }
