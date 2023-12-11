@@ -1,4 +1,4 @@
-package kennarddh.genesis.commands.exceptions
+package kennarddh.genesis.commands.parameters.exceptions
 
 class CommandParameterValidationException(private val messages: Array<String>) : Exception() {
     override val message: String
