@@ -1,0 +1,6 @@
+services:
+  main:
+    image: genesis
+    build: .
+    ports:
+      - 6567
