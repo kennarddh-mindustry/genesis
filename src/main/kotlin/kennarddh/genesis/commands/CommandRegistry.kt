@@ -190,12 +190,16 @@ class CommandRegistry {
         }
     }
 
-    private fun getCommandFromCommandString(commandString: String): CommandData? {
+    private fun getCommandFromCommandName(commandName: String?): CommandData? {
+        return commands[commandName]
+    }
+
+    private fun getCommandNameFromCommandString(commandString: String): String? {
         val splitted = commandString.split(" ")
 
         if (splitted.isEmpty()) return null
 
-        return commands[splitted[0]]
+        return splitted[0]
     }
 
     private fun removeCommandNameFromCommandString(command: CommandData, commandString: String): String {
@@ -205,10 +209,11 @@ class CommandRegistry {
     }
 
     private fun parseServerCommand(commandString: String) {
-        val command = getCommandFromCommandString(commandString)
+        val commandName = getCommandNameFromCommandString(commandString)
+        val command = getCommandFromCommandName(commandName)
 
         val result = if (command == null || !command.sides.contains(CommandSide.Server)) {
-            CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
+            CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
         } else {
             invokeCommand(command, commandString, null) { parameters ->
                 command.function.callBy(parameters) as CommandResult
@@ -219,10 +224,11 @@ class CommandRegistry {
     }
 
     private fun parseClientCommand(commandString: String, player: Player) {
-        val command = getCommandFromCommandString(commandString)
+        val commandName = getCommandNameFromCommandString(commandString)
+        val command = getCommandFromCommandName(commandName)
 
         val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
-            CommandResult("Command $commandString not found.", CommandResultStatus.Failed)
+            CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
         } else {
             invokeCommand(command, commandString, player) { parameters ->
                 command.function.callBy(parameters) as CommandResult
