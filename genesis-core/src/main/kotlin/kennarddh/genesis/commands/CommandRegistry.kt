@@ -6,6 +6,7 @@ import arc.util.Reflect
 import kennarddh.genesis.commands.annotations.ClientSide
 import kennarddh.genesis.commands.annotations.Command
 import kennarddh.genesis.commands.annotations.ServerSide
+import kennarddh.genesis.commands.exceptions.DuplicateCommandNameException
 import kennarddh.genesis.commands.exceptions.InvalidCommandMethodException
 import kennarddh.genesis.commands.parameters.CommandParameter
 import kennarddh.genesis.commands.parameters.CommandParameterValidator
@@ -130,6 +131,20 @@ class CommandRegistry {
             val serverSideAnnotation = function.findAnnotation<ServerSide>()
 
             val names = commandAnnotation.names
+
+            val checkedNames: MutableList<String> = mutableListOf()
+
+            for (name in names) {
+                if (checkedNames.contains(name))
+                    throw DuplicateCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
+
+                val command = getCommandFromCommandName(name)
+
+                if (command != null)
+                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered")
+
+                checkedNames.add(name)
+            }
 
             val isServerSide = serverSideAnnotation != null
             val isClientSide = clientSideAnnotation != null
