@@ -1,10 +1,10 @@
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
+
 plugins {
     kotlin("jvm") version "1.9.10"
     `maven-publish`
 }
-
-group = "kennarddh"
-version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -13,8 +13,12 @@ repositories {
     maven("https://maven.xpdustry.com/releases")
 }
 
-val mindustryVersion by extra { "v146" }
-val jabelVersion by extra { "93fde537c7" }
+val mindustryVersion = "v146"
+val jabelVersion = "93fde537c7"
+val submoduleName = "genesis-core"
+
+group = "kennarddh"
+version = rootProject.file("$submoduleName/version.txt").readLines().first()
 
 dependencies {
     compileOnly("com.github.Anuken.Arc:arc-core:$mindustryVersion")
@@ -42,6 +46,21 @@ configurations.runtimeClasspath {
 }
 
 tasks.register<Jar>("buildJAR") {
+    val pluginJson = rootProject.file("$submoduleName/src/main/resources/plugin.json")
+    val pluginJsonText = pluginJson.readText()
+    val jsonSlurper = JsonSlurper()
+
+    @Suppress("UNCHECKED_CAST")
+    val pluginJsonParsed = jsonSlurper.parseText(pluginJsonText) as MutableMap<Any, Any>
+
+    pluginJsonParsed["version"] = version
+
+    val builder = JsonBuilder(pluginJsonParsed)
+
+    val pluginJsonModified = builder.toPrettyString()
+
+    pluginJson.writeText(pluginJsonModified)
+
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     from(sourceSets.main.get().output)
