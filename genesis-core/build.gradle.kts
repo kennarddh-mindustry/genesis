@@ -93,3 +93,7 @@ publishing {
 tasks.register<Jar>("buildAndPublish") {
     dependsOn(tasks.build, tasks.publish)
 }
+
+tasks.register<Jar>("buildAndPublishLocal") {
+    dependsOn(tasks.build, tasks.publishToMavenLocal)
+}
