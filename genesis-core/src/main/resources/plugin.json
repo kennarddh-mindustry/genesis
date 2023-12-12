@@ -1,6 +1,6 @@
 {
-    "name": "genesis",
-    "displayName": "Genesis",
+    "name": "genesis-core",
+    "displayName": "GenesisCore",
     "author": "Kennarddh",
     "description": "Plugin",
     "minGameVersion": "146",
