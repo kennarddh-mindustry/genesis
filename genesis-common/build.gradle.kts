@@ -7,11 +7,12 @@ plugins {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository")
     maven("https://www.jitpack.io")
     maven("https://maven.xpdustry.com/releases")
-    
+
     maven {
         url = uri("http://23.95.107.12:9999/releases")
         isAllowInsecureProtocol = true
@@ -34,7 +35,7 @@ dependencies {
     compileOnly("com.xpdustry:kotlin-runtime:3.1.0-k.1.9.10")
     compileOnly(kotlin("reflect"))
 
-    compileOnly("kennarddh:genesis-core:1.0.0")
+    compileOnly("kennarddh:genesis-core:1.0.1")
 }
 
 kotlin {

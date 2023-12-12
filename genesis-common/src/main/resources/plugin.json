@@ -1,14 +1,15 @@
 {
-    "name": "genesis-core",
-    "displayName": "GenesisCore",
+    "name": "genesis-common",
+    "displayName": "GenesisCommon",
     "author": "Kennarddh",
     "description": "Plugin",
     "minGameVersion": "146",
     "java": true,
-    "main": "kennarddh.genesis.core.Genesis",
+    "main": "kennarddh.genesis.common.GenesisCommon",
     "version": "1.0.0",
     "repo": "kennarddh-mindustry/genesis",
     "dependencies": [
-        "kotlin-runtime"
+        "kotlin-runtime",
+        "genesis-core"
     ]
 }
