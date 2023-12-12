@@ -5,10 +5,9 @@ import kennarddh.genesis.core.commands.CommandRegistry
 import kennarddh.genesis.core.common.AbstractPlugin
 import kennarddh.genesis.core.events.EventRegistry
 import kennarddh.genesis.core.handlers.Handler
-import kennarddh.genesis.core.handlers.server.ServerHandler
 
 @Suppress("unused")
-class Genesis : AbstractPlugin() {
+object Genesis : AbstractPlugin() {
     private val handlers: MutableList<Handler> = mutableListOf()
     private val commandRegistry = CommandRegistry()
     private val eventSystem = EventRegistry()
@@ -16,8 +15,6 @@ class Genesis : AbstractPlugin() {
     override fun init() {
         commandRegistry.init()
         eventSystem.init()
-
-        addHandler(ServerHandler())
 
         Log.info("[GenesisCore] Loaded")
     }
