@@ -45,27 +45,29 @@ configurations.runtimeClasspath {
     exclude(group = "org.jetbrains.kotlinx")
 }
 
-tasks.register<Jar>("buildJAR") {
-    val pluginJson = rootProject.file("$submoduleName/src/main/resources/plugin.json")
-    val pluginJsonText = pluginJson.readText()
-    val jsonSlurper = JsonSlurper()
+tasks {
+    jar {
+        val pluginJson = rootProject.file("$submoduleName/src/main/resources/plugin.json")
+        val pluginJsonText = pluginJson.readText()
+        val jsonSlurper = JsonSlurper()
 
-    @Suppress("UNCHECKED_CAST")
-    val pluginJsonParsed = jsonSlurper.parseText(pluginJsonText) as MutableMap<Any, Any>
+        @Suppress("UNCHECKED_CAST")
+        val pluginJsonParsed = jsonSlurper.parseText(pluginJsonText) as MutableMap<Any, Any>
 
-    pluginJsonParsed["version"] = version
+        pluginJsonParsed["version"] = version
 
-    val builder = JsonBuilder(pluginJsonParsed)
+        val builder = JsonBuilder(pluginJsonParsed)
 
-    val pluginJsonModified = builder.toPrettyString()
+        val pluginJsonModified = builder.toPrettyString()
 
-    pluginJson.writeText(pluginJsonModified)
+        pluginJson.writeText(pluginJsonModified)
 
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    from(sourceSets.main.get().output)
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-    from(rootProject.fileTree("src/main/resources/"))
+        from(sourceSets.main.get().output)
+        from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+        from(rootProject.fileTree("src/main/resources/"))
+    }
 }
 
 publishing {
@@ -91,9 +93,9 @@ publishing {
 }
 
 tasks.register<Jar>("buildAndPublish") {
-    dependsOn(tasks.build, tasks.publish)
+    dependsOn(tasks.jar, tasks.publish)
 }
 
 tasks.register<Jar>("buildAndPublishLocal") {
-    dependsOn(tasks.build, tasks.publishToMavenLocal)
+    dependsOn(tasks.jar, tasks.publishToMavenLocal)
 }
