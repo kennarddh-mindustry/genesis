@@ -25,10 +25,6 @@ import mindustry.net.Administration
 import mindustry.server.ServerControl
 
 class ServerHandler : Handler() {
-    override fun onInit() {
-        println("Server handler init")
-    }
-
     @Command(["host"])
     @ServerSide
     fun host(): CommandResult {
