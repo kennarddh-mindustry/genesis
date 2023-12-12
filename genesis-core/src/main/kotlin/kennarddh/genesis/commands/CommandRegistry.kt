@@ -50,7 +50,7 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.typeOf
 
 class CommandRegistry {
-    private val commands: MutableMap<String, CommandData> = mutableMapOf()
+    private val commands: MutableList<CommandData> = mutableListOf()
 
     private val parameterConverters: MutableMap<KClass<*>, CommandParameterConverter<*>> = mutableMapOf()
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
@@ -129,7 +129,7 @@ class CommandRegistry {
             val clientSideAnnotation = function.findAnnotation<ClientSide>()
             val serverSideAnnotation = function.findAnnotation<ServerSide>()
 
-            val name = commandAnnotation.name
+            val names = commandAnnotation.names
 
             val isServerSide = serverSideAnnotation != null
             val isClientSide = clientSideAnnotation != null
@@ -182,12 +182,16 @@ class CommandRegistry {
                 )
             }
 
-            commands[name] = CommandData(name, sides, handler, function, parameters.toTypedArray())
+            commands.add(CommandData(names, sides, handler, function, parameters.toTypedArray()))
         }
     }
 
     private fun getCommandFromCommandName(commandName: String?): CommandData? {
-        return commands[commandName]
+        for (command in commands) {
+            if (command.names.contains(commandName)) return command
+        }
+
+        return null
     }
 
     private fun getCommandNameFromCommandString(commandString: String): String? {
@@ -198,10 +202,10 @@ class CommandRegistry {
         return splitted[0]
     }
 
-    private fun removeCommandNameFromCommandString(command: CommandData, commandString: String): String {
-        if (command.name.length == commandString.length) return ""
+    private fun removeCommandNameFromCommandString(commandName: String, commandString: String): String {
+        if (commandName.length == commandString.length) return ""
 
-        return commandString.substring(command.name.length + 1)
+        return commandString.substring(commandName.length + 1)
     }
 
     private fun parseServerCommand(commandString: String) {
@@ -211,7 +215,7 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Server)) {
             CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
         } else {
-            invokeCommand(command, commandString, null) { parameters ->
+            invokeCommand(commandName!!, command, commandString, null) { parameters ->
                 command.function.callBy(parameters) as CommandResult
             }
         }
@@ -226,7 +230,7 @@ class CommandRegistry {
         val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
             CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
         } else {
-            invokeCommand(command, commandString, player) { parameters ->
+            invokeCommand(commandName!!, command, commandString, player) { parameters ->
                 command.function.callBy(parameters) as CommandResult
             }
         }
@@ -235,12 +239,13 @@ class CommandRegistry {
     }
 
     private fun invokeCommand(
+        invokedCommandName: String,
         command: CommandData,
         commandString: String,
         player: Player?,
         invoke: (Map<KParameter, Any?>) -> CommandResult
     ): CommandResult {
-        val commandStringWithoutCommandName = removeCommandNameFromCommandString(command, commandString)
+        val commandStringWithoutCommandName = removeCommandNameFromCommandString(invokedCommandName, commandString)
 
         return try {
             val parameters = parseCommandParameters(command, commandStringWithoutCommandName, player)

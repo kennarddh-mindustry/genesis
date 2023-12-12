@@ -19,7 +19,7 @@ class Genesis : AbstractPlugin() {
 
         addHandler(ServerHandler())
 
-        Log.info("[Genesis:Core] Loaded")
+        Log.info("[GenesisCore] Loaded")
     }
 
     fun addHandler(handler: Handler) {

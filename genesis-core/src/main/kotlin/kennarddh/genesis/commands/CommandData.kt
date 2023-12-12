@@ -5,7 +5,7 @@ import kennarddh.genesis.handlers.Handler
 import kotlin.reflect.KFunction
 
 data class CommandData(
-    val name: String,
+    val names: Array<String>,
     val sides: Array<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,

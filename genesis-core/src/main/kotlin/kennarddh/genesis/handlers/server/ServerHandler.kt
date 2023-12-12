@@ -29,7 +29,7 @@ class ServerHandler : Handler() {
         println("Server handler init")
     }
 
-    @Command("host")
+    @Command(["host"])
     @ServerSide
     fun host(): CommandResult {
         if (Vars.state.isGame) {
@@ -72,13 +72,13 @@ class ServerHandler : Handler() {
         }
     }
 
-    @Command("ping")
+    @Command(["ping"])
     @ClientSide
     fun ping(@Suppress("UNUSED_PARAMETER") player: Player): CommandResult {
         return CommandResult("Pong!")
     }
 
-    @Command("log")
+    @Command(["log"])
     @ClientSide
     @ServerSide
     fun log(player: Player? = null): CommandResult {
@@ -90,7 +90,7 @@ class ServerHandler : Handler() {
         return CommandResult("Log success.", colorDependsOnStatus = false)
     }
 
-    @Command("say")
+    @Command(["say"])
     @ClientSide
     @ServerSide
     fun say(@Suppress("UNUSED_PARAMETER") player: Player? = null, message: String): CommandResult {
@@ -106,7 +106,7 @@ class ServerHandler : Handler() {
         return CommandResult("Say success.")
     }
 
-    @Command("add")
+    @Command(["add", "math-add"])
     @ClientSide
     @ServerSide
     fun add(
