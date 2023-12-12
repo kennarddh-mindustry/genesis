@@ -28,10 +28,6 @@ toxopid {
     platforms.add(ModPlatform.HEADLESS)
 }
 
-val mindustryVersion = "v146"
-val jabelVersion = "93fde537c7"
-val submoduleName = "genesis-core"
-
 val metadata = ModMetadata.fromJson(project.file("plugin.json"))
 
 project.group = "kennarddh"
