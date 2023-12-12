@@ -118,7 +118,6 @@ class ServerHandler : Handler() {
     }
 
     @EventHandler
-    @Suppress("UNUSED")
     fun onPlayerJoin(playerJoin: EventType.PlayerJoin) {
         println("Player join")
         println(playerJoin)
