@@ -7,7 +7,7 @@ import kennarddh.genesis.core.events.EventRegistry
 import kennarddh.genesis.core.handlers.Handler
 
 @Suppress("unused")
-object Genesis : AbstractPlugin() {
+class Genesis : AbstractPlugin() {
     private val handlers: MutableList<Handler> = mutableListOf()
     private val commandRegistry = CommandRegistry()
     private val eventSystem = EventRegistry()
