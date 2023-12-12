@@ -98,7 +98,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "kennarddh"
-            artifactId = "genesis-core"
+            artifactId = metadata.name
             version = version
             from(components["java"])
         }
