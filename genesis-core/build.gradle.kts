@@ -91,5 +91,5 @@ publishing {
 }
 
 tasks.register<Jar>("buildAndPublish") {
-    dependsOn(tasks.build, tasks.build)
+    dependsOn(tasks.build, tasks.publish)
 }
