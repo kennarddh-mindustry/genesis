@@ -5,7 +5,7 @@
     "description": "Plugin",
     "minGameVersion": "146",
     "java": true,
-    "main": "kennarddh.genesis.Genesis",
+    "main": "kennarddh.genesis.core.Genesis",
     "version": "1.0.0",
     "repo": "kennarddh-mindustry/genesis",
     "dependencies": [
