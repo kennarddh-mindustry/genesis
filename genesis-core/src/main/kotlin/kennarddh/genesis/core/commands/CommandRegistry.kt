@@ -54,14 +54,28 @@ class CommandRegistry {
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
         mutableMapOf()
 
-    fun init() {
-        Reflect.set(ServerControl.instance, "handler", InterceptedCommandHandler("") { command, _ ->
-            parseServerCommand(command)
-        })
+    private val serverInterceptedCommandHandler = InterceptedCommandHandler("") { command, _ ->
+        parseServerCommand(command)
+    }
 
-        Reflect.set(Vars.netServer, "clientCommands", InterceptedCommandHandler("/") { command, player ->
-            parseClientCommand(command, player!!)
-        })
+    private val clientInterceptedCommandHandler = InterceptedCommandHandler("/") { command, player ->
+        parseClientCommand(command, player!!)
+    }
+
+    @Suppress("UNUSED")
+    var clientPrefix: String
+        get() = clientInterceptedCommandHandler.getPrefix()
+        set(newPrefix) = clientInterceptedCommandHandler.setPrefix(newPrefix)
+    
+    @Suppress("UNUSED")
+    var serverPrefix: String
+        get() = serverInterceptedCommandHandler.getPrefix()
+        set(newPrefix) = serverInterceptedCommandHandler.setPrefix(newPrefix)
+
+    fun init() {
+        Reflect.set(ServerControl.instance, "handler", serverInterceptedCommandHandler)
+
+        Reflect.set(Vars.netServer, "clientCommands", clientInterceptedCommandHandler)
 
         registerParameterConverter(Boolean::class, BooleanParameterConverter())
         registerParameterConverter(Char::class, CharParameterConverter())
