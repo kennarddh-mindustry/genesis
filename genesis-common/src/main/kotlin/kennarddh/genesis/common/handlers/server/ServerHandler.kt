@@ -134,9 +134,9 @@ class ServerHandler : Handler() {
             if (showCustom) all.addAll(maps.customMaps())
             if (showDefault) all.addAll(maps.defaultMaps())
 
-            if (all.isEmpty() && !showDefault) {
+            if (all.isEmpty() && !showDefault)
                 output.appendLine("No custom maps loaded. Set default as the first parameter to show default maps.")
-            } else {
+            else {
                 output.appendLine("Maps:")
 
                 for (map in all) {
@@ -149,9 +149,8 @@ class ServerHandler : Handler() {
                     }
                 }
             }
-        } else {
+        } else
             output.appendLine("No maps found.")
-        }
 
         output.appendLine("Map directory: ${customMapDirectory.file().getAbsoluteFile()}")
 
@@ -165,13 +164,12 @@ class ServerHandler : Handler() {
 
         maps.reload()
 
-        val output = if (maps.all().size > beforeMapsSize) {
+        val output = if (maps.all().size > beforeMapsSize)
             "${maps.all().size - beforeMapsSize} new map(s) found and reloaded."
-        } else if (maps.all().size < beforeMapsSize) {
+        else if (maps.all().size < beforeMapsSize)
             "${beforeMapsSize - maps.all().size} old map(s) deleted."
-        } else {
+        else
             "Maps reloaded."
-        }
 
         return CommandResult(output)
     }
@@ -202,10 +200,28 @@ class ServerHandler : Handler() {
 
                 for (player in Groups.player)
                     output.appendLine("\t\t${if (player.admin()) "[A]" else "[P]"} ${player.plainName()} / ${player.uuid()}")
-            } else {
+            } else
                 output.appendLine("\tNo players connected.")
-            }
         }
+
+        return CommandResult(output.toString())
+    }
+
+
+    @Command(["mods", "plugins"])
+    @ServerSide
+    fun mods(): CommandResult {
+        val output = StringBuilder()
+
+        if (!mods.list().isEmpty) {
+            output.appendLine("Mods:")
+
+            for (mod in mods.list())
+                output.appendLine("\t${mod.meta.displayName} ${mod.meta.version} ${if (mod.enabled()) "" else " (${mod.state})"}")
+        } else
+            output.appendLine("No mods found.")
+
+        output.appendLine("Mod directory: ${modDirectory.file().getAbsoluteFile()}")
 
         return CommandResult(output.toString())
     }
