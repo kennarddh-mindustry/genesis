@@ -2,27 +2,24 @@ package kennarddh.genesis.common.handlers.server
 
 import arc.Core
 import arc.util.Log
+import arc.util.OS
 import arc.util.Reflect
 import arc.util.Timer
-import kennarddh.genesis.core.commands.annotations.ClientSide
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
-import kennarddh.genesis.core.commands.parameters.validations.numbers.Max
-import kennarddh.genesis.core.commands.parameters.validations.numbers.Min
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
-import kennarddh.genesis.core.events.annotations.EventHandler
 import kennarddh.genesis.core.handlers.Handler
 import mindustry.Vars
 import mindustry.core.GameState
-import mindustry.game.EventType
+import mindustry.core.Version
 import mindustry.game.Gamemode
 import mindustry.gen.Call
-import mindustry.gen.Player
 import mindustry.maps.Map
 import mindustry.maps.MapException
 import mindustry.net.Administration
 import mindustry.server.ServerControl
+
 
 class ServerHandler : Handler() {
     @Command(["host"])
@@ -32,8 +29,10 @@ class ServerHandler : Handler() {
             return CommandResult("Already hosting. Type 'stop' to stop hosting first.", CommandResultStatus.Failed)
         }
 
-        // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
-        Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
+        Core.app.post {
+            // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
+            Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
+        }
 
         val preset = Gamemode.survival
         val result: Map = Vars.maps.shuffleMode.next(preset, Vars.state.map)
@@ -41,25 +40,29 @@ class ServerHandler : Handler() {
 
         Log.info("Loading map...")
 
-        Vars.logic.reset()
+        Core.app.post {
+            Vars.logic.reset()
 
-        ServerControl.instance.lastMode = preset
+            ServerControl.instance.lastMode = preset
 
-        Core.settings.put("lastServerMode", ServerControl.instance.lastMode.name)
+            Core.settings.put("lastServerMode", ServerControl.instance.lastMode.name)
+        }
 
         try {
-            Vars.world.loadMap(result, result.applyRules(ServerControl.instance.lastMode))
-            Vars.state.rules = result.applyRules(preset)
-            Vars.logic.play()
+            Core.app.post {
+                Vars.world.loadMap(result, result.applyRules(ServerControl.instance.lastMode))
+                Vars.state.rules = result.applyRules(preset)
+                Vars.logic.play()
 
-            Log.info("Map loaded.")
+                Log.info("Map loaded.")
 
-            Vars.netServer.openServer()
+                Vars.netServer.openServer()
 
-            if (Administration.Config.autoPause.bool()) {
-                Vars.state.set(GameState.State.paused)
+                if (Administration.Config.autoPause.bool()) {
+                    Vars.state.set(GameState.State.paused)
 
-                Reflect.set(ServerControl.instance, "autoPaused", true)
+                    Reflect.set(ServerControl.instance, "autoPaused", true)
+                }
             }
 
             return CommandResult("Host success")
@@ -68,28 +71,46 @@ class ServerHandler : Handler() {
         }
     }
 
-    @Command(["ping"])
-    @ClientSide
-    fun ping(@Suppress("UNUSED_PARAMETER") player: Player): CommandResult {
-        return CommandResult("Pong!")
+    @Command(["version"])
+    @ServerSide
+    fun version(): CommandResult {
+        return CommandResult(
+            """
+            Version: Mindustry ${Version.number}-${Version.modifier} ${Version.type} / build ${Version.build} ${if (Version.revision == 0) "" else ".${Version.revision}"}
+            Java Version: ${OS.javaVersion}
+            """.trimIndent()
+        )
     }
 
-    @Command(["log"])
-    @ClientSide
+    @Command(["exit"])
     @ServerSide
-    fun log(player: Player? = null): CommandResult {
-        if (player != null)
-            Log.info("Log by ${player.name}.")
-        else
-            Log.info("Log by Server.")
+    fun exit(): CommandResult {
+        Core.app.post {
+            Vars.net.dispose()
+            Core.app.exit()
+        }
 
-        return CommandResult("Log success.", colorDependsOnStatus = false)
+        return CommandResult("Server shutdown")
+    }
+
+    @Command(["stop"])
+    @ServerSide
+    fun stop(): CommandResult {
+        Core.app.post {
+            Vars.net.closeServer()
+
+            // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
+            Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
+
+            Vars.state.set(GameState.State.menu)
+        }
+
+        return CommandResult("Stopped server.")
     }
 
     @Command(["say"])
-    @ClientSide
     @ServerSide
-    fun say(@Suppress("UNUSED_PARAMETER") player: Player? = null, message: String): CommandResult {
+    fun say(message: String): CommandResult {
         if (!Vars.state.isGame)
             return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
 
@@ -97,25 +118,7 @@ class ServerHandler : Handler() {
             Call.sendMessage("[scarlet][[Server]:[] $message")
         }
 
-        Log.info("Server: $message")
-
-        return CommandResult("Say success.")
+        return CommandResult("Server: $message")
     }
 
-    @Command(["add", "math-add"])
-    @ClientSide
-    @ServerSide
-    fun add(
-        @Suppress("UNUSED_PARAMETER") player: Player? = null,
-        @Min(0) @Max(100) number1: Int,
-        @Min(-10) @Max(10) number2: Int = 1
-    ): CommandResult {
-        return CommandResult("Result: $number1 + $number2 = ${number1 + number2}")
-    }
-
-    @EventHandler
-    fun onPlayerJoin(playerJoin: EventType.PlayerJoin) {
-        println("Player join")
-        println(playerJoin)
-    }
 }
