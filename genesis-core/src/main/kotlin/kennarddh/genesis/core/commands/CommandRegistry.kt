@@ -29,10 +29,7 @@ import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterVal
 import kennarddh.genesis.core.commands.parameters.exceptions.InvalidCommandParameterException
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidation
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidationDescription
-import kennarddh.genesis.core.commands.parameters.validations.numbers.Max
-import kennarddh.genesis.core.commands.parameters.validations.numbers.Min
-import kennarddh.genesis.core.commands.parameters.validations.numbers.validateMax
-import kennarddh.genesis.core.commands.parameters.validations.numbers.validateMin
+import kennarddh.genesis.core.commands.parameters.validations.numbers.*
 import kennarddh.genesis.core.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
@@ -84,24 +81,44 @@ class CommandRegistry {
         registerParameterConverter(ULong::class, ULongParameterConverter())
 
         registerValidationAnnotation(
-            Min::class, listOf(
+            GT::class, listOf(
                 Float::class,
                 Double::class,
                 Byte::class,
                 Short::class,
                 Int::class,
                 Long::class,
-            ), ::validateMin
+            ), ::validateGT
         )
         registerValidationAnnotation(
-            Max::class, listOf(
+            GTE::class, listOf(
                 Float::class,
                 Double::class,
                 Byte::class,
                 Short::class,
                 Int::class,
                 Long::class,
-            ), ::validateMax
+            ), ::validateGTE
+        )
+        registerValidationAnnotation(
+            LT::class, listOf(
+                Float::class,
+                Double::class,
+                Byte::class,
+                Short::class,
+                Int::class,
+                Long::class,
+            ), ::validateLT
+        )
+        registerValidationAnnotation(
+            LTE::class, listOf(
+                Float::class,
+                Double::class,
+                Byte::class,
+                Short::class,
+                Int::class,
+                Long::class,
+            ), ::validateLTE
         )
     }
 
