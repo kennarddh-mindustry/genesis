@@ -3,9 +3,7 @@ package kennarddh.genesis.core.commands
 import arc.Core
 import arc.util.Log
 import arc.util.Reflect
-import kennarddh.genesis.core.commands.annotations.ClientSide
-import kennarddh.genesis.core.commands.annotations.Command
-import kennarddh.genesis.core.commands.annotations.ServerSide
+import kennarddh.genesis.core.commands.annotations.*
 import kennarddh.genesis.core.commands.exceptions.DuplicateCommandNameException
 import kennarddh.genesis.core.commands.exceptions.InvalidCommandMethodException
 import kennarddh.genesis.core.commands.parameters.CommandParameter
@@ -66,7 +64,7 @@ class CommandRegistry {
     var clientPrefix: String
         get() = clientInterceptedCommandHandler.getPrefix()
         set(newPrefix) = clientInterceptedCommandHandler.setPrefix(newPrefix)
-    
+
     @Suppress("UNUSED")
     var serverPrefix: String
         get() = serverInterceptedCommandHandler.getPrefix()
@@ -161,7 +159,13 @@ class CommandRegistry {
             val clientSideAnnotation = function.findAnnotation<ClientSide>()
             val serverSideAnnotation = function.findAnnotation<ServerSide>()
 
+            val descriptionAnnotation = function.findAnnotation<Description>()
+            val briefAnnotation = function.findAnnotation<Brief>()
+
             val names = commandAnnotation.names
+
+            val description = descriptionAnnotation?.description ?: ""
+            val brief = briefAnnotation?.brief ?: description
 
             val checkedNames: MutableList<String> = mutableListOf()
 
@@ -228,7 +232,7 @@ class CommandRegistry {
                 )
             }
 
-            commands.add(CommandData(names, sides, handler, function, parameters.toTypedArray()))
+            commands.add(CommandData(names, description, brief, sides, handler, function, parameters.toTypedArray()))
         }
     }
 

@@ -6,6 +6,8 @@ import kotlin.reflect.KFunction
 
 data class CommandData(
     val names: Array<String>,
+    val description: String,
+    val brief: String,
     val sides: Array<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,
@@ -17,6 +19,9 @@ data class CommandData(
 
         other as CommandData
 
+        if (!names.contentEquals(other.names)) return false
+        if (description != other.description) return false
+        if (brief != other.brief) return false
         if (!sides.contentEquals(other.sides)) return false
         if (handler != other.handler) return false
         if (function != other.function) return false
@@ -26,7 +31,10 @@ data class CommandData(
     }
 
     override fun hashCode(): Int {
-        var result = sides.contentHashCode()
+        var result = names.contentHashCode()
+        result = 31 * result + description.hashCode()
+        result = 31 * result + brief.hashCode()
+        result = 31 * result + sides.contentHashCode()
         result = 31 * result + handler.hashCode()
         result = 31 * result + function.hashCode()
         result = 31 * result + parametersType.contentHashCode()
