@@ -3,7 +3,7 @@ package kennarddh.genesis.core.utils
 class LimitedListSizeGreaterThanCapacityException(message: String) : Exception(message)
 
 @Suppress("UNUSED")
-class LimitedList<E>(val capacity: Int) : Iterable<E> {
+class LimitedList<E>(@Suppress("MemberVisibilityCanBePrivate") val capacity: Int) : Iterable<E> {
     private val backingMutableList: MutableList<E> = mutableListOf()
 
     constructor(capacity: Int, original: Collection<E>) : this(capacity) {
