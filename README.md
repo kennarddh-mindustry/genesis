@@ -6,8 +6,8 @@
 
 - [x] Optional Command Parameter
 - [x] Event Handler
-- [ ] Better Filter System
-- [ ] Command Usage
+- [ ] Better Filter System With Priority
+- [ ] Command Usage. Auto generated.
 - [x] Command with more than 1 name/aliases
 - [x] Separate core with common. Common will include like host command.
 - [ ] Publish artifact
