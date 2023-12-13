@@ -207,7 +207,6 @@ class ServerHandler : Handler() {
         return CommandResult(output.toString())
     }
 
-
     @Command(["mods", "plugins"])
     @ServerSide
     fun mods(): CommandResult {
@@ -224,6 +223,26 @@ class ServerHandler : Handler() {
         output.appendLine("Mod directory: ${modDirectory.file().getAbsoluteFile()}")
 
         return CommandResult(output.toString())
+    }
+
+    @Command(["mod", "plugin"])
+    @ServerSide
+    fun mod(name: String): CommandResult {
+        val output = StringBuilder()
+
+        val mod = mods.list().find { it.meta.name.equals(name, ignoreCase = true) }
+
+        if (mod != null) {
+            output.appendLine("Name: ${mod.meta.displayName}")
+            output.appendLine("Internal Name: ${mod.name}")
+            output.appendLine("Version: ${mod.meta.version}")
+            output.appendLine("Author: ${mod.meta.author}")
+            output.appendLine("Path: ${mod.file.path()}")
+            output.appendLine("Description: ${mod.meta.description}")
+        } else
+            output.appendLine("No mod with name $name found.")
+
+        return CommandResult(output.trimEnd('\n').toString())
     }
 
     @Command(["say"])
