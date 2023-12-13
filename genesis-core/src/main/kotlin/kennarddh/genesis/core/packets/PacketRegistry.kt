@@ -40,10 +40,12 @@ class PacketRegistry {
 
             names.forEach {
                 netServer.addPacketHandler(it) { player, data ->
-                    if (functionParameters.size == 3)
+                    if (acceptName)
                         function.call(handler, player, data, it)
-                    else
+                    else if (acceptContent)
                         function.call(handler, player, data)
+                    else
+                        function.call(handler, player)
                 }
             }
         }
