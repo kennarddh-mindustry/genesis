@@ -23,9 +23,8 @@ class ServerHandler : Handler() {
     @Command(["host"])
     @ServerSide
     fun host(): CommandResult {
-        if (state.isGame) {
+        if (state.isGame)
             return CommandResult("Already hosting. Type 'stop' to stop hosting first.", CommandResultStatus.Failed)
-        }
 
         Core.app.post {
             // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
@@ -249,6 +248,19 @@ class ServerHandler : Handler() {
     @ServerSide
     fun javascript(script: String): CommandResult {
         return CommandResult(mods.getScripts().runConsole(script))
+    }
+
+    @Command(["pause"])
+    @ServerSide
+    fun pause(pause: Boolean): CommandResult {
+        if (state.isMenu)
+            return CommandResult("Cannot pause without a game running.", CommandResultStatus.Failed)
+
+        Reflect.set(ServerControl.instance, "autoPaused", false)
+
+        state.set(if (state.isPaused) GameState.State.playing else GameState.State.paused)
+
+        return CommandResult(if (pause) "Game paused." else "Game unpaused.")
     }
 
     @Command(["say"])
