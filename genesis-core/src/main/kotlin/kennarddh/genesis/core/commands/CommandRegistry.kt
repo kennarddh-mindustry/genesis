@@ -306,8 +306,10 @@ class CommandRegistry {
 
         val parsedString = StringParser.parseToArray(commandStringWithoutCommandName)
 
+        val isClientSupported = command.sides.contains(CommandSide.Client)
+
         val actualParametersSize =
-            if (command.sides.contains(CommandSide.Client) && command.parametersType.isNotEmpty())
+            if (isClientSupported && command.parametersType.isNotEmpty())
                 command.parametersType.size - 1
             else
                 command.parametersType.size
@@ -320,7 +322,7 @@ class CommandRegistry {
         val errorMessages: MutableList<String> = mutableListOf()
 
         for (i in 0..<actualParametersSize) {
-            val parameter = command.parametersType[i + 1]
+            val parameter = command.parametersType[i + if (isClientSupported) 1 else 0]
 
             if (i > parsedString.size - 1) {
                 if (!parameter.isOptional)
