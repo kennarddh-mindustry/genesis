@@ -2,6 +2,9 @@ package kennarddh.genesis.common.handlers.server
 
 import arc.Core
 import arc.util.*
+import arc.util.serialization.JsonReader
+import arc.util.serialization.JsonValue
+import arc.util.serialization.JsonValue.ValueType
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
 import kennarddh.genesis.core.commands.result.CommandResult
@@ -13,6 +16,7 @@ import mindustry.core.Version
 import mindustry.game.Gamemode
 import mindustry.gen.Call
 import mindustry.gen.Groups
+import mindustry.io.JsonIO
 import mindustry.maps.Map
 import mindustry.maps.MapException
 import mindustry.net.Administration
@@ -274,5 +278,99 @@ class ServerHandler : Handler() {
         }
 
         return CommandResult("Server: $message")
+    }
+
+    @Command(["rules"])
+    @ServerSide
+    fun rules(type: String = "list", name: String? = null, value: String? = null): CommandResult {
+        when (type) {
+            "list" -> {
+                if (name != null) return CommandResult(
+                    "Name is not required for list",
+                    CommandResultStatus.Failed
+                )
+
+                if (value != null) return CommandResult(
+                    "Value is not required for list",
+                    CommandResultStatus.Failed
+                )
+            }
+
+            "add" -> {
+                if (name == null) return CommandResult(
+                    "Name is required for add",
+                    CommandResultStatus.Failed
+                )
+
+                if (value == null) return CommandResult(
+                    "Value is required for add",
+                    CommandResultStatus.Failed
+                )
+            }
+
+            "remove" -> {
+                if (name == null) return CommandResult(
+                    "Name is required for remove",
+                    CommandResultStatus.Failed
+                )
+
+                if (value != null) return CommandResult(
+                    "Value is not required for remove",
+                    CommandResultStatus.Failed
+                )
+            }
+
+            else -> return CommandResult(
+                "$type is an invalid type. Possible value are list, add, remove",
+                CommandResultStatus.Failed
+            )
+        }
+
+        var commandResultOutput: CommandResult
+
+        val rules = Core.settings.getString("globalrules")
+        val base = JsonIO.json.fromJson<JsonValue>(null, rules)
+
+        if (type == "list")
+            commandResultOutput = CommandResult("Rules:\n${JsonIO.print(rules)}")
+        else {
+            val isRemove = type == "remove"
+
+            if (isRemove) {
+                commandResultOutput = if (base.has(name)) {
+                    base.remove(name)
+
+                    CommandResult("Rule '${name}' removed.")
+                } else
+                    CommandResult("Rule not defined, so not removed.", CommandResultStatus.Failed)
+            } else {
+                try {
+                    val jsonValue: JsonValue = JsonReader().parse(value)
+
+                    jsonValue.name = name
+
+                    val parent = JsonValue(ValueType.`object`)
+
+                    parent.addChild(jsonValue)
+
+                    JsonIO.json.readField(state.rules, jsonValue.name, parent)
+
+                    if (base.has(jsonValue.name))
+                        base.remove(jsonValue.name)
+
+                    base.addChild(name, jsonValue)
+
+                    commandResultOutput = CommandResult("Changed rule: ${jsonValue.toString().replace("\n", " ")}")
+                } catch (e: Throwable) {
+                    commandResultOutput =
+                        CommandResult("Error parsing rule JSON: ${e.message}", CommandResultStatus.Failed)
+                }
+            }
+
+            Core.settings.put("globalrules", base.toString())
+            Call.setRules(state.rules)
+        }
+
+        return commandResultOutput
     }
 }
