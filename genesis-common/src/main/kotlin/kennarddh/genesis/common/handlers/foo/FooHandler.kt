@@ -14,12 +14,21 @@ class FooHandler : Handler() {
     /** @since v1 Plugin presence check */
     @PacketHandler(["fooCheck"])
     fun fooCheck(player: Player) {
-        println(player)
         Call.clientPacketReliable(player.con, "fooCheck", version)
 
         enableTransmissions(player)
         //TODO: After get command usage and command registry exposed
 //        sendCommands(player)
+    }
+
+    /** @since v1 Client transmission forwarding */
+    @PacketHandler(["fooTransmission"])
+    fun fooTransmission(player: Player, content: String) {
+        val output = StringBuilder()
+
+        output.append(player.id).append(" ").append(content)
+
+        Call.clientPacketReliable("fooTransmission", output.toString())
     }
 
     /** @since v2 Informs clients of the transmission forwarding state. When [player] is null, the status is sent to everyone */
@@ -32,8 +41,8 @@ class FooHandler : Handler() {
             Call.clientPacketReliable("fooTransmissionEnabled", enabled.toString())
     }
 
-    /** @since v2 Sends the list of commands to a player */
-    private fun sendCommands(player: Player) {
+//    /** @since v2 Sends the list of commands to a player */
+//    private fun sendCommands(player: Player) {
 //        with(Jval.newObject()) {
 //            add("prefix", Reflect.get<String>(Vars.netServer.clientCommands, "prefix"))
 //            add("commands", Jval.newObject().apply {
@@ -43,5 +52,5 @@ class FooHandler : Handler() {
 //            })
 //            Call.clientPacketReliable(player.con, "commandList", this.toString())
 //        }
-    }
+//    }
 }
