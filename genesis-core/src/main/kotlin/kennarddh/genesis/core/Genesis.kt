@@ -5,12 +5,14 @@ import kennarddh.genesis.core.commands.CommandRegistry
 import kennarddh.genesis.core.common.AbstractPlugin
 import kennarddh.genesis.core.events.EventRegistry
 import kennarddh.genesis.core.handlers.Handler
+import kennarddh.genesis.core.packets.PacketRegistry
 
 @Suppress("unused")
 class Genesis : AbstractPlugin() {
     override fun init() {
         commandRegistry.init()
-        eventSystem.init()
+        eventRegistry.init()
+        packetRegistry.init()
 
         Log.info("[GenesisCore] Loaded")
     }
@@ -18,7 +20,8 @@ class Genesis : AbstractPlugin() {
     companion object {
         private val handlers: MutableList<Handler> = mutableListOf()
         private val commandRegistry = CommandRegistry()
-        private val eventSystem = EventRegistry()
+        private val eventRegistry = EventRegistry()
+        private val packetRegistry = PacketRegistry()
 
         fun addHandler(handler: Handler) {
             handlers.add(handler)
@@ -26,7 +29,8 @@ class Genesis : AbstractPlugin() {
             handler.onInit()
 
             commandRegistry.registerHandler(handler)
-            eventSystem.registerHandler(handler)
+            eventRegistry.registerHandler(handler)
+            packetRegistry.registerHandler(handler)
         }
     }
 }
