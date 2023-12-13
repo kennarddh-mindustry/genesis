@@ -7,6 +7,9 @@ import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
+import kennarddh.genesis.core.commands.parameters.converters.BooleanParameterConverter
+import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.integer.IntParameterConverter
+import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
 import kennarddh.genesis.core.commands.parameters.validations.numbers.GTE
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
@@ -389,5 +392,103 @@ class ServerHandler : Handler() {
             CommandResult("Player limit disabled.")
         else
             CommandResult("Player limit is now $limit")
+    }
+
+    @Command(["config"])
+    @ServerSide
+    fun config(type: String = "list", name: String? = null, value: String? = null): CommandResult {
+        when (type) {
+            "list" -> {
+                if (name != null) return CommandResult(
+                    "Name is not required for list",
+                    CommandResultStatus.Failed
+                )
+
+                if (value != null) return CommandResult(
+                    "Value is not required for list",
+                    CommandResultStatus.Failed
+                )
+            }
+
+            "add" -> {
+                if (name == null) return CommandResult(
+                    "Name is required for add",
+                    CommandResultStatus.Failed
+                )
+
+                if (value == null) return CommandResult(
+                    "Value is required for add",
+                    CommandResultStatus.Failed
+                )
+            }
+
+            "remove", "get" -> {
+                if (name == null) return CommandResult(
+                    "Name is required for $type",
+                    CommandResultStatus.Failed
+                )
+
+                if (value != null) return CommandResult(
+                    "Value is not required for $type",
+                    CommandResultStatus.Failed
+                )
+            }
+
+            else -> return CommandResult(
+                "$type is an invalid type. Possible value are list, add, remove, get",
+                CommandResultStatus.Failed
+            )
+        }
+
+        var commandResultOutput: CommandResult
+
+        if (type == "list") {
+            val output = StringBuilder()
+
+            output.appendLine("All config values:")
+
+            for (config in Administration.Config.all) {
+                output.appendLine("\t| ${config.name}: ${config.get()}")
+                output.appendLine("\t| | ${config.description}")
+            }
+
+            return CommandResult(output.trimEnd('\n').toString())
+        }
+
+        val config = Administration.Config.all.find { it.name.equals(name, ignoreCase = true) }
+
+        if (config != null) {
+            if (type == "get")
+                commandResultOutput = CommandResult("${config.name} is currently ${config.get()}.")
+            else {
+                try {
+                    if (type == "remove") {
+                        config.set(config.defaultValue)
+                    } else if (config.isBool) {
+                        config.set(BooleanParameterConverter().parse(value!!))
+                    } else if (config.isNum) {
+                        config.set(IntParameterConverter().parse(value!!))
+                    } else if (config.isString) {
+                        config.set(value!!.replace("\\n", "\n"))
+                    }
+
+                    commandResultOutput = CommandResult("${config.name} set to ${config.get()}.")
+                } catch (error: CommandParameterValidationException) {
+                    commandResultOutput = CommandResult(
+                        error.message,
+                        CommandResultStatus.Failed
+                    )
+                }
+            }
+
+            Core.settings.forceSave()
+        } else {
+            commandResultOutput = CommandResult(
+                "Unknown config: '$name'. Run the command with list parameter to get a list of valid configs.",
+                CommandResultStatus.Failed
+            )
+        }
+
+        return commandResultOutput
     }
 }
