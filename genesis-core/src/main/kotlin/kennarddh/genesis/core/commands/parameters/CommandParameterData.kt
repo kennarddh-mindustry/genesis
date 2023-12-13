@@ -5,7 +5,7 @@ import kotlin.reflect.KParameter
 
 typealias CommandParameterValidator<T> = (annotation: Annotation, value: T) -> Boolean
 
-data class CommandParameter(
+data class CommandParameterData(
     val kParameter: KParameter,
     val validator: Array<Annotation>,
 ) {
@@ -22,7 +22,7 @@ data class CommandParameter(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CommandParameter
+        other as CommandParameterData
 
         if (kParameter != other.kParameter) return false
         if (!validator.contentEquals(other.validator)) return false

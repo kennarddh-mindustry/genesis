@@ -6,25 +6,24 @@ import arc.util.Reflect
 import kennarddh.genesis.core.commands.annotations.*
 import kennarddh.genesis.core.commands.exceptions.DuplicateCommandNameException
 import kennarddh.genesis.core.commands.exceptions.InvalidCommandMethodException
-import kennarddh.genesis.core.commands.parameters.CommandParameter
+import kennarddh.genesis.core.commands.parameters.CommandParameterData
 import kennarddh.genesis.core.commands.parameters.CommandParameterValidator
-import kennarddh.genesis.core.commands.parameters.converters.BooleanParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.CharParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.StringParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.base.CommandParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.base.CommandParameterConverterParsingException
-import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.floating.DoubleParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.floating.FloatParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.integer.ByteParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.integer.IntParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.integer.LongParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.integer.ShortParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.unsigned.integer.UByteParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.unsigned.integer.UIntParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.unsigned.integer.ULongParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.unsigned.integer.UShortParameterConverter
 import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
 import kennarddh.genesis.core.commands.parameters.exceptions.InvalidCommandParameterException
+import kennarddh.genesis.core.commands.parameters.types.BooleanParameter
+import kennarddh.genesis.core.commands.parameters.types.CharParameter
+import kennarddh.genesis.core.commands.parameters.types.StringParameter
+import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating.DoubleParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating.FloatParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.ByteParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.IntParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.LongParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.ShortParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.UByteParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.UIntParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.ULongParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.UShortParameter
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidation
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidationDescription
 import kennarddh.genesis.core.commands.parameters.validations.numbers.*
@@ -48,7 +47,8 @@ import kotlin.reflect.typeOf
 class CommandRegistry {
     private val commands: MutableList<CommandData> = mutableListOf()
 
-    private val parameterConverters: MutableMap<KClass<*>, CommandParameterConverter<*>> = mutableMapOf()
+    private val parameterTypes: MutableMap<KClass<*>, kennarddh.genesis.core.commands.parameters.types.base.CommandParameter<*>> =
+        mutableMapOf()
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
         mutableMapOf()
 
@@ -75,22 +75,22 @@ class CommandRegistry {
 
         Reflect.set(Vars.netServer, "clientCommands", clientInterceptedCommandHandler)
 
-        registerParameterConverter(Boolean::class, BooleanParameterConverter())
-        registerParameterConverter(Char::class, CharParameterConverter())
-        registerParameterConverter(String::class, StringParameterConverter())
+        registerParameterType(Boolean::class, BooleanParameter())
+        registerParameterType(Char::class, CharParameter())
+        registerParameterType(String::class, StringParameter())
 
-        registerParameterConverter(Float::class, FloatParameterConverter())
-        registerParameterConverter(Double::class, DoubleParameterConverter())
+        registerParameterType(Float::class, FloatParameter())
+        registerParameterType(Double::class, DoubleParameter())
 
-        registerParameterConverter(Byte::class, ByteParameterConverter())
-        registerParameterConverter(Short::class, ShortParameterConverter())
-        registerParameterConverter(Int::class, IntParameterConverter())
-        registerParameterConverter(Long::class, LongParameterConverter())
+        registerParameterType(Byte::class, ByteParameter())
+        registerParameterType(Short::class, ShortParameter())
+        registerParameterType(Int::class, IntParameter())
+        registerParameterType(Long::class, LongParameter())
 
-        registerParameterConverter(UByte::class, UByteParameterConverter())
-        registerParameterConverter(UShort::class, UShortParameterConverter())
-        registerParameterConverter(UInt::class, UIntParameterConverter())
-        registerParameterConverter(ULong::class, ULongParameterConverter())
+        registerParameterType(UByte::class, UByteParameter())
+        registerParameterType(UShort::class, UShortParameter())
+        registerParameterType(UInt::class, UIntParameter())
+        registerParameterType(ULong::class, ULongParameter())
 
         registerValidationAnnotation(
             GT::class, listOf(
@@ -152,10 +152,13 @@ class CommandRegistry {
         }
     }
 
-    fun registerParameterConverter(from: KClass<*>, parameterConverter: CommandParameterConverter<*>) {
+    fun registerParameterType(
+        from: KClass<*>,
+        parameterConverter: kennarddh.genesis.core.commands.parameters.types.base.CommandParameter<*>
+    ) {
         // TODO: Check if parameter type already registered
 
-        parameterConverters[from] = parameterConverter
+        parameterTypes[from] = parameterConverter
     }
 
     fun registerHandler(handler: Handler) {
@@ -210,12 +213,12 @@ class CommandRegistry {
             if (isClientSide && isServerSide && functionParameters.isNotEmpty() && (!functionParameters[0].isOptional || functionParameters[0].type != typeOf<Player?>()))
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} support client and server must accept optional player as the first parameter")
 
-            val parameters: MutableList<CommandParameter> = mutableListOf()
+            val parameters: MutableList<CommandParameterData> = mutableListOf()
 
             functionParameters.forEachIndexed { index, functionParameter ->
                 if (isClientSide && index == 0) {
                     parameters.add(
-                        CommandParameter(
+                        CommandParameterData(
                             functionParameter,
                             arrayOf(),
                         )
@@ -226,14 +229,14 @@ class CommandRegistry {
 
                 val parameterTypeKClass = functionParameter.type.classifier
 
-                if (!parameterConverters.contains(parameterTypeKClass))
+                if (!parameterTypes.contains(parameterTypeKClass))
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
 
                 val validationsAnnotation: List<Annotation> =
                     functionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
 
                 parameters.add(
-                    CommandParameter(
+                    CommandParameterData(
                         functionParameter,
                         validationsAnnotation.toTypedArray(),
                     )
@@ -318,7 +321,7 @@ class CommandRegistry {
             CommandResult(error.message ?: "Unknown Unterminated String Exception Occurred", CommandResultStatus.Failed)
         } catch (error: InvalidEscapedCharacterException) {
             CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
-        } catch (error: CommandParameterConverterParsingException) {
+        } catch (error: CommandParameterParsingException) {
             CommandResult(
                 error.message ?: "Unknown Parameter Conversion Exception Occurred",
                 CommandResultStatus.Failed
@@ -385,7 +388,7 @@ class CommandRegistry {
 
             try {
                 if (passedParameter is StringToken) {
-                    val output = parameterConverters[parameter.kClass]!!.parse(passedParameter.value)
+                    val output = parameterTypes[parameter.kClass]!!.parse(passedParameter.value)
 
                     parameter.validator.forEach {
                         val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
@@ -412,7 +415,7 @@ class CommandRegistry {
 
                     parameters[parameter.kParameter] = output!!
                 }
-            } catch (error: CommandParameterConverterParsingException) {
+            } catch (error: CommandParameterParsingException) {
                 errorMessages.add(error.toParametrizedString(parameter.name))
             }
         }

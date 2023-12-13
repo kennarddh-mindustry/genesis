@@ -7,9 +7,9 @@ import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
-import kennarddh.genesis.core.commands.parameters.converters.BooleanParameterConverter
-import kennarddh.genesis.core.commands.parameters.converters.numbers.signed.integer.IntParameterConverter
 import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
+import kennarddh.genesis.core.commands.parameters.types.BooleanParameter
+import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.IntParameter
 import kennarddh.genesis.core.commands.parameters.validations.numbers.GTE
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
@@ -465,9 +465,9 @@ class ServerHandler : Handler() {
                     if (type == "remove") {
                         config.set(config.defaultValue)
                     } else if (config.isBool) {
-                        config.set(BooleanParameterConverter().parse(value!!))
+                        config.set(BooleanParameter().parse(value!!))
                     } else if (config.isNum) {
-                        config.set(IntParameterConverter().parse(value!!))
+                        config.set(IntParameter().parse(value!!))
                     } else if (config.isString) {
                         config.set(value!!.replace("\\n", "\n"))
                     }
