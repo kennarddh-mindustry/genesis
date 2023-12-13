@@ -245,6 +245,12 @@ class ServerHandler : Handler() {
         return CommandResult(output.trimEnd('\n').toString())
     }
 
+    @Command(["javascript", "js"])
+    @ServerSide
+    fun javascript(script: String): CommandResult {
+        return CommandResult(mods.getScripts().runConsole(script))
+    }
+
     @Command(["say"])
     @ServerSide
     fun say(message: String): CommandResult {
@@ -257,5 +263,4 @@ class ServerHandler : Handler() {
 
         return CommandResult("Server: $message")
     }
-
 }
