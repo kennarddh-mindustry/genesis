@@ -134,6 +134,12 @@ class CommandRegistry {
         )
     }
 
+    companion object {
+        fun commandToUsage(command: CommandData): String {
+            TODO("Usage")
+        }
+    }
+
     fun <T : Any, V : Any> registerValidationAnnotation(
         annotation: KClass<T>,
         parametersType: List<KClass<out V>>,
