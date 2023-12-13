@@ -1,22 +1,18 @@
 package kennarddh.genesis.common.handlers.server
 
 import arc.Core
-import arc.util.Log
-import arc.util.OS
-import arc.util.Reflect
-import arc.util.Timer
+import arc.util.*
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
 import kennarddh.genesis.core.handlers.Handler
-import mindustry.Vars
-import mindustry.Vars.customMapDirectory
-import mindustry.Vars.maps
+import mindustry.Vars.*
 import mindustry.core.GameState
 import mindustry.core.Version
 import mindustry.game.Gamemode
 import mindustry.gen.Call
+import mindustry.gen.Groups
 import mindustry.maps.Map
 import mindustry.maps.MapException
 import mindustry.net.Administration
@@ -27,7 +23,7 @@ class ServerHandler : Handler() {
     @Command(["host"])
     @ServerSide
     fun host(): CommandResult {
-        if (Vars.state.isGame) {
+        if (state.isGame) {
             return CommandResult("Already hosting. Type 'stop' to stop hosting first.", CommandResultStatus.Failed)
         }
 
@@ -37,13 +33,13 @@ class ServerHandler : Handler() {
         }
 
         val preset = Gamemode.survival
-        val result: Map = maps.shuffleMode.next(preset, Vars.state.map)
+        val result: Map = maps.shuffleMode.next(preset, state.map)
         Log.info("Randomized next map to be @.", result.plainName())
 
         Log.info("Loading map...")
 
         Core.app.post {
-            Vars.logic.reset()
+            logic.reset()
 
             ServerControl.instance.lastMode = preset
 
@@ -52,16 +48,16 @@ class ServerHandler : Handler() {
 
         try {
             Core.app.post {
-                Vars.world.loadMap(result, result.applyRules(ServerControl.instance.lastMode))
-                Vars.state.rules = result.applyRules(preset)
-                Vars.logic.play()
+                world.loadMap(result, result.applyRules(ServerControl.instance.lastMode))
+                state.rules = result.applyRules(preset)
+                logic.play()
 
                 Log.info("Map loaded.")
 
-                Vars.netServer.openServer()
+                netServer.openServer()
 
                 if (Administration.Config.autoPause.bool()) {
-                    Vars.state.set(GameState.State.paused)
+                    state.set(GameState.State.paused)
 
                     Reflect.set(ServerControl.instance, "autoPaused", true)
                 }
@@ -88,7 +84,7 @@ class ServerHandler : Handler() {
     @ServerSide
     fun exit(): CommandResult {
         Core.app.post {
-            Vars.net.dispose()
+            net.dispose()
             Core.app.exit()
         }
 
@@ -99,12 +95,12 @@ class ServerHandler : Handler() {
     @ServerSide
     fun stop(): CommandResult {
         Core.app.post {
-            Vars.net.closeServer()
+            net.closeServer()
 
             // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
             Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
 
-            Vars.state.set(GameState.State.menu)
+            state.set(GameState.State.menu)
         }
 
         return CommandResult("Stopped server.")
@@ -162,11 +158,62 @@ class ServerHandler : Handler() {
         return CommandResult(output.toString())
     }
 
+    @Command(["reloadMaps"])
+    @ServerSide
+    fun reloadMaps(): CommandResult {
+        val beforeMapsSize = maps.all().size
+
+        maps.reload()
+
+        val output = if (maps.all().size > beforeMapsSize) {
+            "${maps.all().size - beforeMapsSize} new map(s) found and reloaded."
+        } else if (maps.all().size < beforeMapsSize) {
+            "${beforeMapsSize - maps.all().size} old map(s) deleted."
+        } else {
+            "Maps reloaded."
+        }
+
+        return CommandResult(output)
+    }
+
+    @Command(["status"])
+    @ServerSide
+    fun status(): CommandResult {
+        val output = StringBuilder()
+
+        if (state.isMenu)
+            output.appendLine("Status: Server closed")
+        else {
+            val currentMapName = Strings.capitalize(state.map.plainName())
+            val currentWave = state.wave
+
+            output.appendLine("Status:")
+
+            output.appendLine("\tPlaying on map $currentMapName / Wave $currentWave")
+
+            if (state.rules.waves)
+                output.appendLine("\t${(state.wavetime / 60).toInt()} seconds until next wave.")
+
+            output.appendLine("\t${Groups.unit.size()}units / ${state.enemies} enemies")
+            output.appendLine("\t${Core.graphics.framesPerSecond} TPS, ${Core.app.javaHeap / 1024 / 1024} MB used.")
+
+            if (!Groups.player.isEmpty) {
+                output.appendLine("\tPlayers: ${Groups.player.size()}")
+
+                for (player in Groups.player)
+                    output.appendLine("\t\t${if (player.admin()) "[A]" else "[P]"} ${player.plainName()} / ${player.uuid()}")
+            } else {
+                output.appendLine("\tNo players connected.")
+            }
+        }
+
+        return CommandResult(output.toString())
+    }
 
     @Command(["say"])
     @ServerSide
     fun say(message: String): CommandResult {
-        if (!Vars.state.isGame)
+        if (!state.isGame)
             return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
 
         Core.app.post {
