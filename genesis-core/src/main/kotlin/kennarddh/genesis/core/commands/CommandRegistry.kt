@@ -231,7 +231,7 @@ class CommandRegistry {
             CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
         } else {
             invokeCommand(commandName!!, command, commandString, null) { parameters ->
-                command.function.callBy(parameters) as CommandResult
+                command.function.callBy(parameters)
             }
         }
 
@@ -246,7 +246,7 @@ class CommandRegistry {
             CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
         } else {
             invokeCommand(commandName!!, command, commandString, player) { parameters ->
-                command.function.callBy(parameters) as CommandResult
+                command.function.callBy(parameters)
             }
         }
 
@@ -258,8 +258,8 @@ class CommandRegistry {
         command: CommandData,
         commandString: String,
         player: Player?,
-        invoke: (Map<KParameter, Any?>) -> CommandResult
-    ): CommandResult {
+        invoke: (Map<KParameter, Any?>) -> Any?
+    ): Any? {
         val commandStringWithoutCommandName = removeCommandNameFromCommandString(invokedCommandName, commandString)
 
         return try {
