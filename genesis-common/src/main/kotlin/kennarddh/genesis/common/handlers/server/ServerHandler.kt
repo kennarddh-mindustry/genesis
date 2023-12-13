@@ -154,7 +154,7 @@ class ServerHandler : Handler() {
 
         output.appendLine("Map directory: ${customMapDirectory.file().getAbsoluteFile()}")
 
-        return CommandResult(output.toString())
+        return CommandResult(output.trimEnd('\n').toString())
     }
 
     @Command(["reloadMaps"])
@@ -204,7 +204,7 @@ class ServerHandler : Handler() {
                 output.appendLine("\tNo players connected.")
         }
 
-        return CommandResult(output.toString())
+        return CommandResult(output.trimEnd('\n').toString())
     }
 
     @Command(["mods", "plugins"])
@@ -222,7 +222,7 @@ class ServerHandler : Handler() {
 
         output.appendLine("Mod directory: ${modDirectory.file().getAbsoluteFile()}")
 
-        return CommandResult(output.toString())
+        return CommandResult(output.trimEnd('\n').toString())
     }
 
     @Command(["mod", "plugin"])
