@@ -11,6 +11,8 @@ import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
 import kennarddh.genesis.core.handlers.Handler
 import mindustry.Vars
+import mindustry.Vars.customMapDirectory
+import mindustry.Vars.maps
 import mindustry.core.GameState
 import mindustry.core.Version
 import mindustry.game.Gamemode
@@ -35,7 +37,7 @@ class ServerHandler : Handler() {
         }
 
         val preset = Gamemode.survival
-        val result: Map = Vars.maps.shuffleMode.next(preset, Vars.state.map)
+        val result: Map = maps.shuffleMode.next(preset, Vars.state.map)
         Log.info("Randomized next map to be @.", result.plainName())
 
         Log.info("Loading map...")
@@ -107,6 +109,59 @@ class ServerHandler : Handler() {
 
         return CommandResult("Stopped server.")
     }
+
+    @Command(["maps"])
+    @ServerSide
+    fun maps(type: String = "custom"): CommandResult {
+        var showCustom = false
+        var showDefault = false
+
+        when (type) {
+            "custom" -> showCustom = true
+            "default" -> showDefault = true
+            "all" -> {
+                showCustom = true
+                showDefault = true
+            }
+
+            else -> return CommandResult(
+                "$type is an invalid type. Possible value are custom, default, all.",
+                CommandResultStatus.Failed
+            )
+        }
+
+        val output = StringBuilder()
+
+        if (!maps.all().isEmpty) {
+            val all: MutableList<Map> = mutableListOf()
+
+            if (showCustom) all.addAll(maps.customMaps())
+            if (showDefault) all.addAll(maps.defaultMaps())
+
+            if (all.isEmpty() && !showDefault) {
+                output.appendLine("No custom maps loaded. Set default as the first parameter to show default maps.")
+            } else {
+                output.appendLine("Maps:")
+
+                for (map in all) {
+                    val mapName = map.plainName().replace(' ', '_')
+
+                    if (map.custom) {
+                        output.appendLine("\t${mapName} (${map.file.name()}): Custom / ${map.width}x${map.height}")
+                    } else {
+                        output.appendLine("\t${mapName}: Default / ${map.width}x${map.height}")
+                    }
+                }
+            }
+        } else {
+            output.appendLine("No maps found.")
+        }
+
+        output.appendLine("Map directory: ${customMapDirectory.file().getAbsoluteFile()}")
+
+        return CommandResult(output.toString())
+    }
+
 
     @Command(["say"])
     @ServerSide
