@@ -217,7 +217,7 @@ class ServerHandler : Handler() {
             output.appendLine("Mods:")
 
             for (mod in mods.list())
-                output.appendLine("\t${mod.meta.displayName} ${mod.meta.version} ${if (mod.enabled()) "" else " (${mod.state})"}")
+                output.appendLine("\t${mod.meta.displayName}: ${mod.meta.name}@${mod.meta.version} ${if (mod.enabled()) "" else " (${mod.state})"}")
         } else
             output.appendLine("No mods found.")
 
