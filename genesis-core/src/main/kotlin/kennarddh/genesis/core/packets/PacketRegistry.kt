@@ -23,16 +23,19 @@ class PacketRegistry {
 
             val functionParameters = function.parameters.drop(1)
 
-            if (functionParameters.size == 3 || functionParameters.size == 2)
-                throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept 3 or 2 parameters")
+            if (!(functionParameters.size == 1 || functionParameters.size == 2 || functionParameters.size == 3))
+                throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept 1, 2 or 3 parameters")
+
+            val acceptContent = functionParameters.size >= 2
+            val acceptName = functionParameters.size == 3
 
             if (functionParameters[0].type.classifier != Player::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept player as the first parameter")
 
-            if (functionParameters[1].type.classifier != String::class)
+            if (acceptContent && functionParameters[1].type.classifier != String::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept string as the second parameter")
 
-            if (functionParameters.size == 3 && functionParameters[2].type.classifier != String::class)
+            if (acceptName && functionParameters[2].type.classifier != String::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept string as the third parameter")
 
             names.forEach {
