@@ -153,6 +153,8 @@ class CommandRegistry {
     }
 
     fun registerParameterConverter(from: KClass<*>, parameterConverter: CommandParameterConverter<*>) {
+        // TODO: Check if parameter type already registered
+
         parameterConverters[from] = parameterConverter
     }
 
