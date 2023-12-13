@@ -21,7 +21,7 @@ class EventRegistry {
 
             val functionParameters = function.parameters.drop(1)
 
-            if (functionParameters.isEmpty())
+            if (functionParameters.size != 1)
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly one parameter with the event type")
 
             val eventType = functionParameters[0].type.classifier as KClass<*>
