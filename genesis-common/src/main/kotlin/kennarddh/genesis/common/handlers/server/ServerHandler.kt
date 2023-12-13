@@ -7,6 +7,7 @@ import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
+import kennarddh.genesis.core.commands.parameters.validations.numbers.Min
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
 import kennarddh.genesis.core.handlers.Handler
@@ -372,5 +373,21 @@ class ServerHandler : Handler() {
         }
 
         return commandResultOutput
+    }
+
+    @Command(["playerLimit", "playerlimit"])
+    @ServerSide
+    fun playerLimit(@Min(-1) limit: Int? = null): CommandResult {
+        if (limit == null)
+            return CommandResult(
+                "Player limit is currently ${netServer.admins.playerLimit}.",
+            )
+
+        netServer.admins.playerLimit = limit
+
+        return if (limit == 0)
+            CommandResult("Player limit disabled.")
+        else
+            CommandResult("Player limit is now $limit")
     }
 }
