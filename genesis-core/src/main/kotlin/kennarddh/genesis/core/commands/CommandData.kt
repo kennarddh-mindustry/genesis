@@ -47,7 +47,8 @@ data class CommandData(
     fun toUsage(): String {
         val output = StringBuilder()
 
-        val functionParameters = parametersType.drop(1)
+        val functionParameters =
+            if (sides.contains(CommandSide.Client)) parametersType.drop(1).toTypedArray() else parametersType
 
         functionParameters.forEach {
             output.append(if (it.isOptional) "[" else "<")
@@ -58,9 +59,12 @@ data class CommandData(
                 @Suppress("UNCHECKED_CAST")
                 (commandRegistry.parameterTypes[it.kClass] as CommandParameter<Any>).toUsageType(it.kClass as KClass<Any>)
             )
+
             output.append(if (it.isOptional) "]" else ">")
+
+            output.append(' ')
         }
 
-        return output.toString()
+        return output.trimEnd(' ').toString()
     }
 }
