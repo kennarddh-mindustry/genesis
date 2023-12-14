@@ -9,4 +9,6 @@ class BooleanParameter : CommandParameter<Boolean> {
         else if (input.lowercase() == "off" || input.lowercase() == "false" || input.lowercase() == "no") false
         else throw CommandParameterParsingException("Cannot convert $input into boolean for parameter :parameterName:.")
     }
+
+    override fun toUsageType(input: Boolean): String = "boolean"
 }

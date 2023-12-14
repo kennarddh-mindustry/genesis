@@ -11,4 +11,6 @@ class UIntParameter : CommandParameter<UInt> {
             throw CommandParameterParsingException("Cannot convert $input into unsigned int for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: UInt): String = "uInt"
 }

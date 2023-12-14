@@ -11,4 +11,6 @@ class LongParameter : CommandParameter<Long> {
             throw CommandParameterParsingException("Cannot convert $input into long for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: Long): String = "long"
 }

@@ -11,4 +11,6 @@ class UByteParameter : CommandParameter<UByte> {
             throw CommandParameterParsingException("Cannot convert $input into unsigned byte for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: UByte): String = "uByte"
 }

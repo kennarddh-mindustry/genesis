@@ -11,4 +11,6 @@ class IntParameter : CommandParameter<Int> {
             throw CommandParameterParsingException("Cannot convert $input into int for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: Int): String = "int"
 }

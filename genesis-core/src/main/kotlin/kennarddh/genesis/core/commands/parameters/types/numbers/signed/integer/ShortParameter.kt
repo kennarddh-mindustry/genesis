@@ -11,4 +11,6 @@ class ShortParameter : CommandParameter<Short> {
             throw CommandParameterParsingException("Cannot convert $input into short for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: Short): String = "short"
 }

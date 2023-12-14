@@ -11,4 +11,6 @@ class CharParameter : CommandParameter<Char> {
 
         throw CommandParameterParsingException("Cannot convert $input into char for parameter :parameterName:.")
     }
+
+    override fun toUsageType(input: Char): String = "char"
 }

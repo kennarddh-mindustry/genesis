@@ -11,4 +11,6 @@ class ByteParameter : CommandParameter<Byte> {
             throw CommandParameterParsingException("Cannot convert $input into byte for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: Byte): String = "byte"
 }

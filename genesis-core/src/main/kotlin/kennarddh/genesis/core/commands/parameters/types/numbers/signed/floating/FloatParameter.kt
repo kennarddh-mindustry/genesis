@@ -11,4 +11,6 @@ class FloatParameter : CommandParameter<Float> {
             throw CommandParameterParsingException("Cannot convert $input into float for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: Float): String = "float"
 }

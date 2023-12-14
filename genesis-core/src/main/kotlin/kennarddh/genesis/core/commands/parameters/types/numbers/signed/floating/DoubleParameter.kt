@@ -11,4 +11,6 @@ class DoubleParameter : CommandParameter<Double> {
             throw CommandParameterParsingException("Cannot convert $input into double for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: Double): String = "double"
 }

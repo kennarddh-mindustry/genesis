@@ -6,4 +6,6 @@ class StringParameter : CommandParameter<String> {
     override fun parse(input: String): String {
         return input
     }
+
+    override fun toUsageType(input: String): String = "string"
 }

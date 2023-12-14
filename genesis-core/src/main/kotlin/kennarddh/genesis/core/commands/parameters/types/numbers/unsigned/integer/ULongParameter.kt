@@ -11,4 +11,6 @@ class ULongParameter : CommandParameter<ULong> {
             throw CommandParameterParsingException("Cannot convert $input into unsigned long for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: ULong): String = "uLong"
 }

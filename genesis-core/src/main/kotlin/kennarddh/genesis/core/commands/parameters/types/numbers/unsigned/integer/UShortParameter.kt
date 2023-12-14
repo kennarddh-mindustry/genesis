@@ -11,4 +11,6 @@ class UShortParameter : CommandParameter<UShort> {
             throw CommandParameterParsingException("Cannot convert $input into unsigned short for parameter :parameterName:.")
         }
     }
+
+    override fun toUsageType(input: UShort): String = "uShort"
 }
