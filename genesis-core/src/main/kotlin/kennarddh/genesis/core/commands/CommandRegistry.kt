@@ -48,7 +48,7 @@ import kotlin.reflect.typeOf
 class CommandRegistry {
     private val commands: MutableList<CommandData> = mutableListOf()
 
-    private val parameterTypes: MutableMap<KClass<*>, CommandParameter<*>> =
+    private val _parameterTypes: MutableMap<KClass<*>, CommandParameter<*>> =
         mutableMapOf()
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
         mutableMapOf()
@@ -61,8 +61,8 @@ class CommandRegistry {
         parseClientCommand(command, player!!)
     }
 
-    val ParameterTypes
-        get() = parameterTypes.toMap()
+    val parameterTypes
+        get() = _parameterTypes.toMap()
 
     @Suppress("UNUSED")
     var clientPrefix: String
@@ -156,7 +156,7 @@ class CommandRegistry {
     ) {
         // TODO: Check if parameter type already registered
 
-        parameterTypes[from] = parameterType
+        _parameterTypes[from] = parameterType
     }
 
     fun registerHandler(handler: Handler) {
@@ -227,7 +227,7 @@ class CommandRegistry {
 
                 val parameterTypeKClass = functionParameter.type.classifier
 
-                if (!parameterTypes.contains(parameterTypeKClass))
+                if (!_parameterTypes.contains(parameterTypeKClass))
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass is not registered.")
 
                 val validationsAnnotation: List<Annotation> =
@@ -397,7 +397,7 @@ class CommandRegistry {
 
             try {
                 if (passedParameter is StringToken) {
-                    val output = parameterTypes[parameter.kClass]!!.parse(passedParameter.value)
+                    val output = _parameterTypes[parameter.kClass]!!.parse(passedParameter.value)
 
                     parameter.validator.forEach {
                         val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
