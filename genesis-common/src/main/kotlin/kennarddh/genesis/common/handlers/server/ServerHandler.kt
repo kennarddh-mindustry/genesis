@@ -64,7 +64,7 @@ class ServerHandler : Handler() {
             output.append(usage)
 
             if (it.brief.isNotEmpty()) {
-                if (!usage.isEmpty())
+                if (usage.isNotEmpty())
                     output.append(' ')
 
                 output.append(" ")
