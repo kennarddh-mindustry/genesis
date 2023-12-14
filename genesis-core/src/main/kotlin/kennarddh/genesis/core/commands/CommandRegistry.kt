@@ -82,7 +82,7 @@ class CommandRegistry {
         get() = serverInterceptedCommandHandler.getPrefix()
         set(newPrefix) = serverInterceptedCommandHandler.setPrefix(newPrefix)
 
-    fun init() {
+    internal fun init() {
         Reflect.set(ServerControl.instance, "handler", serverInterceptedCommandHandler)
 
         Reflect.set(Vars.netServer, "clientCommands", clientInterceptedCommandHandler)
