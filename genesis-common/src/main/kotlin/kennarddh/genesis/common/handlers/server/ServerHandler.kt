@@ -627,7 +627,6 @@ class ServerHandler : Handler() {
                 commandResultOutput = CommandResult("${config.name} is currently ${config.get()}.")
             else {
                 try {
-                    //TODO: Catch CommandParameterParsingException
                     if (type == "remove") {
                         config.set(config.defaultValue)
                     } else if (config.isBool) {
@@ -644,6 +643,8 @@ class ServerHandler : Handler() {
                         error.message,
                         CommandResultStatus.Failed
                     )
+                } catch (error: CommandParameterParsingException) {
+                    commandResultOutput = CommandResult(error.toParametrizedString("value"), CommandResultStatus.Failed)
                 }
             }
 
