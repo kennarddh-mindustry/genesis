@@ -5,6 +5,8 @@ import arc.util.*
 import arc.util.serialization.JsonReader
 import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
+import kennarddh.genesis.core.Genesis
+import kennarddh.genesis.core.commands.annotations.ClientSide
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
 import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
@@ -20,6 +22,7 @@ import mindustry.core.Version
 import mindustry.game.Gamemode
 import mindustry.gen.Call
 import mindustry.gen.Groups
+import mindustry.gen.Player
 import mindustry.io.JsonIO
 import mindustry.maps.Map
 import mindustry.maps.MapException
@@ -28,6 +31,28 @@ import mindustry.server.ServerControl
 
 
 class ServerHandler : Handler() {
+    @Command(["help"])
+    @ServerSide
+    @ClientSide
+    fun help(player: Player? = null): CommandResult {
+        val output = StringBuilder()
+
+        val commands = if (player == null)
+            Genesis.commandRegistry.serverCommands
+        else
+            Genesis.commandRegistry.clientCommands
+
+        output.appendLine("Help:")
+
+        commands.forEach {
+            val name = it.names[0]
+
+            output.appendLine("$name: ${it.toUsage()}")
+        }
+
+        return CommandResult(output.trimEnd('\n').toString())
+    }
+
     @Command(["host"])
     @ServerSide
     fun host(): CommandResult {
