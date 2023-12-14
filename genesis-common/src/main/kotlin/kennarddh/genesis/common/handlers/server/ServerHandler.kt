@@ -46,7 +46,7 @@ class ServerHandler : Handler() {
         else
             Genesis.commandRegistry.clientCommands
 
-        output.appendLine("Help:")
+        output.appendLine("Commands:")
 
         commands.forEach {
             val name = it.names[0]
@@ -70,7 +70,9 @@ class ServerHandler : Handler() {
                     output.append(' ')
 
                 if (!isServer)
-                    output.append("[gray]- ")
+                    output.append("[gray]")
+
+                output.append("- ")
 
                 output.append(it.brief)
             }
