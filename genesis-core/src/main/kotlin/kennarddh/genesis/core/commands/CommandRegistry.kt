@@ -68,7 +68,7 @@ class CommandRegistry {
         get() = commands.filter { it.sides.contains(CommandSide.Client) }
 
     val serverCommands
-        get() = commands.filter { it.sides.contains(CommandSide.Client) }
+        get() = commands.filter { it.sides.contains(CommandSide.Server) }
 
     @Suppress("UNUSED")
     var clientPrefix: String
