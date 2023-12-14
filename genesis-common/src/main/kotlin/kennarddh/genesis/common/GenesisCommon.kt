@@ -7,7 +7,6 @@ import kennarddh.genesis.common.handlers.server.ServerHandler
 import kennarddh.genesis.core.Genesis
 import kennarddh.genesis.core.commons.AbstractPlugin
 
-@Suppress("unused")
 class GenesisCommon : AbstractPlugin() {
     override fun init() {
         Log.info("[GenesisCommon] Loaded")

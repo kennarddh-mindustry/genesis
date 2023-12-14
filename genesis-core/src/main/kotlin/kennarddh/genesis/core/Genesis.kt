@@ -7,7 +7,6 @@ import kennarddh.genesis.core.events.EventRegistry
 import kennarddh.genesis.core.handlers.Handler
 import kennarddh.genesis.core.packets.PacketRegistry
 
-@Suppress("unused")
 class Genesis : AbstractPlugin() {
     override fun init() {
         commandRegistry.init()
