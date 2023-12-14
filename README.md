@@ -16,3 +16,4 @@
 - [ ] Command description
 - [ ] (common) Help command
 - [ ] Remove command
+- [ ] Enum parameter support
