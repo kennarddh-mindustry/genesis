@@ -64,6 +64,12 @@ class CommandRegistry {
     val parameterTypes
         get() = _parameterTypes.toMap()
 
+    val clientCommands
+        get() = commands.filter { it.sides.contains(CommandSide.Client) }
+
+    val serverCommands
+        get() = commands.filter { it.sides.contains(CommandSide.Client) }
+
     @Suppress("UNUSED")
     var clientPrefix: String
         get() = clientInterceptedCommandHandler.getPrefix()
