@@ -67,8 +67,6 @@ class ServerHandler : Handler() {
                 if (usage.isNotEmpty())
                     output.append(' ')
 
-                output.append(" ")
-
                 if (!isServer)
                     output.append("[gray]- ")
 
