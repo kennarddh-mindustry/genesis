@@ -19,7 +19,7 @@ class Genesis : AbstractPlugin() {
 
     companion object {
         private val handlers: MutableList<Handler> = mutableListOf()
-        private val commandRegistry = CommandRegistry()
+        val commandRegistry = CommandRegistry()
         private val eventRegistry = EventRegistry()
         private val packetRegistry = PacketRegistry()
 
