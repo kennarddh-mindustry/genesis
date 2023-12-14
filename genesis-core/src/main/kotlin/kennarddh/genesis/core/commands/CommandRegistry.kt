@@ -12,24 +12,10 @@ import kennarddh.genesis.core.commands.parameters.CommandParameterData
 import kennarddh.genesis.core.commands.parameters.CommandParameterValidator
 import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
 import kennarddh.genesis.core.commands.parameters.exceptions.InvalidCommandParameterException
-import kennarddh.genesis.core.commands.parameters.types.BooleanParameter
-import kennarddh.genesis.core.commands.parameters.types.CharParameter
-import kennarddh.genesis.core.commands.parameters.types.StringParameter
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
-import kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating.DoubleParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating.FloatParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.ByteParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.IntParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.LongParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.ShortParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.UByteParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.UIntParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.ULongParameter
-import kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.integer.UShortParameter
+import kennarddh.genesis.core.commands.parameters.types.CommandParameter
+import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingException
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidation
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidationDescription
-import kennarddh.genesis.core.commands.parameters.validations.numbers.*
 import kennarddh.genesis.core.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
@@ -86,64 +72,6 @@ class CommandRegistry {
         Reflect.set(ServerControl.instance, "handler", serverInterceptedCommandHandler)
 
         Reflect.set(Vars.netServer, "clientCommands", clientInterceptedCommandHandler)
-
-        registerParameterType(Boolean::class, BooleanParameter())
-        registerParameterType(Char::class, CharParameter())
-        registerParameterType(String::class, StringParameter())
-
-        registerParameterType(Float::class, FloatParameter())
-        registerParameterType(Double::class, DoubleParameter())
-
-        registerParameterType(Byte::class, ByteParameter())
-        registerParameterType(Short::class, ShortParameter())
-        registerParameterType(Int::class, IntParameter())
-        registerParameterType(Long::class, LongParameter())
-
-        registerParameterType(UByte::class, UByteParameter())
-        registerParameterType(UShort::class, UShortParameter())
-        registerParameterType(UInt::class, UIntParameter())
-        registerParameterType(ULong::class, ULongParameter())
-
-        registerValidationAnnotation(
-            GT::class, listOf(
-                Float::class,
-                Double::class,
-                Byte::class,
-                Short::class,
-                Int::class,
-                Long::class,
-            ), ::validateGT
-        )
-        registerValidationAnnotation(
-            GTE::class, listOf(
-                Float::class,
-                Double::class,
-                Byte::class,
-                Short::class,
-                Int::class,
-                Long::class,
-            ), ::validateGTE
-        )
-        registerValidationAnnotation(
-            LT::class, listOf(
-                Float::class,
-                Double::class,
-                Byte::class,
-                Short::class,
-                Int::class,
-                Long::class,
-            ), ::validateLT
-        )
-        registerValidationAnnotation(
-            LTE::class, listOf(
-                Float::class,
-                Double::class,
-                Byte::class,
-                Short::class,
-                Int::class,
-                Long::class,
-            ), ::validateLTE
-        )
     }
 
     fun <T : Any, V : Any> registerValidationAnnotation(

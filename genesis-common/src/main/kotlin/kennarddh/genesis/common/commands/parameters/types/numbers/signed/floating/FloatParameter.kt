@@ -1,7 +1,7 @@
-package kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating
+package kennarddh.genesis.common.commands.parameters.types.numbers.signed.floating
 
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kennarddh.genesis.core.commands.parameters.types.CommandParameter
+import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingException
 import kotlin.reflect.KClass
 
 class FloatParameter : CommandParameter<Float> {

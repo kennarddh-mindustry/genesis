@@ -1,4 +1,4 @@
-package kennarddh.genesis.core.commands.parameters.types.base
+package kennarddh.genesis.core.commands.parameters.types
 
 import kotlin.reflect.KClass
 

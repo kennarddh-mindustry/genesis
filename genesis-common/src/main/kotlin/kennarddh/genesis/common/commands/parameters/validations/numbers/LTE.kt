@@ -1,4 +1,4 @@
-package kennarddh.genesis.core.commands.parameters.validations.numbers
+package kennarddh.genesis.common.commands.parameters.validations.numbers
 
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidation
 import kennarddh.genesis.core.commands.parameters.validations.ParameterValidationDescription

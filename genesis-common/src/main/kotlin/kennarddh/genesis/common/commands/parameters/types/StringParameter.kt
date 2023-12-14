@@ -1,6 +1,6 @@
-package kennarddh.genesis.core.commands.parameters.types
+package kennarddh.genesis.common.commands.parameters.types
 
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
+import kennarddh.genesis.core.commands.parameters.types.CommandParameter
 import kotlin.reflect.KClass
 
 class StringParameter : CommandParameter<String> {

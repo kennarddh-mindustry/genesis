@@ -1,7 +1,7 @@
-package kennarddh.genesis.core.commands.parameters.types
+package kennarddh.genesis.common.commands.parameters.types
 
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kennarddh.genesis.core.commands.parameters.types.CommandParameter
+import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingException
 import kotlin.reflect.KClass
 
 class BooleanParameter : CommandParameter<Boolean> {

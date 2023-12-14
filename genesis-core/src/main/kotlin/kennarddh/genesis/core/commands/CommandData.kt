@@ -1,7 +1,7 @@
 package kennarddh.genesis.core.commands
 
 import kennarddh.genesis.core.commands.parameters.CommandParameterData
-import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
+import kennarddh.genesis.core.commands.parameters.types.CommandParameter
 import kennarddh.genesis.core.handlers.Handler
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
