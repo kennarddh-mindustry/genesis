@@ -1,4 +1,4 @@
-package kennarddh.genesis.core.common
+package kennarddh.genesis.core.commons
 
 import arc.util.CommandHandler
 import mindustry.mod.Plugin

@@ -5,7 +5,7 @@ import kennarddh.genesis.common.handlers.commands.CommandsHandler
 import kennarddh.genesis.common.handlers.foo.FooHandler
 import kennarddh.genesis.common.handlers.server.ServerHandler
 import kennarddh.genesis.core.Genesis
-import kennarddh.genesis.core.common.AbstractPlugin
+import kennarddh.genesis.core.commons.AbstractPlugin
 
 @Suppress("unused")
 class GenesisCommon : AbstractPlugin() {

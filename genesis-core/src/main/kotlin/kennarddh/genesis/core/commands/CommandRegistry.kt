@@ -19,7 +19,7 @@ import kennarddh.genesis.core.commands.parameters.validations.ParameterValidatio
 import kennarddh.genesis.core.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
-import kennarddh.genesis.core.common.*
+import kennarddh.genesis.core.commons.*
 import kennarddh.genesis.core.handlers.Handler
 import mindustry.Vars
 import mindustry.gen.Player

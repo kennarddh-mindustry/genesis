@@ -1,4 +1,4 @@
-package kennarddh.genesis.core.common
+package kennarddh.genesis.core.commons
 
 class LimitedListSizeGreaterThanCapacityException(message: String) : Exception(message)
 

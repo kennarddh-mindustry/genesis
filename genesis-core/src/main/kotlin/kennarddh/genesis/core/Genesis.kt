@@ -2,7 +2,7 @@ package kennarddh.genesis.core
 
 import arc.util.Log
 import kennarddh.genesis.core.commands.CommandRegistry
-import kennarddh.genesis.core.common.AbstractPlugin
+import kennarddh.genesis.core.commons.AbstractPlugin
 import kennarddh.genesis.core.events.EventRegistry
 import kennarddh.genesis.core.handlers.Handler
 import kennarddh.genesis.core.packets.PacketRegistry
