@@ -32,6 +32,8 @@ import mindustry.maps.Map
 import mindustry.maps.MapException
 import mindustry.net.Administration
 import mindustry.server.ServerControl
+import kotlin.math.ceil
+import kotlin.math.min
 import kotlin.reflect.full.findAnnotation
 
 
@@ -41,6 +43,8 @@ class ServerHandler : Handler() {
     @ClientSide
     @Description("Display the command list, or get help for a specific command.")
     fun help(player: Player? = null, commandOrPage: String = "0"): CommandResult {
+        val commandsPerPage = 10
+
         var page: Int? = null
         var commandName: String? = null
 
@@ -62,7 +66,18 @@ class ServerHandler : Handler() {
         if (page != null) {
             output.appendLine("Commands:")
 
-            commands.forEach {
+            if (page <= 0)
+                return CommandResult("Parameter page must be greater than 0", CommandResultStatus.Failed)
+
+            val maxPage = ceil(commands.size.toDouble() / commandsPerPage).toInt()
+
+            if (page > maxPage)
+                return CommandResult(
+                    "Help max page is $maxPage",
+                    CommandResultStatus.Failed
+                )
+
+            commands.subList((page - 1) * commandsPerPage, min(page * commandsPerPage, commands.size)).forEach {
                 val name = it.names[0]
                 val usage = it.toUsage()
 
@@ -135,7 +150,7 @@ class ServerHandler : Handler() {
                 output.append('\n')
                 output.append(command.description)
             }
-            
+
             output.append('\n')
 
             command.parametersType.forEach {
