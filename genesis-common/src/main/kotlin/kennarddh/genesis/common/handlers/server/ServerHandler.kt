@@ -112,7 +112,7 @@ class ServerHandler : Handler() {
             }
         } else {
             val command = commands.find { it.names.contains(commandName) }
-                ?: return CommandResult("$commandName not found.", CommandResultStatus.Failed)
+                ?: return CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
 
             val firstCommandName = command.names[0]
             val usage = command.toUsage()
