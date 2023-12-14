@@ -12,8 +12,11 @@ import kennarddh.genesis.core.commands.annotations.Description
 import kennarddh.genesis.core.commands.annotations.ServerSide
 import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
 import kennarddh.genesis.core.commands.parameters.types.BooleanParameter
+import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
 import kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer.IntParameter
+import kennarddh.genesis.core.commands.parameters.validations.ParameterValidationDescription
 import kennarddh.genesis.core.commands.parameters.validations.numbers.GTE
+import kennarddh.genesis.core.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.commands.result.CommandResultStatus
 import kennarddh.genesis.core.handlers.Handler
@@ -29,6 +32,7 @@ import mindustry.maps.Map
 import mindustry.maps.MapException
 import mindustry.net.Administration
 import mindustry.server.ServerControl
+import kotlin.reflect.full.findAnnotation
 
 
 class ServerHandler : Handler() {
@@ -36,7 +40,16 @@ class ServerHandler : Handler() {
     @ServerSide
     @ClientSide
     @Description("Display the command list, or get help for a specific command.")
-    fun help(player: Player? = null): CommandResult {
+    fun help(player: Player? = null, commandOrPage: String = "0"): CommandResult {
+        var page: Int? = null
+        var commandName: String? = null
+
+        try {
+            page = IntParameter().parse(commandOrPage)
+        } catch (e: CommandParameterParsingException) {
+            commandName = commandOrPage
+        }
+
         val output = StringBuilder()
 
         val isServer = player == null
@@ -46,18 +59,59 @@ class ServerHandler : Handler() {
         else
             Genesis.commandRegistry.clientCommands
 
-        output.appendLine("Commands:")
+        if (page != null) {
+            output.appendLine("Commands:")
 
-        commands.forEach {
-            val name = it.names[0]
-            val usage = it.toUsage()
+            commands.forEach {
+                val name = it.names[0]
+                val usage = it.toUsage()
+
+                output.append("\t")
+
+                if (!isServer)
+                    output.append("[orange]")
+
+                output.append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
+
+                output.append(name)
+
+                if (!isServer)
+                    output.append("[lightgray]")
+
+                output.append(' ')
+                output.append(usage)
+
+                if (it.brief.isNotEmpty()) {
+                    if (usage.isNotEmpty())
+                        output.append(' ')
+
+                    if (!isServer)
+                        output.append("[gray]")
+
+                    output.append("- ")
+
+                    output.append(it.brief)
+                }
+
+                output.append('\n')
+            }
+        } else {
+            val command = commands.find { it.names.contains(commandName) }
+                ?: return CommandResult("$commandName not found.", CommandResultStatus.Failed)
+
+            val firstCommandName = command.names[0]
+            val usage = command.toUsage()
+
+            output.appendLine("Command $firstCommandName:")
+
+            output.append("\t")
 
             if (!isServer)
                 output.append("[orange]")
 
             output.append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
 
-            output.append(name)
+            output.append(firstCommandName)
 
             if (!isServer)
                 output.append("[lightgray]")
@@ -65,7 +119,7 @@ class ServerHandler : Handler() {
             output.append(' ')
             output.append(usage)
 
-            if (it.brief.isNotEmpty()) {
+            if (command.brief.isNotEmpty()) {
                 if (usage.isNotEmpty())
                     output.append(' ')
 
@@ -74,10 +128,33 @@ class ServerHandler : Handler() {
 
                 output.append("- ")
 
-                output.append(it.brief)
+                output.append(command.brief)
             }
 
+            if (command.description.isNotEmpty() && command.brief != command.description) {
+                output.append('\n')
+                output.append(command.description)
+            }
+            
             output.append('\n')
+
+            command.parametersType.forEach {
+                it.validator.forEach { validator ->
+                    val validatorDescriptionAnnotation =
+                        validator.annotationClass.findAnnotation<ParameterValidationDescription>()
+
+                    if (validatorDescriptionAnnotation != null) {
+                        output.append("\t- ")
+                        output.appendLine(
+                            parameterValidationDescriptionAnnotationToString(
+                                validatorDescriptionAnnotation,
+                                validator,
+                                it.name
+                            )
+                        )
+                    }
+                }
+            }
         }
 
         return CommandResult(output.trimEnd('\n').toString())
@@ -535,6 +612,7 @@ class ServerHandler : Handler() {
                 commandResultOutput = CommandResult("${config.name} is currently ${config.get()}.")
             else {
                 try {
+                    //TODO: Catch CommandParameterParsingException
                     if (type == "remove") {
                         config.set(config.defaultValue)
                     } else if (config.isBool) {
