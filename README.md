@@ -2,11 +2,13 @@
 
 - General Purpose Mindustry Plugin Library
 
-> :warning: **Genesis override some mindustry code using reflection. This library is probably will not be compatible
-> with other mindustry plugins.**
+> [!IMPORTANT]
+> Genesis override some mindustry code using reflection. This library is probably will not be compatible
+> with other mindustry plugins.
 
-> :warning: **It won't be compatible if the plugin register commands, use `handleServer`, etc.
-> The behaviour will be unknown because Genesis manage some internal states**
+> [!IMPORTANT]
+> It won't be compatible if the plugin register commands, use `handleServer`, etc.
+> The behaviour will be unknown because Genesis manage some internal states
 
 ## Todo
 
