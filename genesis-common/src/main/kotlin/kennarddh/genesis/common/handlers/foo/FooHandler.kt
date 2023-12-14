@@ -1,6 +1,10 @@
 package kennarddh.genesis.common.handlers.foo
 
+import arc.util.serialization.Jval
 import kennarddh.genesis.common.GenesisCommon
+import kennarddh.genesis.core.Genesis
+import kennarddh.genesis.core.commands.events.CommandsChanged
+import kennarddh.genesis.core.events.annotations.EventHandler
 import kennarddh.genesis.core.handlers.Handler
 import kennarddh.genesis.core.packets.annotations.PacketHandler
 import mindustry.Vars
@@ -17,8 +21,7 @@ class FooHandler : Handler() {
         Call.clientPacketReliable(player.con, "fooCheck", version)
 
         enableTransmissions(player)
-        //TODO: After get command usage and command registry exposed
-//        sendCommands(player)
+        sendCommands(player)
     }
 
     /** @since v1 Client transmission forwarding */
@@ -31,6 +34,11 @@ class FooHandler : Handler() {
         Call.clientPacketReliable("fooTransmission", output.toString())
     }
 
+    @EventHandler
+    private fun onCommandsChanged(event: CommandsChanged) {
+        sendCommands()
+    }
+
     /** @since v2 Informs clients of the transmission forwarding state. When [player] is null, the status is sent to everyone */
     private fun enableTransmissions(player: Player? = null) {
         val enabled = true
@@ -41,16 +49,23 @@ class FooHandler : Handler() {
             Call.clientPacketReliable("fooTransmissionEnabled", enabled.toString())
     }
 
-//    /** @since v2 Sends the list of commands to a player */
-//    private fun sendCommands(player: Player) {
-//        with(Jval.newObject()) {
-//            add("prefix", Reflect.get<String>(Vars.netServer.clientCommands, "prefix"))
-//            add("commands", Jval.newObject().apply {
-//                Vars.netServer.clientCommands.commandList.forEach {
-//                    add(it.text, it.paramText)
-//                }
-//            })
-//            Call.clientPacketReliable(player.con, "commandList", this.toString())
-//        }
-//    }
+    /** @since v2 Sends the list of commands to a player */
+    private fun sendCommands(player: Player? = null) {
+        with(Jval.newObject()) {
+            add("prefix", Genesis.commandRegistry.clientPrefix)
+
+            add("commands", Jval.newObject().apply {
+                Genesis.commandRegistry.clientCommands.forEach {
+                    it.names.forEach { name ->
+                        add(name, it.toUsage())
+                    }
+                }
+            })
+
+            if (player == null)
+                Call.clientPacketReliable("commandList", this.toString())
+            else
+                Call.clientPacketReliable(player.con, "commandList", this.toString())
+        }
+    }
 }
