@@ -56,7 +56,7 @@ data class CommandData(
 
             output.append(
                 @Suppress("UNCHECKED_CAST")
-                (commandRegistry.ParameterTypes[it.kClass] as CommandParameter<Any>).toUsageType(it.kClass as KClass<Any>)
+                (commandRegistry.parameterTypes[it.kClass] as CommandParameter<Any>).toUsageType(it.kClass as KClass<Any>)
             )
             output.append(if (it.isOptional) "]" else ">")
         }
