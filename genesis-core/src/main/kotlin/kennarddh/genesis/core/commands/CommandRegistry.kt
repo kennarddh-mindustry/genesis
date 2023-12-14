@@ -1,9 +1,11 @@
 package kennarddh.genesis.core.commands
 
 import arc.Core
+import arc.Events
 import arc.util.Log
 import arc.util.Reflect
 import kennarddh.genesis.core.commands.annotations.*
+import kennarddh.genesis.core.commands.events.CommandsChanged
 import kennarddh.genesis.core.commands.exceptions.DuplicateCommandNameException
 import kennarddh.genesis.core.commands.exceptions.InvalidCommandMethodException
 import kennarddh.genesis.core.commands.parameters.CommandParameterData
@@ -166,6 +168,8 @@ class CommandRegistry {
     }
 
     fun registerHandler(handler: Handler) {
+        var addedCommandCounter = 0
+
         for (function in handler::class.declaredFunctions) {
             function.isAccessible = true
 
@@ -259,7 +263,12 @@ class CommandRegistry {
                     parameters.toTypedArray()
                 )
             )
+
+            addedCommandCounter += 1
         }
+
+        if (addedCommandCounter > 0)
+            Events.fire(CommandsChanged())
     }
 
     private fun getCommandFromCommandName(commandName: String?): CommandData? {
