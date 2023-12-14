@@ -2,6 +2,7 @@ package kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.intege
 
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kotlin.reflect.KClass
 
 class UIntParameter : CommandParameter<UInt> {
     override fun parse(input: String): UInt {
@@ -12,5 +13,5 @@ class UIntParameter : CommandParameter<UInt> {
         }
     }
 
-    override fun toUsageType(input: UInt): String = "uInt"
+    override fun toUsageType(input: KClass<UInt>): String = "uInt"
 }

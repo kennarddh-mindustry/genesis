@@ -2,6 +2,7 @@ package kennarddh.genesis.core.commands.parameters.types.numbers.unsigned.intege
 
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kotlin.reflect.KClass
 
 class UShortParameter : CommandParameter<UShort> {
     override fun parse(input: String): UShort {
@@ -12,5 +13,5 @@ class UShortParameter : CommandParameter<UShort> {
         }
     }
 
-    override fun toUsageType(input: UShort): String = "uShort"
+    override fun toUsageType(input: KClass<UShort>): String = "uShort"
 }

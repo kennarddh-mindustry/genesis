@@ -2,6 +2,7 @@ package kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating
 
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kotlin.reflect.KClass
 
 class FloatParameter : CommandParameter<Float> {
     override fun parse(input: String): Float {
@@ -12,5 +13,5 @@ class FloatParameter : CommandParameter<Float> {
         }
     }
 
-    override fun toUsageType(input: Float): String = "float"
+    override fun toUsageType(input: KClass<Float>): String = "float"
 }

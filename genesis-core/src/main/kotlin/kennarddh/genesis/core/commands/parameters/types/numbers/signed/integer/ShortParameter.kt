@@ -2,6 +2,7 @@ package kennarddh.genesis.core.commands.parameters.types.numbers.signed.integer
 
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kotlin.reflect.KClass
 
 class ShortParameter : CommandParameter<Short> {
     override fun parse(input: String): Short {
@@ -12,5 +13,5 @@ class ShortParameter : CommandParameter<Short> {
         }
     }
 
-    override fun toUsageType(input: Short): String = "short"
+    override fun toUsageType(input: KClass<Short>): String = "short"
 }

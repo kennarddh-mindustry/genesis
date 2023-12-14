@@ -61,6 +61,9 @@ class CommandRegistry {
         parseClientCommand(command, player!!)
     }
 
+    val ParameterTypes
+        get() = parameterTypes.toMap()
+
     @Suppress("UNUSED")
     var clientPrefix: String
         get() = clientInterceptedCommandHandler.getPrefix()
@@ -133,12 +136,6 @@ class CommandRegistry {
                 Long::class,
             ), ::validateLTE
         )
-    }
-
-    companion object {
-        fun commandToUsage(command: CommandData): String {
-            TODO("Usage")
-        }
     }
 
     fun <T : Any, V : Any> registerValidationAnnotation(
@@ -244,7 +241,18 @@ class CommandRegistry {
                 )
             }
 
-            commands.add(CommandData(names, description, brief, sides, handler, function, parameters.toTypedArray()))
+            commands.add(
+                CommandData(
+                    this,
+                    names,
+                    description,
+                    brief,
+                    sides,
+                    handler,
+                    function,
+                    parameters.toTypedArray()
+                )
+            )
         }
     }
 
@@ -395,7 +403,7 @@ class CommandRegistry {
                         val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
 
                         @Suppress("UNCHECKED_CAST")
-                        val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output!!)
+                        val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output)
 
                         if (!isValid) {
                             val descriptionAnnotation =
@@ -414,7 +422,7 @@ class CommandRegistry {
                         }
                     }
 
-                    parameters[parameter.kParameter] = output!!
+                    parameters[parameter.kParameter] = output
                 }
             } catch (error: CommandParameterParsingException) {
                 errorMessages.add(error.toParametrizedString(parameter.name))

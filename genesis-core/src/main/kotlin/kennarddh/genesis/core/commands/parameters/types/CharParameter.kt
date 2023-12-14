@@ -2,6 +2,7 @@ package kennarddh.genesis.core.commands.parameters.types
 
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kotlin.reflect.KClass
 
 class CharParameter : CommandParameter<Char> {
     override fun parse(input: String): Char {
@@ -12,5 +13,5 @@ class CharParameter : CommandParameter<Char> {
         throw CommandParameterParsingException("Cannot convert $input into char for parameter :parameterName:.")
     }
 
-    override fun toUsageType(input: Char): String = "char"
+    override fun toUsageType(input: KClass<Char>): String = "char"
 }

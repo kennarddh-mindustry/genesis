@@ -2,6 +2,7 @@ package kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating
 
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
+import kotlin.reflect.KClass
 
 class DoubleParameter : CommandParameter<Double> {
     override fun parse(input: String): Double {
@@ -12,5 +13,5 @@ class DoubleParameter : CommandParameter<Double> {
         }
     }
 
-    override fun toUsageType(input: Double): String = "double"
+    override fun toUsageType(input: KClass<Double>): String = "double"
 }

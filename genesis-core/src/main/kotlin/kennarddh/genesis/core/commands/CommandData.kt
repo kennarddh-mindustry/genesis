@@ -1,10 +1,13 @@
 package kennarddh.genesis.core.commands
 
 import kennarddh.genesis.core.commands.parameters.CommandParameterData
+import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.handlers.Handler
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
 data class CommandData(
+    val commandRegistry: CommandRegistry,
     val names: Array<String>,
     val description: String,
     val brief: String,
@@ -39,5 +42,25 @@ data class CommandData(
         result = 31 * result + function.hashCode()
         result = 31 * result + parametersType.contentHashCode()
         return result
+    }
+
+    fun toUsage(): String {
+        val output = StringBuilder()
+
+        val functionParameters = parametersType.drop(1)
+
+        functionParameters.forEach {
+            output.append(if (it.isOptional) "[" else "<")
+            output.append(it.name)
+            output.append(":")
+
+            output.append(
+                @Suppress("UNCHECKED_CAST")
+                (commandRegistry.ParameterTypes[it.kClass] as CommandParameter<Any>).toUsageType(it.kClass as KClass<Any>)
+            )
+            output.append(if (it.isOptional) "]" else ">")
+        }
+
+        return output.toString()
     }
 }
