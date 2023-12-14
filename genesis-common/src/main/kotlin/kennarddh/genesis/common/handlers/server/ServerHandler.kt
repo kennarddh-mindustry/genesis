@@ -8,6 +8,7 @@ import arc.util.serialization.JsonValue.ValueType
 import kennarddh.genesis.core.Genesis
 import kennarddh.genesis.core.commands.annotations.ClientSide
 import kennarddh.genesis.core.commands.annotations.Command
+import kennarddh.genesis.core.commands.annotations.Description
 import kennarddh.genesis.core.commands.annotations.ServerSide
 import kennarddh.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
 import kennarddh.genesis.core.commands.parameters.types.BooleanParameter
@@ -34,6 +35,7 @@ class ServerHandler : Handler() {
     @Command(["help"])
     @ServerSide
     @ClientSide
+    @Description("Display the command list, or get help for a specific command.")
     fun help(player: Player? = null): CommandResult {
         val output = StringBuilder()
 
@@ -81,7 +83,9 @@ class ServerHandler : Handler() {
 
     @Command(["host"])
     @ServerSide
+    @Description("Open the server. Will default to survival and a random map if not specified.")
     fun host(): CommandResult {
+        //TODO: Specify map and game mode
         if (state.isGame)
             return CommandResult("Already hosting. Type 'stop' to stop hosting first.", CommandResultStatus.Failed)
 
@@ -129,6 +133,7 @@ class ServerHandler : Handler() {
 
     @Command(["version"])
     @ServerSide
+    @Description("Displays server version info.")
     fun version(): CommandResult {
         return CommandResult(
             """
@@ -140,6 +145,7 @@ class ServerHandler : Handler() {
 
     @Command(["exit"])
     @ServerSide
+    @Description("Exit the server application.")
     fun exit(): CommandResult {
         Core.app.post {
             net.dispose()
@@ -151,6 +157,7 @@ class ServerHandler : Handler() {
 
     @Command(["stop"])
     @ServerSide
+    @Description("Stop hosting the server.")
     fun stop(): CommandResult {
         Core.app.post {
             net.closeServer()
@@ -166,6 +173,7 @@ class ServerHandler : Handler() {
 
     @Command(["maps"])
     @ServerSide
+    @Description("Display available maps. Displays only custom maps by default.")
     fun maps(type: String = "custom"): CommandResult {
         var showCustom = false
         var showDefault = false
@@ -217,6 +225,7 @@ class ServerHandler : Handler() {
 
     @Command(["reloadMaps"])
     @ServerSide
+    @Description("Reload all maps from disk.")
     fun reloadMaps(): CommandResult {
         val beforeMapsSize = maps.all().size
 
@@ -234,6 +243,7 @@ class ServerHandler : Handler() {
 
     @Command(["status"])
     @ServerSide
+    @Description("Display server status.")
     fun status(): CommandResult {
         val output = StringBuilder()
 
@@ -267,6 +277,7 @@ class ServerHandler : Handler() {
 
     @Command(["mods", "plugins"])
     @ServerSide
+    @Description("Display all loaded mods/plugins.")
     fun mods(): CommandResult {
         val output = StringBuilder()
 
@@ -285,6 +296,7 @@ class ServerHandler : Handler() {
 
     @Command(["mod", "plugin"])
     @ServerSide
+    @Description("Display information about a loaded mod/plugin.")
     fun mod(name: String): CommandResult {
         val output = StringBuilder()
 
@@ -305,12 +317,14 @@ class ServerHandler : Handler() {
 
     @Command(["javascript", "js"])
     @ServerSide
+    @Description("Run arbitrary Javascript.")
     fun javascript(script: String): CommandResult {
         return CommandResult(mods.getScripts().runConsole(script))
     }
 
     @Command(["pause"])
     @ServerSide
+    @Description("Pause or unpause the game.")
     fun pause(pause: Boolean): CommandResult {
         if (state.isMenu)
             return CommandResult("Cannot pause without a game running.", CommandResultStatus.Failed)
@@ -324,6 +338,7 @@ class ServerHandler : Handler() {
 
     @Command(["say"])
     @ServerSide
+    @Description("Send a message to all players.")
     fun say(message: String): CommandResult {
         if (!state.isGame)
             return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
@@ -337,6 +352,7 @@ class ServerHandler : Handler() {
 
     @Command(["rules"])
     @ServerSide
+    @Description("List, remove or add global rules. These will apply regardless of map.")
     fun rules(type: String = "list", name: String? = null, value: String? = null): CommandResult {
         when (type) {
             "list" -> {
@@ -429,8 +445,11 @@ class ServerHandler : Handler() {
         return commandResultOutput
     }
 
+    // TODO: Fill items
+
     @Command(["playerLimit", "playerlimit"])
     @ServerSide
+    @Description("Set the server player limit. 0 to disable limit")
     fun playerLimit(@GTE(0) limit: Int? = null): CommandResult {
         if (limit == null)
             return CommandResult(
@@ -447,6 +466,7 @@ class ServerHandler : Handler() {
 
     @Command(["config"])
     @ServerSide
+    @Description("Configure server settings.")
     fun config(type: String = "list", name: String? = null, value: String? = null): CommandResult {
         when (type) {
             "list" -> {
