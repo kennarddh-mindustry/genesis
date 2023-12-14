@@ -37,7 +37,9 @@ class ServerHandler : Handler() {
     fun help(player: Player? = null): CommandResult {
         val output = StringBuilder()
 
-        val commands = if (player == null)
+        val isServer = player == null
+
+        val commands = if (isServer)
             Genesis.commandRegistry.serverCommands
         else
             Genesis.commandRegistry.clientCommands
@@ -46,8 +48,34 @@ class ServerHandler : Handler() {
 
         commands.forEach {
             val name = it.names[0]
+            val usage = it.toUsage()
 
-            output.appendLine("$name: ${it.toUsage()}")
+            if (!isServer)
+                output.append("[orange]")
+
+            output.append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
+
+            output.append(name)
+
+            if (!isServer)
+                output.append("[lightgray]")
+
+            output.append(' ')
+            output.append(usage)
+
+            if (it.brief.isNotEmpty()) {
+                if (!usage.isEmpty())
+                    output.append(' ')
+
+                output.append(" ")
+
+                if (!isServer)
+                    output.append("[gray]- ")
+
+                output.append(it.brief)
+            }
+
+            output.append('\n')
         }
 
         return CommandResult(output.trimEnd('\n').toString())
