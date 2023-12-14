@@ -13,6 +13,7 @@ import kennarddh.genesis.core.commands.parameters.exceptions.InvalidCommandParam
 import kennarddh.genesis.core.commands.parameters.types.BooleanParameter
 import kennarddh.genesis.core.commands.parameters.types.CharParameter
 import kennarddh.genesis.core.commands.parameters.types.StringParameter
+import kennarddh.genesis.core.commands.parameters.types.base.CommandParameter
 import kennarddh.genesis.core.commands.parameters.types.base.CommandParameterParsingException
 import kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating.DoubleParameter
 import kennarddh.genesis.core.commands.parameters.types.numbers.signed.floating.FloatParameter
@@ -47,7 +48,7 @@ import kotlin.reflect.typeOf
 class CommandRegistry {
     private val commands: MutableList<CommandData> = mutableListOf()
 
-    private val parameterTypes: MutableMap<KClass<*>, kennarddh.genesis.core.commands.parameters.types.base.CommandParameter<*>> =
+    private val parameterTypes: MutableMap<KClass<*>, CommandParameter<*>> =
         mutableMapOf()
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
         mutableMapOf()
@@ -154,11 +155,11 @@ class CommandRegistry {
 
     fun registerParameterType(
         from: KClass<*>,
-        parameterConverter: kennarddh.genesis.core.commands.parameters.types.base.CommandParameter<*>
+        parameterType: CommandParameter<*>
     ) {
         // TODO: Check if parameter type already registered
 
-        parameterTypes[from] = parameterConverter
+        parameterTypes[from] = parameterType
     }
 
     fun registerHandler(handler: Handler) {
@@ -230,7 +231,7 @@ class CommandRegistry {
                 val parameterTypeKClass = functionParameter.type.classifier
 
                 if (!parameterTypes.contains(parameterTypeKClass))
-                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass converter is not registered.")
+                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass is not registered.")
 
                 val validationsAnnotation: List<Annotation> =
                     functionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
