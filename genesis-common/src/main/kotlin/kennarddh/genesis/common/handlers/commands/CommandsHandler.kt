@@ -2,6 +2,7 @@ package kennarddh.genesis.common.handlers.commands
 
 import kennarddh.genesis.common.commands.parameters.types.BooleanParameter
 import kennarddh.genesis.common.commands.parameters.types.CharParameter
+import kennarddh.genesis.common.commands.parameters.types.EnumParameter
 import kennarddh.genesis.common.commands.parameters.types.StringParameter
 import kennarddh.genesis.common.commands.parameters.types.numbers.signed.floating.DoubleParameter
 import kennarddh.genesis.common.commands.parameters.types.numbers.signed.floating.FloatParameter
@@ -36,6 +37,8 @@ class CommandsHandler : Handler() {
         Genesis.commandRegistry.registerParameterType(UShort::class, UShortParameter())
         Genesis.commandRegistry.registerParameterType(UInt::class, UIntParameter())
         Genesis.commandRegistry.registerParameterType(ULong::class, ULongParameter())
+
+        Genesis.commandRegistry.registerParameterType(Enum::class, EnumParameter())
 
         Genesis.commandRegistry.registerValidationAnnotation(
             GT::class, listOf(
