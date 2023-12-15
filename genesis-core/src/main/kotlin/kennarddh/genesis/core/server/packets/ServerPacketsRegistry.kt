@@ -33,7 +33,7 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 
-class ServerPackets {
+class ServerPacketsRegistry {
     private val serverListeners: MutableMap<KClass<Any>, MutablePriorityList<(NetConnection, Any) -> Boolean>> =
         mutableMapOf()
 
