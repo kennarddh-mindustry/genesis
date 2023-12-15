@@ -27,3 +27,7 @@
 - [ ] Remove command
 - [ ] Enum parameter support
 - [x] Handle server annotation for `net.handleServer`
+
+### Next
+
+- [ ] Support normal command register for compatibility with other plugins
