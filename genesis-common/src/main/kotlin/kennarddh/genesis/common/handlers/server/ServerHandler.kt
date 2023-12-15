@@ -569,12 +569,20 @@ class ServerHandler : Handler() {
             CommandResult("Player limit is now $limit")
     }
 
+    enum class ConfigCommandType {
+        list, add, remove, get
+    }
+
     @Command(["config"])
     @ServerSide
     @Description("Configure server settings.")
-    fun config(type: String = "list", name: String? = null, value: String? = null): CommandResult {
+    fun config(
+        type: ConfigCommandType = ConfigCommandType.list,
+        name: String? = null,
+        value: String? = null
+    ): CommandResult {
         when (type) {
-            "list" -> {
+            ConfigCommandType.list -> {
                 if (name != null) return CommandResult(
                     "Name is not required for list",
                     CommandResultStatus.Failed
@@ -586,7 +594,7 @@ class ServerHandler : Handler() {
                 )
             }
 
-            "add" -> {
+            ConfigCommandType.add -> {
                 if (name == null) return CommandResult(
                     "Name is required for add",
                     CommandResultStatus.Failed
@@ -598,7 +606,7 @@ class ServerHandler : Handler() {
                 )
             }
 
-            "remove", "get" -> {
+            ConfigCommandType.remove, ConfigCommandType.get -> {
                 if (name == null) return CommandResult(
                     "Name is required for $type",
                     CommandResultStatus.Failed
@@ -609,16 +617,11 @@ class ServerHandler : Handler() {
                     CommandResultStatus.Failed
                 )
             }
-
-            else -> return CommandResult(
-                "$type is an invalid type. Possible value are list, add, remove, get",
-                CommandResultStatus.Failed
-            )
         }
 
         var commandResultOutput: CommandResult
 
-        if (type == "list") {
+        if (type == ConfigCommandType.list) {
             val output = StringBuilder()
 
             output.appendLine("All config values:")
@@ -634,11 +637,11 @@ class ServerHandler : Handler() {
         val config = Administration.Config.all.find { it.name.equals(name, ignoreCase = true) }
 
         if (config != null) {
-            if (type == "get")
+            if (type == ConfigCommandType.get)
                 commandResultOutput = CommandResult("${config.name} is currently ${config.get()}.")
             else {
                 try {
-                    if (type == "remove") {
+                    if (type == ConfigCommandType.remove) {
                         config.set(config.defaultValue)
                     } else if (config.isBool) {
                         config.set(BooleanParameter().parse(Boolean::class, value!!))
