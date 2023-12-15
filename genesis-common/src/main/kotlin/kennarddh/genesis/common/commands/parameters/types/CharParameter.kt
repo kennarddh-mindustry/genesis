@@ -5,7 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingE
 import kotlin.reflect.KClass
 
 class CharParameter : CommandParameter<Char> {
-    override fun parse(input: String): Char {
+    override fun parse(instance: KClass<Char>, input: String): Char {
         val charArray = input.toCharArray()
 
         if (charArray.size == 1) return charArray[0]

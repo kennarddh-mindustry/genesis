@@ -5,7 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingE
 import kotlin.reflect.KClass
 
 class DoubleParameter : CommandParameter<Double> {
-    override fun parse(input: String): Double {
+    override fun parse(instance: KClass<Double>, input: String): Double {
         try {
             return input.toDouble()
         } catch (error: NumberFormatException) {

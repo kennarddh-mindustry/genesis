@@ -5,7 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingE
 import kotlin.reflect.KClass
 
 class LongParameter : CommandParameter<Long> {
-    override fun parse(input: String): Long {
+    override fun parse(instance: KClass<Long>, input: String): Long {
         try {
             return input.toLong()
         } catch (error: NumberFormatException) {

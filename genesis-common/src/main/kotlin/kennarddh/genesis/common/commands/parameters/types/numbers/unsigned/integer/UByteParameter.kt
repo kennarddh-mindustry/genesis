@@ -5,7 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingE
 import kotlin.reflect.KClass
 
 class UByteParameter : CommandParameter<UByte> {
-    override fun parse(input: String): UByte {
+    override fun parse(instance: KClass<UByte>, input: String): UByte {
         try {
             return input.toUByte()
         } catch (error: NumberFormatException) {

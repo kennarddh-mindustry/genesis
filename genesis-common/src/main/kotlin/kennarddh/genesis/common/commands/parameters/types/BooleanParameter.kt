@@ -5,7 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingE
 import kotlin.reflect.KClass
 
 class BooleanParameter : CommandParameter<Boolean> {
-    override fun parse(input: String): Boolean {
+    override fun parse(instance: KClass<Boolean>, input: String): Boolean {
         return if (input.lowercase() == "on" || input.lowercase() == "true" || input.lowercase() == "yes") true
         else if (input.lowercase() == "off" || input.lowercase() == "false" || input.lowercase() == "no") false
         else throw CommandParameterParsingException("Cannot convert $input into boolean for parameter :parameterName:.")

@@ -5,7 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingE
 import kotlin.reflect.KClass
 
 class IntParameter : CommandParameter<Int> {
-    override fun parse(input: String): Int {
+    override fun parse(instance: KClass<Int>, input: String): Int {
         try {
             return input.toInt()
         } catch (error: NumberFormatException) {

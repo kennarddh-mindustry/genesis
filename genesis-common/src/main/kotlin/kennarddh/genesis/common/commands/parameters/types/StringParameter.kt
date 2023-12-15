@@ -4,7 +4,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameter
 import kotlin.reflect.KClass
 
 class StringParameter : CommandParameter<String> {
-    override fun parse(input: String): String {
+    override fun parse(instance: KClass<String>, input: String): String {
         return input
     }
 

@@ -5,7 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameterParsingE
 import kotlin.reflect.KClass
 
 class UShortParameter : CommandParameter<UShort> {
-    override fun parse(input: String): UShort {
+    override fun parse(instance: KClass<UShort>, input: String): UShort {
         try {
             return input.toUShort()
         } catch (error: NumberFormatException) {

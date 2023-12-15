@@ -356,7 +356,11 @@ class CommandRegistry {
 
                     val parameterType = parameterTypeFilterResult.values.toTypedArray()[0]
 
-                    val output = parameterType.parse(passedParameter.value)
+                    @Suppress("UNCHECKED_CAST")
+                    val output = (parameterType as CommandParameter<Any>).parse(
+                        parameter.kClass as KClass<Any>,
+                        passedParameter.value
+                    )
 
                     parameter.validator.forEach {
                         val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
