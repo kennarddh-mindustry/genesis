@@ -1,6 +1,7 @@
 # Genesis
 
 - General Purpose Mindustry Plugin Library
+- This plugin removes mindustry default kick, ban, vote kick, admin, system
 
 > [!IMPORTANT]
 > Genesis override some mindustry code using reflection. This library is probably will not be compatible
