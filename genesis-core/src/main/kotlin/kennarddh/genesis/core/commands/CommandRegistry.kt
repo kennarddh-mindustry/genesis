@@ -171,6 +171,11 @@ class CommandRegistry {
                 val validationsAnnotation: List<Annotation> =
                     functionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
 
+                validationsAnnotation.forEach {
+                    if (parameterValidator[functionParameter.type.classifier]?.contains(it.annotationClass) != true)
+                        throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with validator ${it.annotationClass} is not registered for ${parameterTypeKClass}.")
+                }
+
                 parameters.add(
                     CommandParameterData(
                         functionParameter,
