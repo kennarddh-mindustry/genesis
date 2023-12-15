@@ -256,7 +256,7 @@ class ServerPacketsRegistry {
             if (functionParameters[0].type.classifier != NetConnection::class)
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept connection as the first parameter")
 
-            if (function.returnType != Boolean::class)
+            if (function.returnType.classifier != Boolean::class)
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
             val packetType = functionParameters[1].type.classifier as KClass<*>
