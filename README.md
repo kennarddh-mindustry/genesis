@@ -25,7 +25,7 @@
 - [x] Command description
 - [x] (common) Help command
 - [ ] Remove command
-- [ ] Enum parameter support
+- [x] Enum parameter support
 - [x] Handle server annotation for `net.handleServer`
 - [ ] Command validation with player as parameter for the validator function
 
