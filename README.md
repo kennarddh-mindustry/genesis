@@ -26,4 +26,4 @@
 - [x] (common) Help command
 - [ ] Remove command
 - [ ] Enum parameter support
-- [ ] Handle server annotation for `net.handleServer`
+- [x] Handle server annotation for `net.handleServer`
