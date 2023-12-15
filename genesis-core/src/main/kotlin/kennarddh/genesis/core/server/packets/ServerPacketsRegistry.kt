@@ -253,7 +253,7 @@ class ServerPacketsRegistry {
             if (functionParameters.size != 2)
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly two parameters connection and the packet type")
 
-            if (functionParameters[0] != NetConnection::class)
+            if (functionParameters[0].type.classifier != NetConnection::class)
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept connection as the first parameter")
 
             if (function.returnType != Boolean::class)
