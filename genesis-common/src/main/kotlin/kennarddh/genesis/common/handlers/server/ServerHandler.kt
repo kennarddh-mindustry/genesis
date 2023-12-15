@@ -454,12 +454,20 @@ class ServerHandler : Handler() {
         return CommandResult("Server: $message")
     }
 
+    enum class RulesCommandType {
+        list, add, remove
+    }
+
     @Command(["rules"])
     @ServerSide
     @Description("List, remove or add global rules. These will apply regardless of map.")
-    fun rules(type: String = "list", name: String? = null, value: String? = null): CommandResult {
+    fun rules(
+        type: RulesCommandType = RulesCommandType.list,
+        name: String? = null,
+        value: String? = null
+    ): CommandResult {
         when (type) {
-            "list" -> {
+            RulesCommandType.list -> {
                 if (name != null) return CommandResult(
                     "Name is not required for list",
                     CommandResultStatus.Failed
@@ -471,7 +479,7 @@ class ServerHandler : Handler() {
                 )
             }
 
-            "add" -> {
+            RulesCommandType.add -> {
                 if (name == null) return CommandResult(
                     "Name is required for add",
                     CommandResultStatus.Failed
@@ -483,7 +491,7 @@ class ServerHandler : Handler() {
                 )
             }
 
-            "remove" -> {
+            RulesCommandType.remove -> {
                 if (name == null) return CommandResult(
                     "Name is required for remove",
                     CommandResultStatus.Failed
@@ -494,11 +502,6 @@ class ServerHandler : Handler() {
                     CommandResultStatus.Failed
                 )
             }
-
-            else -> return CommandResult(
-                "$type is an invalid type. Possible value are list, add, remove",
-                CommandResultStatus.Failed
-            )
         }
 
         var commandResultOutput: CommandResult
@@ -506,12 +509,10 @@ class ServerHandler : Handler() {
         val rules = Core.settings.getString("globalrules")
         val base = JsonIO.json.fromJson<JsonValue>(null, rules)
 
-        if (type == "list")
+        if (type == RulesCommandType.list)
             commandResultOutput = CommandResult("Rules:\n${JsonIO.print(rules)}")
         else {
-            val isRemove = type == "remove"
-
-            if (isRemove) {
+            if (type == RulesCommandType.remove) {
                 commandResultOutput = if (base.has(name)) {
                     base.remove(name)
 
