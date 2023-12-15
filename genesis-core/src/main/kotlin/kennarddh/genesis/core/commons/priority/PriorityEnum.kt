@@ -1,4 +1,4 @@
-package kennarddh.genesis.core.commons
+package kennarddh.genesis.core.commons.priority
 
 enum class PriorityEnum(val value: Int) {
     VeryLow(10),

@@ -3,9 +3,9 @@ package kennarddh.genesis.core.server.packets
 import arc.func.Cons2
 import arc.struct.ObjectMap
 import arc.util.Reflect
-import kennarddh.genesis.core.commons.MutablePriorityList
-import kennarddh.genesis.core.commons.PriorityContainer
-import kennarddh.genesis.core.commons.PriorityEnum
+import kennarddh.genesis.core.commons.priority.MutablePriorityList
+import kennarddh.genesis.core.commons.priority.PriorityContainer
+import kennarddh.genesis.core.commons.priority.PriorityEnum
 import mindustry.Vars
 import mindustry.net.NetConnection
 import kotlin.reflect.KClass
