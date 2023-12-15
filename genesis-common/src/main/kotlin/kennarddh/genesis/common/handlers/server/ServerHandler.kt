@@ -42,8 +42,7 @@ class ServerHandler : Handler() {
     @ServerSide
     @ClientSide
     @Description("Display the command list, or get help for a specific command.")
-    fun help(player: Player? = null, commandOrPage: String = "0"): CommandResult {
-        // TODO: Change default commandOrPage to "1"
+    fun help(player: Player? = null, commandOrPage: String = "1"): CommandResult {
         val commandsPerPage = 10
 
         var page: Int? = null
