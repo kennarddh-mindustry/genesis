@@ -178,22 +178,13 @@ class ServerHandler : Handler() {
     @Command(["host"])
     @ServerSide
     @Description("Open the server. Will default to survival and a random map if not specified.")
-    fun host(mapName: String? = null, gameMode: String = "survival"): CommandResult {
+    fun host(mapName: String? = null, gameMode: Gamemode = Gamemode.survival): CommandResult {
         if (state.isGame)
             return CommandResult("Already hosting. Type 'stop' to stop hosting first.", CommandResultStatus.Failed)
 
         Core.app.post {
             // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
             Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
-        }
-
-        val preset: Gamemode
-
-        // TODO: Enum parameter
-        try {
-            preset = Gamemode.valueOf(gameMode)
-        } catch (error: IllegalArgumentException) {
-            return CommandResult("Game mode $gameMode not found.", CommandResultStatus.Failed)
         }
 
         val map: Map?
@@ -206,7 +197,7 @@ class ServerHandler : Handler() {
             if (map == null)
                 return CommandResult("Map with name $mapName not found.", CommandResultStatus.Failed)
         } else {
-            map = maps.shuffleMode.next(preset, state.map)
+            map = maps.shuffleMode.next(gameMode, state.map)
 
             Log.info("Randomized next map to be @.", map.plainName())
         }
@@ -216,7 +207,7 @@ class ServerHandler : Handler() {
         Core.app.post {
             logic.reset()
 
-            ServerControl.instance.lastMode = preset
+            ServerControl.instance.lastMode = gameMode
 
             Core.settings.put("lastServerMode", ServerControl.instance.lastMode.name)
         }
@@ -224,7 +215,7 @@ class ServerHandler : Handler() {
         try {
             Core.app.post {
                 world.loadMap(map, map.applyRules(ServerControl.instance.lastMode))
-                state.rules = map.applyRules(preset)
+                state.rules = map.applyRules(gameMode)
                 logic.play()
 
                 Log.info("Map loaded.")
