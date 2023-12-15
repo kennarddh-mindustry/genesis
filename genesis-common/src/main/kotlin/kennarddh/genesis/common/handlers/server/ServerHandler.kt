@@ -43,13 +43,14 @@ class ServerHandler : Handler() {
     @ClientSide
     @Description("Display the command list, or get help for a specific command.")
     fun help(player: Player? = null, commandOrPage: String = "0"): CommandResult {
+        // TODO: Change default commandOrPage to "1"
         val commandsPerPage = 10
 
         var page: Int? = null
         var commandName: String? = null
 
         try {
-            page = IntParameter().parse(commandOrPage)
+            page = IntParameter().parse(Int::class, commandOrPage)
         } catch (e: CommandParameterParsingException) {
             commandName = commandOrPage
         }
@@ -649,9 +650,9 @@ class ServerHandler : Handler() {
                     if (type == "remove") {
                         config.set(config.defaultValue)
                     } else if (config.isBool) {
-                        config.set(BooleanParameter().parse(value!!))
+                        config.set(BooleanParameter().parse(Boolean::class, value!!))
                     } else if (config.isNum) {
-                        config.set(IntParameter().parse(value!!))
+                        config.set(IntParameter().parse(Int::class, value!!))
                     } else if (config.isString) {
                         config.set(value!!.replace("\\n", "\n"))
                     }
