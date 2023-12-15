@@ -26,10 +26,7 @@ import mindustry.gen.Player
 import mindustry.server.ServerControl
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
-import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
-import kotlin.reflect.full.instanceParameter
+import kotlin.reflect.full.*
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.typeOf
 
@@ -165,7 +162,10 @@ class CommandRegistry {
 
                 val parameterTypeKClass = functionParameter.type.classifier
 
-                if (!_parameterTypes.contains(parameterTypeKClass))
+                val parameterTypeFilterResult =
+                    _parameterTypes.filterKeys { (parameterTypeKClass as KClass<*>).isSubclassOf(it) }
+
+                if (parameterTypeFilterResult.isEmpty())
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass is not registered.")
 
                 val validationsAnnotation: List<Annotation> =
@@ -268,7 +268,13 @@ class CommandRegistry {
         return try {
             val parameters = parseCommandParameters(command, commandStringWithoutCommandName, player)
 
-            invoke(parameters)
+            try {
+                invoke(parameters)
+            } catch (e: Exception) {
+                //TODO: Proper command stack trace handling
+                Log.err("Command exception occurred")
+                e.printStackTrace()
+            }
         } catch (error: InvalidCommandParameterException) {
             CommandResult(
                 error.message ?: "Unknown Invalid Command Parameter Exception Occurred",
@@ -345,7 +351,12 @@ class CommandRegistry {
 
             try {
                 if (passedParameter is StringToken) {
-                    val output = _parameterTypes[parameter.kClass]!!.parse(passedParameter.value)
+                    val parameterTypeFilterResult =
+                        _parameterTypes.filterKeys { parameter.kClass.isSubclassOf(it) }
+
+                    val parameterType = parameterTypeFilterResult.values.toTypedArray()[0]
+
+                    val output = parameterType.parse(passedParameter.value)
 
                     parameter.validator.forEach {
                         val validator = parameterValidator[parameter.kClass]!![it.annotationClass]

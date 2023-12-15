@@ -5,6 +5,7 @@ import kennarddh.genesis.core.commands.parameters.types.CommandParameter
 import kennarddh.genesis.core.handlers.Handler
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.full.isSubclassOf
 
 data class CommandData(
     val commandRegistry: CommandRegistry,
@@ -55,9 +56,14 @@ data class CommandData(
             output.append(it.name)
             output.append(":")
 
+            val parameterTypeFilterResult =
+                commandRegistry.parameterTypes.filterKeys { type -> it.kClass.isSubclassOf(type) }
+
+            val parameterType = parameterTypeFilterResult.values.toTypedArray()[0]
+
             output.append(
                 @Suppress("UNCHECKED_CAST")
-                (commandRegistry.parameterTypes[it.kClass] as CommandParameter<Any>).toUsageType(it.kClass as KClass<Any>)
+                (parameterType as CommandParameter<Any>).toUsageType(it.kClass as KClass<Any>)
             )
 
             output.append(if (it.isOptional) "]" else ">")
