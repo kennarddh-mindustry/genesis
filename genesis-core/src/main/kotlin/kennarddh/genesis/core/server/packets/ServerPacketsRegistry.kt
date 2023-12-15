@@ -230,8 +230,16 @@ class ServerPacketsRegistry {
             serverListeners[packetType] = MutablePriorityList()
 
             Vars.net.handleServer(packetType.java) { connection, packet ->
+                var isStopped = false
+
                 serverListeners[packetType]!!.forEachPrioritized {
-                    it(connection, packet)
+                    if (isStopped)
+                        return@forEachPrioritized
+
+                    val result = it(connection, packet)
+
+                    if (!result)
+                        isStopped = true
                 }
             }
         }

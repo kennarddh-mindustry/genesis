@@ -4,5 +4,4 @@ class MutablePriorityList<E> : ArrayList<PriorityContainer<E>>(), MutableList<Pr
     fun forEachPrioritized(action: (E) -> Unit) {
         this.sorted().forEach { action(it.data) }
     }
-
 }
