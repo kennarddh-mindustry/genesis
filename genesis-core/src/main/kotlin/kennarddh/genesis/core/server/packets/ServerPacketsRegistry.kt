@@ -12,7 +12,7 @@ import arc.util.io.Writes
 import kennarddh.genesis.core.commons.priority.MutablePriorityList
 import kennarddh.genesis.core.commons.priority.PriorityContainer
 import kennarddh.genesis.core.commons.priority.PriorityEnum
-import kennarddh.genesis.core.events.exceptions.InvalidEventHandlerMethodException
+import kennarddh.genesis.core.events.exceptions.InvalidServerPacketHandlerMethodException
 import kennarddh.genesis.core.handlers.Handler
 import kennarddh.genesis.core.server.packets.annotations.ServerPacketHandler
 import kennarddh.genesis.core.server.packets.events.PlayerJoinConstruct
@@ -259,13 +259,13 @@ class ServerPacketsRegistry {
             val functionParameters = function.parameters.drop(1)
 
             if (functionParameters.size != 2)
-                throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly two parameters connection and the packet type")
+                throw InvalidServerPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly two parameters connection and the packet type")
 
             if (functionParameters[0].type.classifier != NetConnection::class)
-                throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept connection as the first parameter")
+                throw InvalidServerPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept connection as the first parameter")
 
             if (function.returnType.classifier != Boolean::class)
-                throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
+                throw InvalidServerPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
             val packetType = functionParameters[1].type.classifier as KClass<*>
 
