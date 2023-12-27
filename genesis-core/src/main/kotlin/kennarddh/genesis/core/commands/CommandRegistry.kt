@@ -395,4 +395,23 @@ class CommandRegistry {
             }
         }
     }
+
+    /**
+     * This method won't fail even if the command doesn't exist. It will just fail silently.
+     */
+    fun removeCommand(name: String, side: CommandSide) {
+        val command = getCommandFromCommandName(name)
+
+        if (side == CommandSide.Client) {
+            clientHandler.removeCommand(name)
+
+            if (command != null && command.sides.contains(CommandSide.Client))
+                command.sides = command.sides.filter { it != CommandSide.Client }.toTypedArray()
+        } else if (side == CommandSide.Server) {
+            serverHandler.removeCommand(name)
+
+            if (command != null && command.sides.contains(CommandSide.Server))
+                command.sides = command.sides.filter { it != CommandSide.Server }.toTypedArray()
+        }
+    }
 }

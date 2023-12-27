@@ -12,7 +12,7 @@ data class CommandData(
     val names: Array<String>,
     val description: String,
     val brief: String,
-    val sides: Array<CommandSide>,
+    var sides: Array<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,
     val parametersType: Array<CommandParameterData>
