@@ -105,20 +105,6 @@ class CommandRegistry {
             val description = descriptionAnnotation?.description ?: ""
             val brief = briefAnnotation?.brief ?: description
 
-            val checkedNames: MutableList<String> = mutableListOf()
-
-            for (name in names) {
-                if (checkedNames.contains(name))
-                    throw DuplicateCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
-
-                val command = getCommandFromCommandName(name)
-
-                if (command != null)
-                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered")
-
-                checkedNames.add(name)
-            }
-
             val isServerSide = serverSideAnnotation != null
             val isClientSide = clientSideAnnotation != null
 
@@ -130,6 +116,21 @@ class CommandRegistry {
                 arrayOf(CommandSide.Client)
             } else {
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} need to have either ServerSide or ClientSide or both annotation")
+            }
+
+            val checkedNames: MutableList<String> = mutableListOf()
+
+            for (name in names) {
+                if (isServerSide && serverHandler.commandList.find { it.text == name } != null)
+                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for server")
+
+                if (isClientSide && clientHandler.commandList.find { it.text == name } != null)
+                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for client")
+
+                if (checkedNames.contains(name))
+                    throw DuplicateCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
+
+                checkedNames.add(name)
             }
 
             val functionParameters = function.parameters.drop(1)
@@ -193,10 +194,10 @@ class CommandRegistry {
 
             names.forEach {
                 if (isClientSide)
-                    clientHandler.register(it, "[params...]", "", ArcCommandRunner(this, it))
+                    clientHandler.register(it, "[params...]", brief, ArcCommandRunner(this, it))
 
                 if (isServerSide)
-                    serverHandler.register(it, "[params...]", "", ArcCommandRunner(this, it))
+                    serverHandler.register(it, "[params...]", brief, ArcCommandRunner(this, it))
             }
 
             addedCommandCounter += 1
