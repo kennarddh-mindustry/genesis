@@ -5,6 +5,7 @@ import arc.util.*
 import arc.util.serialization.JsonReader
 import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
+import com.xpdustry.kotlin.KotlinRuntimePlugin
 import kennarddh.genesis.common.GenesisCommon
 import kennarddh.genesis.common.commands.parameters.types.BooleanParameter
 import kennarddh.genesis.common.commands.parameters.types.numbers.signed.integer.IntParameter
@@ -246,6 +247,7 @@ class ServerHandler : Handler() {
             Java Version: ${OS.javaVersion}
             Genesis Core: ${mods.getMod(Genesis::class.java).meta.version}
             Genesis Common: ${mods.getMod(GenesisCommon::class.java).meta.version}
+            Kotlin Runtime: ${mods.getMod(KotlinRuntimePlugin::class.java).meta.version}
             """.trimIndent()
         )
     }
