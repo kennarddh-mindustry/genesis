@@ -288,9 +288,12 @@ class CommandRegistry {
             else
                 command.parametersType.size
 
-        // TODO: Add Command Usage
+        val prefix = if (player == null) serverPrefix else clientPrefix
+
+        val fullUsage = "${prefix}${command.names[0]} ${command.toUsage()}"
+
         if (actualParametersSize < parsedString.size) {
-            throw InvalidCommandParameterException("Too much parameters supplied. Usage: soon")
+            throw InvalidCommandParameterException("Too much parameters supplied. Usage: \"$fullUsage\"")
         }
 
         val errorMessages: MutableList<String> = mutableListOf()
@@ -300,7 +303,7 @@ class CommandRegistry {
 
             if (i > parsedString.size - 1) {
                 if (!parameter.isOptional)
-                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped")
+                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped. Usage: \"$fullUsage\"")
 
                 continue
             }
@@ -309,7 +312,7 @@ class CommandRegistry {
 
             if (passedParameter is SkipToken) {
                 if (!parameter.isOptional)
-                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped")
+                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped. Usage: \"$fullUsage\"")
 
                 continue
             }
@@ -344,7 +347,7 @@ class CommandRegistry {
                                     parameter.name
                                 )
                             else
-                                "Parameter validation for parameter ${parameter.name} failed."
+                                "Parameter validation for parameter ${parameter.name} failed. Usage: \"$fullUsage\""
 
                             errorMessages.add(errorMessage)
                         }
