@@ -251,17 +251,21 @@ class ServerHandler : Handler() {
         )
     }
 
+    enum class MapsCommandType {
+        custom, default, all, get
+    }
+
     @Command(["maps"])
     @ServerSide
     @Description("Display available maps. Displays only custom maps by default.")
-    fun maps(type: String = "custom"): CommandResult {
+    fun maps(type: MapsCommandType = MapsCommandType.custom): CommandResult {
         var showCustom = false
         var showDefault = false
 
         when (type) {
-            "custom" -> showCustom = true
-            "default" -> showDefault = true
-            "all" -> {
+            MapsCommandType.custom -> showCustom = true
+            MapsCommandType.default -> showDefault = true
+            MapsCommandType.all -> {
                 showCustom = true
                 showDefault = true
             }
