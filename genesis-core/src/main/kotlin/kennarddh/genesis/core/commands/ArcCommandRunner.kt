@@ -5,7 +5,7 @@ import mindustry.gen.Player
 
 class ArcCommandRunner(private val commandRegistry: CommandRegistry, val name: String) : CommandRunner<Player> {
     override fun accept(args: Array<out String>?, player: Player?) {
-        val parametersString = args?.get(0) ?: ""
+        val parametersString = if (args?.isNotEmpty() == true) args[0] else ""
 
         commandRegistry.invokeCommand(name, parametersString, player)
     }
