@@ -19,7 +19,9 @@ import kennarddh.genesis.core.Genesis
 import kennarddh.genesis.core.commands.annotations.ClientSide
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.ServerSide
+import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.handlers.Handler
+import mindustry.gen.Player
 
 class CommandsHandler : Handler() {
     override fun onInit() {
@@ -88,7 +90,7 @@ class CommandsHandler : Handler() {
     @Command(["b", "c"])
     @ServerSide
     @ClientSide
-    fun b() {
-
+    fun b(player: Player? = null, name: String) {
+        CommandResult("hi $name / ${player?.name}")
     }
 }
