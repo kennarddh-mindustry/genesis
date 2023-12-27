@@ -178,18 +178,18 @@ class CommandRegistry {
                 )
             }
 
-            commands.add(
-                CommandData(
-                    this,
-                    names,
-                    description,
-                    brief,
-                    sides,
-                    handler,
-                    function,
-                    parameters.toTypedArray()
-                )
+            val command = CommandData(
+                this,
+                names,
+                description,
+                brief,
+                sides,
+                handler,
+                function,
+                parameters.toTypedArray()
             )
+
+            commands.add(command)
 
             names.forEach {
                 if (isClientSide)
