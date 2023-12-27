@@ -39,6 +39,20 @@ import kotlin.reflect.full.findAnnotation
 
 
 class ServerHandler : Handler() {
+    override fun onInit() {
+        Genesis.commandRegistry.removeCommand("help")
+        Genesis.commandRegistry.removeCommand("host")
+        Genesis.commandRegistry.removeCommand("version")
+        Genesis.commandRegistry.removeCommand("maps")
+        Genesis.commandRegistry.removeCommand("mods")
+        Genesis.commandRegistry.removeCommand("mod")
+        Genesis.commandRegistry.removeCommand("js")
+        Genesis.commandRegistry.removeCommand("pause")
+        Genesis.commandRegistry.removeCommand("rules")
+        Genesis.commandRegistry.removeCommand("config")
+        Genesis.commandRegistry.removeCommand("playerlimit")
+    }
+
     @Command(["help"])
     @ServerSide
     @ClientSide
