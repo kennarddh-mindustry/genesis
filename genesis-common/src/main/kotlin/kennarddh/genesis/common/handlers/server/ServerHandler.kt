@@ -5,6 +5,7 @@ import arc.util.*
 import arc.util.serialization.JsonReader
 import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
+import kennarddh.genesis.common.GenesisCommon
 import kennarddh.genesis.common.commands.parameters.types.BooleanParameter
 import kennarddh.genesis.common.commands.parameters.types.numbers.signed.integer.IntParameter
 import kennarddh.genesis.common.commands.parameters.validations.numbers.GTE
@@ -243,6 +244,8 @@ class ServerHandler : Handler() {
             """
             Version: Mindustry ${Version.number}-${Version.modifier} ${Version.type} / build ${Version.build} ${if (Version.revision == 0) "" else ".${Version.revision}"}
             Java Version: ${OS.javaVersion}
+            Genesis Core: ${mods.getMod(Genesis::class.java).meta.version}
+            Genesis Common: ${mods.getMod(GenesisCommon::class.java).meta.version}
             """.trimIndent()
         )
     }
