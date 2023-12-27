@@ -2,6 +2,8 @@ package kennarddh.genesis.core.commands
 
 import arc.Core
 import arc.Events
+import arc.struct.Seq
+import arc.util.CommandHandler
 import arc.util.Log
 import kennarddh.genesis.core.commands.annotations.*
 import kennarddh.genesis.core.commands.events.CommandsChanged
@@ -40,16 +42,22 @@ class CommandRegistry {
     val parameterTypes
         get() = _parameterTypes.toMap()
 
-    val clientCommands
+    val clientCommands: Seq<CommandHandler.Command>
+        get() = clientHandler.commandList
+
+    val serverCommands: Seq<CommandHandler.Command>
+        get() = serverHandler.commandList
+
+    val genesisClientCommands
         get() = commands.filter { it.sides.contains(CommandSide.Client) }
 
-    val serverCommands
+    val genesisServerCommands
         get() = commands.filter { it.sides.contains(CommandSide.Server) }
 
-    val clientHandler
+    private val clientHandler: CommandHandler
         get() = Vars.netServer.clientCommands
 
-    val serverHandler
+    private val serverHandler: CommandHandler
         get() = ServerControl.instance.handler
 
     @Suppress("UNUSED")

@@ -55,7 +55,7 @@ class FooHandler : Handler() {
             add("prefix", Genesis.commandRegistry.clientPrefix)
 
             add("commands", Jval.newObject().apply {
-                Genesis.commandRegistry.clientCommands.forEach {
+                Genesis.commandRegistry.genesisClientCommands.forEach {
                     it.names.forEach { name ->
                         add(name, it.toUsage())
                     }

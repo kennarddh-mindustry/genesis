@@ -74,9 +74,9 @@ class ServerHandler : Handler() {
         val isServer = player == null
 
         val commands = if (isServer)
-            Genesis.commandRegistry.serverCommands
+            Genesis.commandRegistry.genesisServerCommands
         else
-            Genesis.commandRegistry.clientCommands
+            Genesis.commandRegistry.genesisClientCommands
 
         if (page != null) {
             output.appendLine("Commands:")
