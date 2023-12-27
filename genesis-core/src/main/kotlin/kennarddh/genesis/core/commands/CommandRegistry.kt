@@ -3,7 +3,6 @@ package kennarddh.genesis.core.commands
 import arc.Core
 import arc.Events
 import arc.util.Log
-import arc.util.Reflect
 import kennarddh.genesis.core.commands.annotations.*
 import kennarddh.genesis.core.commands.events.CommandsChanged
 import kennarddh.genesis.core.commands.exceptions.DuplicateCommandNameException
@@ -38,14 +37,6 @@ class CommandRegistry {
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
         mutableMapOf()
 
-    private val serverInterceptedCommandHandler = InterceptedCommandHandler("") { command, _ ->
-        parseServerCommand(command)
-    }
-
-    private val clientInterceptedCommandHandler = InterceptedCommandHandler("/") { command, player ->
-        parseClientCommand(command, player!!)
-    }
-
     val parameterTypes
         get() = _parameterTypes.toMap()
 
@@ -55,20 +46,23 @@ class CommandRegistry {
     val serverCommands
         get() = commands.filter { it.sides.contains(CommandSide.Server) }
 
+    val clientHandler
+        get() = Vars.netServer.clientCommands
+
+    val serverHandler
+        get() = ServerControl.instance.handler
+
     @Suppress("UNUSED")
     var clientPrefix: String
-        get() = clientInterceptedCommandHandler.getPrefix()
-        set(newPrefix) = clientInterceptedCommandHandler.setPrefix(newPrefix)
+        get() = clientHandler.getPrefix()
+        set(newPrefix) = clientHandler.setPrefix(newPrefix)
 
     @Suppress("UNUSED")
     var serverPrefix: String
-        get() = serverInterceptedCommandHandler.getPrefix()
-        set(newPrefix) = serverInterceptedCommandHandler.setPrefix(newPrefix)
+        get() = serverHandler.getPrefix()
+        set(newPrefix) = serverHandler.setPrefix(newPrefix)
 
     internal fun init() {
-        Reflect.set(ServerControl.instance, "handler", serverInterceptedCommandHandler)
-
-        Reflect.set(Vars.netServer, "clientCommands", clientInterceptedCommandHandler)
     }
 
     fun <T : Any, V : Any> registerValidationAnnotation(
@@ -196,6 +190,14 @@ class CommandRegistry {
                     parameters.toTypedArray()
                 )
             )
+
+            names.forEach {
+                if (isClientSide)
+                    clientHandler.register(it, "[params...]", "", ArcCommandRunner(this, it))
+
+                if (isServerSide)
+                    serverHandler.register(it, "[params...]", "", ArcCommandRunner(this, it))
+            }
 
             addedCommandCounter += 1
         }
