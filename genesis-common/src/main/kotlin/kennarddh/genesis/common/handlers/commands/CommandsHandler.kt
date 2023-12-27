@@ -16,12 +16,7 @@ import kennarddh.genesis.common.commands.parameters.types.numbers.unsigned.integ
 import kennarddh.genesis.common.commands.parameters.types.numbers.unsigned.integer.UShortParameter
 import kennarddh.genesis.common.commands.parameters.validations.numbers.*
 import kennarddh.genesis.core.Genesis
-import kennarddh.genesis.core.commands.annotations.ClientSide
-import kennarddh.genesis.core.commands.annotations.Command
-import kennarddh.genesis.core.commands.annotations.ServerSide
-import kennarddh.genesis.core.commands.result.CommandResult
 import kennarddh.genesis.core.handlers.Handler
-import mindustry.gen.Player
 
 class CommandsHandler : Handler() {
     override fun onInit() {
@@ -85,12 +80,5 @@ class CommandsHandler : Handler() {
                 Long::class,
             ), ::validateLTE
         )
-    }
-
-    @Command(["b", "c"])
-    @ServerSide
-    @ClientSide
-    fun b(player: Player? = null, name: String): CommandResult {
-        return CommandResult("hi $name / ${player?.name}")
     }
 }
