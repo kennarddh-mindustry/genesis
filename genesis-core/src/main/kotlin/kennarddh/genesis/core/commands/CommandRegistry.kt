@@ -214,64 +214,26 @@ class CommandRegistry {
         return null
     }
 
-    private fun getCommandNameFromCommandString(commandString: String): String? {
-        val splitted = commandString.split(" ")
+    fun invokeCommand(
+        name: String,
+        parametersString: String,
+        player: Player?
+    ): Any {
+        val command = getCommandFromCommandName(name)
 
-        if (splitted.isEmpty()) return null
-
-        return splitted[0]
-    }
-
-    private fun removeCommandNameFromCommandString(commandName: String, commandString: String): String {
-        if (commandName.length == commandString.length) return ""
-
-        return commandString.substring(commandName.length + 1)
-    }
-
-    private fun parseServerCommand(commandString: String) {
-        val commandName = getCommandNameFromCommandString(commandString)
-        val command = getCommandFromCommandName(commandName)
-
-        val result = if (command == null || !command.sides.contains(CommandSide.Server)) {
-            CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
-        } else {
-            invokeCommand(commandName!!, command, commandString, null) { parameters ->
-                command.function.callBy(parameters)
-            }
-        }
-
-        handleCommandHandlerResult(result, null)
-    }
-
-    private fun parseClientCommand(commandString: String, player: Player) {
-        val commandName = getCommandNameFromCommandString(commandString)
-        val command = getCommandFromCommandName(commandName)
-
-        val result = if (command == null || !command.sides.contains(CommandSide.Client)) {
-            CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
-        } else {
-            invokeCommand(commandName!!, command, commandString, player) { parameters ->
-                command.function.callBy(parameters)
-            }
-        }
-
-        handleCommandHandlerResult(result, player)
-    }
-
-    private fun invokeCommand(
-        invokedCommandName: String,
-        command: CommandData,
-        commandString: String,
-        player: Player?,
-        invoke: (Map<KParameter, Any?>) -> Any?
-    ): Any? {
-        val commandStringWithoutCommandName = removeCommandNameFromCommandString(invokedCommandName, commandString)
+        if (command == null ||
+            (player == null && !command.sides.contains(CommandSide.Server)) ||
+            (player != null && !command.sides.contains(CommandSide.Client))
+        )
+            return CommandResult("Command $name not found.", CommandResultStatus.Failed)
 
         return try {
-            val parameters = parseCommandParameters(command, commandStringWithoutCommandName, player)
+            val parameters = parseCommandParameters(command, parametersString, player)
 
             try {
-                invoke(parameters)
+                val result = command.function.callBy(parameters)
+
+                handleCommandHandlerResult(result, player)
             } catch (e: Exception) {
                 //TODO: Proper command stack trace handling
                 Log.err("Command exception occurred")
