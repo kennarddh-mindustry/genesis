@@ -85,10 +85,10 @@ class CommandsHandler : Handler() {
         )
     }
 
-    @Command(["a", "b", "c"])
+    @Command(["b", "c"])
     @ServerSide
     @ClientSide
-    fun a() {
+    fun b() {
 
     }
 }
