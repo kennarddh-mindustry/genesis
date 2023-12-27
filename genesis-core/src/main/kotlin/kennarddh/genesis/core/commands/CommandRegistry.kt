@@ -228,13 +228,11 @@ class CommandRegistry {
         )
             return CommandResult("Command $name not found.", CommandResultStatus.Failed)
 
-        return try {
+        val result = try {
             val parameters = parseCommandParameters(command, parametersString, player)
 
             try {
-                val result = command.function.callBy(parameters)
-
-                handleCommandHandlerResult(result, player)
+                command.function.callBy(parameters)
             } catch (e: Exception) {
                 //TODO: Proper command stack trace handling
                 Log.err("Command exception occurred")
@@ -264,6 +262,8 @@ class CommandRegistry {
             error.printStackTrace()
             CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
         }
+
+        return handleCommandHandlerResult(result, player)
     }
 
     private fun parseCommandParameters(
