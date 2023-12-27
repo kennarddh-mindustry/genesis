@@ -27,7 +27,6 @@ import mindustry.core.GameState
 import mindustry.core.Version
 import mindustry.game.Gamemode
 import mindustry.gen.Call
-import mindustry.gen.Groups
 import mindustry.gen.Player
 import mindustry.io.JsonIO
 import mindustry.maps.Map
@@ -252,34 +251,6 @@ class ServerHandler : Handler() {
         )
     }
 
-    @Command(["exit"])
-    @ServerSide
-    @Description("Exit the server application.")
-    fun exit(): CommandResult {
-        Core.app.post {
-            net.dispose()
-            Core.app.exit()
-        }
-
-        return CommandResult("Server shutdown")
-    }
-
-    @Command(["stop"])
-    @ServerSide
-    @Description("Stop hosting the server.")
-    fun stop(): CommandResult {
-        Core.app.post {
-            net.closeServer()
-
-            // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
-            Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
-
-            state.set(GameState.State.menu)
-        }
-
-        return CommandResult("Stopped server.")
-    }
-
     @Command(["maps"])
     @ServerSide
     @Description("Display available maps. Displays only custom maps by default.")
@@ -328,58 +299,6 @@ class ServerHandler : Handler() {
             output.appendLine("No maps found.")
 
         output.appendLine("Map directory: ${customMapDirectory.file().getAbsoluteFile()}")
-
-        return CommandResult(output.trimEnd('\n').toString())
-    }
-
-    @Command(["reloadMaps"])
-    @ServerSide
-    @Description("Reload all maps from disk.")
-    fun reloadMaps(): CommandResult {
-        val beforeMapsSize = maps.all().size
-
-        maps.reload()
-
-        val output = if (maps.all().size > beforeMapsSize)
-            "${maps.all().size - beforeMapsSize} new map(s) found and reloaded."
-        else if (maps.all().size < beforeMapsSize)
-            "${beforeMapsSize - maps.all().size} old map(s) deleted."
-        else
-            "Maps reloaded."
-
-        return CommandResult(output)
-    }
-
-    @Command(["status"])
-    @ServerSide
-    @Description("Display server status.")
-    fun status(): CommandResult {
-        val output = StringBuilder()
-
-        if (state.isMenu)
-            output.appendLine("Status: Server closed")
-        else {
-            val currentMapName = Strings.capitalize(state.map.plainName())
-            val currentWave = state.wave
-
-            output.appendLine("Status:")
-
-            output.appendLine("\tPlaying on map $currentMapName / Wave $currentWave")
-
-            if (state.rules.waves)
-                output.appendLine("\t${(state.wavetime / 60).toInt()} seconds until next wave.")
-
-            output.appendLine("\t${Groups.unit.size()}units / ${state.enemies} enemies")
-            output.appendLine("\t${Core.graphics.framesPerSecond} TPS, ${Core.app.javaHeap / 1024 / 1024} MB used.")
-
-            if (!Groups.player.isEmpty) {
-                output.appendLine("\tPlayers: ${Groups.player.size()}")
-
-                for (player in Groups.player)
-                    output.appendLine("\t\t${if (player.admin()) "[A]" else "[P]"} ${player.plainName()} / ${player.uuid()}")
-            } else
-                output.appendLine("\tNo players connected.")
-        }
 
         return CommandResult(output.trimEnd('\n').toString())
     }
@@ -443,20 +362,6 @@ class ServerHandler : Handler() {
         state.set(if (state.isPaused) GameState.State.playing else GameState.State.paused)
 
         return CommandResult(if (pause) "Game paused." else "Game unpaused.")
-    }
-
-    @Command(["say"])
-    @ServerSide
-    @Description("Send a message to all players.")
-    fun say(message: String): CommandResult {
-        if (!state.isGame)
-            return CommandResult("Not hosting. Host a game first.", CommandResultStatus.Failed)
-
-        Core.app.post {
-            Call.sendMessage("[scarlet][[Server]:[] $message")
-        }
-
-        return CommandResult("Server: $message")
     }
 
     enum class RulesCommandType {
@@ -554,8 +459,6 @@ class ServerHandler : Handler() {
 
         return commandResultOutput
     }
-
-    // TODO: Fill items
 
     @Command(["playerLimit", "playerlimit"])
     @ServerSide
