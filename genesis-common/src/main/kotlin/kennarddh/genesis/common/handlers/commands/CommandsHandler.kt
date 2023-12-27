@@ -90,7 +90,7 @@ class CommandsHandler : Handler() {
     @Command(["b", "c"])
     @ServerSide
     @ClientSide
-    fun b(player: Player? = null, name: String) {
-        CommandResult("hi $name / ${player?.name}")
+    fun b(player: Player? = null, name: String): CommandResult {
+        return CommandResult("hi $name / ${player?.name}")
     }
 }
