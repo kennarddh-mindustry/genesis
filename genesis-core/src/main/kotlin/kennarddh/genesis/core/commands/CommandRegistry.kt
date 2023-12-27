@@ -413,5 +413,16 @@ class CommandRegistry {
             if (command != null && command.sides.contains(CommandSide.Server))
                 command.sides = command.sides.filter { it != CommandSide.Server }.toTypedArray()
         }
+
+        if (command != null && command.sides.isEmpty())
+            commands.remove(command)
+    }
+
+    /**
+     * This method won't fail even if the command doesn't exist. It will just fail silently.
+     */
+    fun removeCommand(name: String) {
+        removeCommand(name, CommandSide.Client)
+        removeCommand(name, CommandSide.Server)
     }
 }
