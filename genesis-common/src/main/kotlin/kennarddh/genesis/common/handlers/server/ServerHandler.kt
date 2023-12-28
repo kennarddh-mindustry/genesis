@@ -11,6 +11,7 @@ import kennarddh.genesis.common.commands.parameters.types.BooleanParameter
 import kennarddh.genesis.common.commands.parameters.types.numbers.signed.integer.IntParameter
 import kennarddh.genesis.common.commands.parameters.validations.numbers.GTE
 import kennarddh.genesis.core.Genesis
+import kennarddh.genesis.core.commands.ArcCommand
 import kennarddh.genesis.core.commands.annotations.ClientSide
 import kennarddh.genesis.core.commands.annotations.Command
 import kennarddh.genesis.core.commands.annotations.Description
@@ -74,9 +75,9 @@ class ServerHandler : Handler() {
         val isServer = player == null
 
         val commands = if (isServer)
-            Genesis.commandRegistry.genesisServerCommands
+            Genesis.commandRegistry.serverCommands.toList()
         else
-            Genesis.commandRegistry.genesisClientCommands
+            Genesis.commandRegistry.clientCommands.toList()
 
         if (page != null) {
             output.appendLine("Commands:")
@@ -93,8 +94,12 @@ class ServerHandler : Handler() {
                 )
 
             commands.subList((page - 1) * commandsPerPage, min(page * commandsPerPage, commands.size)).forEach {
-                val name = it.names[0]
-                val usage = it.toUsage()
+                // Ignore alias command
+                if (it is ArcCommand && it.isAlias) return@forEach
+
+                val name = if (it is ArcCommand) it.realName else it.text
+                val usage = if (it is ArcCommand) it.usage else it.paramText
+                val brief = if (it is ArcCommand) it.brief else it.description
 
                 output.append("\t")
 
@@ -111,7 +116,7 @@ class ServerHandler : Handler() {
                 output.append(' ')
                 output.append(usage)
 
-                if (it.brief.isNotEmpty()) {
+                if (brief.isNotEmpty()) {
                     if (usage.isNotEmpty())
                         output.append(' ')
 
@@ -120,19 +125,21 @@ class ServerHandler : Handler() {
 
                     output.append("- ")
 
-                    output.append(it.brief)
+                    output.append(brief)
                 }
 
                 output.append('\n')
             }
         } else {
-            val command = commands.find { it.names.contains(commandName) }
+            val command = commands.find { if (it is ArcCommand) it.name == commandName else it.text == commandName }
                 ?: return CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
 
-            val firstCommandName = command.names[0]
-            val usage = command.toUsage()
+            val name = if (command is ArcCommand) command.realName else command.text
+            val usage = if (command is ArcCommand) command.usage else command.paramText
+            val brief = if (command is ArcCommand) command.brief else command.description
+            val description = command.description
 
-            output.appendLine("Command $firstCommandName:")
+            output.appendLine("Command $name:")
 
             output.append("\t")
 
@@ -141,7 +148,7 @@ class ServerHandler : Handler() {
 
             output.append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
 
-            output.append(firstCommandName)
+            output.append(name)
 
             if (!isServer)
                 output.append("[lightgray]")
@@ -149,7 +156,7 @@ class ServerHandler : Handler() {
             output.append(' ')
             output.append(usage)
 
-            if (command.brief.isNotEmpty()) {
+            if (brief.isNotEmpty()) {
                 if (usage.isNotEmpty())
                     output.append(' ')
 
@@ -158,30 +165,32 @@ class ServerHandler : Handler() {
 
                 output.append("- ")
 
-                output.append(command.brief)
+                output.append(brief)
             }
 
-            if (command.description.isNotEmpty() && command.brief != command.description) {
+            if (description.isNotEmpty() && brief != description) {
                 output.append('\n')
-                output.append(command.description)
+                output.append(description)
             }
 
             output.append('\n')
 
-            command.parametersType.forEach {
-                it.validator.forEach { validator ->
-                    val validatorDescriptionAnnotation =
-                        validator.annotationClass.findAnnotation<ParameterValidationDescription>()
+            if (command is ArcCommand) {
+                command.commandData.parametersType.forEach {
+                    it.validator.forEach { validator ->
+                        val validatorDescriptionAnnotation =
+                            validator.annotationClass.findAnnotation<ParameterValidationDescription>()
 
-                    if (validatorDescriptionAnnotation != null) {
-                        output.append("\t- ")
-                        output.appendLine(
-                            parameterValidationDescriptionAnnotationToString(
-                                validatorDescriptionAnnotation,
-                                validator,
-                                it.name
+                        if (validatorDescriptionAnnotation != null) {
+                            output.append("\t- ")
+                            output.appendLine(
+                                parameterValidationDescriptionAnnotationToString(
+                                    validatorDescriptionAnnotation,
+                                    validator,
+                                    it.name
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
