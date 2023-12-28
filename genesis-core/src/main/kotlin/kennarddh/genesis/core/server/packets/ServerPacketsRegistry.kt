@@ -17,6 +17,7 @@ import kennarddh.genesis.core.handlers.Handler
 import kennarddh.genesis.core.server.packets.annotations.ServerPacketHandler
 import kennarddh.genesis.core.server.packets.events.PlayerJoinConstruct
 import mindustry.Vars
+import mindustry.Vars.net
 import mindustry.core.NetServer
 import mindustry.core.Version
 import mindustry.game.EventType
@@ -42,7 +43,7 @@ class ServerPacketsRegistry {
 
     internal fun init() {
         val originalServerListeners =
-            Reflect.get<ObjectMap<Class<Any>, Cons2<NetConnection, Any>>>(Vars.net, "serverListeners")
+            Reflect.get<ObjectMap<Class<Any>, Cons2<NetConnection, Any>>>(net, "serverListeners")
 
         @Suppress("UNCHECKED_CAST")
         originalServerListeners.get(ConnectPacket::class.java as Class<Any>)
@@ -146,7 +147,7 @@ class ServerPacketsRegistry {
                     return@addServerListener false
                 }
 
-                for (otherCon in Vars.net.connections) {
+                for (otherCon in net.connections) {
                     if (otherCon !== connection && uuid == otherCon.uuid) {
                         connection.uuid = packet.uuid
 
@@ -229,8 +230,13 @@ class ServerPacketsRegistry {
         if (!serverListeners.contains(packetType as KClass<Any>)) {
             serverListeners[packetType] = MutablePriorityList()
 
-            Vars.net.handleServer(packetType.java) { connection, packet ->
+            net.handleServer(packetType.java) { connection, packet ->
                 var isStopped = false
+
+                val previousListeners =
+                    Reflect.get<ObjectMap<Class<*>, Cons2<NetConnection, Any>>>(net, "serverListeners")
+
+                val previousListener = previousListeners.get(packetType.java)
 
                 serverListeners[packetType]!!.forEachPrioritized {
                     if (isStopped)
@@ -241,6 +247,9 @@ class ServerPacketsRegistry {
                     if (!result)
                         isStopped = true
                 }
+
+                // Previous packet listener will always get called even if genesis listener failed
+                previousListener.get(connection, packet)
             }
         }
 
