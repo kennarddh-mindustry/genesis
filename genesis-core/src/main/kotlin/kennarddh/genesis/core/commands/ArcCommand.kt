@@ -5,7 +5,7 @@ import arc.util.CommandHandler
 class ArcCommand(
     val commandRegistry: CommandRegistry,
     val name: String,
-    val description: String,
+    description: String,
     val brief: String,
     val aliasFor: String?
 ) : CommandHandler.Command(name, "[params...]", description, ArcCommandRunner(commandRegistry, name)) {
