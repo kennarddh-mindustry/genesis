@@ -24,11 +24,7 @@
 - [x] Foo support
 - [x] Command description
 - [x] (common) Help command
-- [ ] Remove command
+- [x] Remove command
 - [x] Enum parameter support
 - [x] Handle server annotation for `net.handleServer`
 - [ ] Command validation with player as parameter for the validator function
-
-### Next
-
-- [ ] Support normal command register for compatibility with other plugins
