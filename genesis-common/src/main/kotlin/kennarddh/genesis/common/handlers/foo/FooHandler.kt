@@ -3,6 +3,7 @@ package kennarddh.genesis.common.handlers.foo
 import arc.util.serialization.Jval
 import kennarddh.genesis.common.GenesisCommon
 import kennarddh.genesis.core.Genesis
+import kennarddh.genesis.core.commands.ArcCommand
 import kennarddh.genesis.core.commands.events.CommandsChanged
 import kennarddh.genesis.core.events.annotations.EventHandler
 import kennarddh.genesis.core.handlers.Handler
@@ -55,10 +56,11 @@ class FooHandler : Handler() {
             add("prefix", Genesis.commandRegistry.clientPrefix)
 
             add("commands", Jval.newObject().apply {
-                Genesis.commandRegistry.genesisClientCommands.forEach {
-                    it.names.forEach { name ->
-                        add(name, it.toUsage())
-                    }
+                Genesis.commandRegistry.clientCommands.forEach {
+                    val name = if (it is ArcCommand) it.realName else it.text
+                    val usage = if (it is ArcCommand) it.usage else it.paramText
+
+                    add(name, usage)
                 }
             })
 
