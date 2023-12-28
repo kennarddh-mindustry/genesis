@@ -215,7 +215,7 @@ class CommandRegistry {
             Events.fire(CommandsChanged())
     }
 
-    private fun getCommandFromCommandName(commandName: String?): CommandData? {
+    fun getCommandFromCommandName(commandName: String?): CommandData? {
         for (command in commands) {
             if (command.names.contains(commandName)) return command
         }
