@@ -269,9 +269,9 @@ class ServerPacketsRegistry {
 
             val packetType = functionParameters[1].type.classifier as KClass<*>
 
-            serverListeners[packetType]!!.add(PriorityContainer(priority) { connection, packet ->
+            addServerListener(packetType, priority) { connection, packet ->
                 function.call(handler, connection, packet) as Boolean
-            })
+            }
         }
     }
 }
