@@ -14,4 +14,7 @@ class ArcCommand(
 
     val usage: String
         get() = commandRegistry.getCommandFromCommandName(name)!!.toUsage()
+
+    val realName: String
+        get() = if (isAlias) aliasFor!! else name
 }
