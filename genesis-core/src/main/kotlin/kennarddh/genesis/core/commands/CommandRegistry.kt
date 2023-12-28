@@ -200,12 +200,15 @@ class CommandRegistry {
 
             commands.add(command)
 
+
             names.forEach {
+                val arcCommand = ArcCommand(this, it, description, brief, if (it == names[0]) null else names[0])
+
                 if (isClientSide)
-                    clientHandler.register(it, "[params...]", brief, ArcCommandRunner(this, it))
+                    clientHandler.registerArcCommand(arcCommand)
 
                 if (isServerSide)
-                    serverHandler.register(it, "[params...]", brief, ArcCommandRunner(this, it))
+                    serverHandler.registerArcCommand(arcCommand)
             }
 
             addedCommandCounter += 1
