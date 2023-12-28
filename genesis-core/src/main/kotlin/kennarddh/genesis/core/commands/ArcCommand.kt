@@ -13,7 +13,10 @@ class ArcCommand(
         get() = aliasFor != null
 
     val usage: String
-        get() = commandRegistry.getCommandFromCommandName(name)!!.toUsage()
+        get() = commandData.toUsage()
+
+    val commandData: CommandData
+        get() = commandRegistry.getCommandFromCommandName(name)!!
 
     val realName: String
         get() = if (isAlias) aliasFor!! else name
