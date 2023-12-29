@@ -83,7 +83,20 @@ class FiltersRegistry {
                 }
 
                 FilterType.Connect -> {
+                    if (functionParameters.size != 1)
+                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly one parameter address string")
 
+                    if (functionParameters[0].type.classifier != Player::class)
+                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept address string as the first parameter")
+
+                    if (function.returnType.classifier != Boolean::class)
+                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
+
+                    val filter = ServerConnectFilter { address ->
+                        function.call(handler, address) as Boolean
+                    }
+
+                    connectFilters.add(PriorityContainer(priority, filter))
                 }
             }
 
