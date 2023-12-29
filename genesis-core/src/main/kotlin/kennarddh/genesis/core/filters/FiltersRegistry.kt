@@ -72,8 +72,8 @@ class FiltersRegistry {
                     if (functionParameters[0].type.classifier != Player::class)
                         throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept PlayerAction as the first parameter")
 
-                    if (function.returnType.classifier != String::class)
-                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return string")
+                    if (function.returnType.classifier != Boolean::class)
+                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
                     val filter = ActionFilter { action ->
                         function.call(handler, action) as Boolean
