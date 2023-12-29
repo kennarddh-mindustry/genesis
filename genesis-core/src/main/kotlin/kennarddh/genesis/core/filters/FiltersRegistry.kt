@@ -66,7 +66,20 @@ class FiltersRegistry {
                 }
 
                 FilterType.Action -> {
+                    if (functionParameters.size != 1)
+                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly one parameter PlayerAction")
 
+                    if (functionParameters[0].type.classifier != Player::class)
+                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept PlayerAction as the first parameter")
+
+                    if (function.returnType.classifier != String::class)
+                        throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return string")
+
+                    val filter = ActionFilter { action ->
+                        function.call(handler, action) as Boolean
+                    }
+
+                    actionFilters.add(PriorityContainer(priority, filter))
                 }
 
                 FilterType.Connect -> {
