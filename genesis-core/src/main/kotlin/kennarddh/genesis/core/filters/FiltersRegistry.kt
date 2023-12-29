@@ -21,9 +21,9 @@ import kotlin.reflect.jvm.isAccessible
 
 
 class FiltersRegistry {
-    private val connectFilters: MutablePriorityList<ServerConnectFilter> = MutablePriorityList()
-    private val actionFilters: MutablePriorityList<ActionFilter> = MutablePriorityList()
     private val chatFilters: MutablePriorityList<ChatFilter> = MutablePriorityList()
+    private val actionFilters: MutablePriorityList<ActionFilter> = MutablePriorityList()
+    private val connectFilters: MutablePriorityList<ServerConnectFilter> = MutablePriorityList()
 
     internal fun init() {
         Vars.netServer.admins.addChatFilter { player, message -> "true" }
@@ -31,6 +31,16 @@ class FiltersRegistry {
         val server = Reflect.get<Server>(provider, "server")
 
         server.setConnectFilter { _ -> true }
+
+        Vars.netServer.admins.addChatFilter { player, message ->
+            var output = message
+            
+            chatFilters.forEachPrioritized {
+                output = it.filter(player, output)
+            }
+
+            return@addChatFilter output
+        }
     }
 
     fun registerHandler(handler: Handler) {
