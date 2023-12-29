@@ -21,9 +21,9 @@ import kotlin.reflect.jvm.isAccessible
 
 
 class FiltersRegistry {
-    val connectFilters: MutablePriorityList<ServerConnectFilter> = MutablePriorityList()
-    val actionFilters: MutablePriorityList<ActionFilter> = MutablePriorityList()
-    val chatFilters: MutablePriorityList<ChatFilter> = MutablePriorityList()
+    private val connectFilters: MutablePriorityList<ServerConnectFilter> = MutablePriorityList()
+    private val actionFilters: MutablePriorityList<ActionFilter> = MutablePriorityList()
+    private val chatFilters: MutablePriorityList<ChatFilter> = MutablePriorityList()
 
     internal fun init() {
         Vars.netServer.admins.addChatFilter { player, message -> "true" }
