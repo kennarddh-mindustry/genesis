@@ -26,11 +26,10 @@ class FiltersRegistry {
     private val connectFilters: MutablePriorityList<ServerConnectFilter> = MutablePriorityList()
 
     internal fun init() {
-        Vars.netServer.admins.addChatFilter { player, message -> "true" }
         val provider = Reflect.get<ArcNetProvider>(net, "provider")
         val server = Reflect.get<Server>(provider, "server")
 
-        server.setConnectFilter { _ -> true }
+        val prevConnectFilter = Reflect.get<ServerConnectFilter>(server, "connectFilter")
 
         Vars.netServer.admins.addChatFilter { player, message ->
             var output = message
@@ -53,6 +52,22 @@ class FiltersRegistry {
             }
 
             return@addActionFilter output
+        }
+
+        server.setConnectFilter { address ->
+            var output = true
+
+            connectFilters.forEachPrioritized {
+                if (!output)
+                    return@forEachPrioritized
+
+                output = it.accept(address)
+            }
+
+            if (output)
+                return@setConnectFilter true
+
+            prevConnectFilter?.accept(address) ?: false
         }
     }
 
