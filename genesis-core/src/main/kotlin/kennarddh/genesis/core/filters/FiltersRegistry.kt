@@ -34,12 +34,25 @@ class FiltersRegistry {
 
         Vars.netServer.admins.addChatFilter { player, message ->
             var output = message
-            
+
             chatFilters.forEachPrioritized {
                 output = it.filter(player, output)
             }
 
             return@addChatFilter output
+        }
+
+        Vars.netServer.admins.addActionFilter { action ->
+            var output = true
+
+            actionFilters.forEachPrioritized {
+                if (!output)
+                    return@forEachPrioritized
+
+                output = it.allow(action)
+            }
+
+            return@addActionFilter output
         }
     }
 
