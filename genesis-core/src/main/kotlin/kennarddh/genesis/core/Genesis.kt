@@ -4,6 +4,7 @@ import arc.util.Log
 import kennarddh.genesis.core.commands.CommandRegistry
 import kennarddh.genesis.core.commons.AbstractPlugin
 import kennarddh.genesis.core.events.EventRegistry
+import kennarddh.genesis.core.filters.FiltersRegistry
 import kennarddh.genesis.core.handlers.Handler
 import kennarddh.genesis.core.packets.PacketRegistry
 import kennarddh.genesis.core.server.packets.ServerPacketsRegistry
@@ -14,6 +15,7 @@ class Genesis : AbstractPlugin() {
         eventRegistry.init()
         packetRegistry.init()
         serverPacketsRegistry.init()
+        filtersRegistry.init()
 
         Log.info("[GenesisCore] Loaded")
     }
@@ -24,6 +26,7 @@ class Genesis : AbstractPlugin() {
         private val eventRegistry = EventRegistry()
         private val packetRegistry = PacketRegistry()
         private val serverPacketsRegistry = ServerPacketsRegistry()
+        private val filtersRegistry = FiltersRegistry()
 
         fun addHandler(handler: Handler) {
             handlers.add(handler)
@@ -34,6 +37,7 @@ class Genesis : AbstractPlugin() {
             eventRegistry.registerHandler(handler)
             packetRegistry.registerHandler(handler)
             serverPacketsRegistry.registerHandler(handler)
+            filtersRegistry.registerHandler(handler)
         }
     }
 }
