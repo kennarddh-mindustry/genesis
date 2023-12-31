@@ -32,7 +32,35 @@ jobs:
           field: version
           value: ${{ github.event.inputs.version }}
 
-      - name: test
-        run: cat ./genesis-core/plugin.json
-#      - name: Build Artifact
-#        run: ./gradlew jar
+      - name: Update Common plugin.json Version
+        uses: jossef/action-set-json-field@v2.1
+        with:
+          file: ./genesis-common/plugin.json
+          field: version
+          value: ${{ github.event.inputs.version }}
+
+      - name: Build Artifact
+        run: ./gradlew jar
+
+      - name: Get artifact path
+        run: |
+          echo "GENESIS_CORE_ARTIFACT_PATH=$(./gradlew :genesis-core:getArtifactPath -q)" >> $GITHUB_ENV
+          echo "GENESIS_COMMON_ARTIFACT_PATH=$(./gradlew :genesis-common:getArtifactPath -q)" >> $GITHUB_ENV
+
+      - name: Publish
+        run: |
+          ./gradlew publish \
+          -PreposiliteUsername=${{ secrets.MAVEN_NAME }} \
+          -PreposilitePassword=${{ secrets.MAVEN_SECRET }}
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: Release v${{ github.event.inputs.version }}
+          body: |
+            Version ${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
