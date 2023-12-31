@@ -54,17 +54,15 @@ jobs:
           -PreposilitePassword=${{ secrets.MAVEN_SECRET }}
 
       - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        uses: softprops/action-gh-release@v1
         with:
+          prerelease: false
           tag_name: v${{ github.event.inputs.version }}
-          release_name: Release v${{ github.event.inputs.version }}
           body: |
             Version ${{ github.event.inputs.version }}
-          draft: false
-          prerelease: false
-
+          files: |
+            ${{ env.GENESIS_CORE_ARTIFACT_PATH }}
+            ${{ env.GENESIS_COMMON_ARTIFACT_PATH }}
 
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5
