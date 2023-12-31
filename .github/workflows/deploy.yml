@@ -30,7 +30,7 @@ jobs:
         with:
           file: ./genesis-core/plugin.json
           field: version
-          value: github.event.inputs.version
+          value: ${{ github.event.inputs.version }}
 
       - name: test
         run: cat ./genesis-core/plugin.json
