@@ -1,0 +1,35 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: Release version
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Update Core plugin.json Version
+        uses: jossef/action-set-json-field@v2.1
+        with:
+          file: ./genesis-core/plugin.json
+          field: version
+          value: github.event.inputs.version
+
+      - name: test
+        run: cat ./genesis-core/plugin.json
+#      - name: Build Artifact
+#        run: ./gradlew jar
