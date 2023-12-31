@@ -35,6 +35,8 @@ class Genesis : AbstractPlugin() {
         fun addHandler(handler: Handler) {
             handlers.add(handler)
 
+            handler.onInit()
+
             commandRegistry.registerHandler(handler)
             eventRegistry.registerHandler(handler)
             packetRegistry.registerHandler(handler)
