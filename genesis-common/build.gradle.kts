@@ -44,8 +44,7 @@ dependencies {
 
     compileOnly("com.xpdustry:kotlin-runtime:3.1.0-k.1.9.10")
 
-//    compileOnly("kennarddh:genesis-core:1.0.1")
-    compileOnly(files("../genesis-core/build/libs/genesis-core-1.0.1.jar"))
+    compileOnly(project(":genesis-core"))
 }
 
 kotlin {
