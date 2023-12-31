@@ -15,7 +15,8 @@
 
 - [x] Optional Command Parameter
 - [x] Event Handler
-- [ ] Better Filter System With Priority
+- [x] Better Filter System With Priority
+- [x] Timer task annotation
 - [x] Command Usage. Auto generated.
 - [x] Command with more than 1 name/aliases
 - [x] Separate core with common. Common will include like host command.
