@@ -112,3 +112,7 @@ tasks.register<Jar>("buildAndPublish") {
 tasks.register<Jar>("buildAndPublishLocal") {
     dependsOn(tasks.jar, tasks.publishToMavenLocal)
 }
+
+tasks.register("getArtifactPath") {
+    doLast { println(tasks.jar.get().archiveFile.get().toString()) }
+}
