@@ -13,7 +13,6 @@ import mindustry.Vars.net
 import mindustry.gen.Player
 import mindustry.net.Administration.*
 import mindustry.net.ArcNetProvider
-import mindustry.net.NetConnection
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
@@ -136,16 +135,6 @@ class FiltersRegistry {
                     connectFilters.add(PriorityContainer(priority, filter))
                 }
             }
-
-            if (functionParameters.size != 2)
-                throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly two parameters connection and the packet type")
-
-            if (functionParameters[0].type.classifier != NetConnection::class)
-                throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept connection as the first parameter")
-
-            if (function.returnType.classifier != Boolean::class)
-                throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
-
         }
     }
 }
