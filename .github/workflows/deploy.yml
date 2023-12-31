@@ -64,3 +64,9 @@ jobs:
             Version ${{ github.event.inputs.version }}
           draft: false
           prerelease: false
+
+
+      - name: Commit
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Increment versions
