@@ -11,8 +11,7 @@ import kennarddh.genesis.core.handlers.Handler
 import mindustry.Vars
 import mindustry.Vars.net
 import mindustry.gen.Player
-import mindustry.net.Administration.ActionFilter
-import mindustry.net.Administration.ChatFilter
+import mindustry.net.Administration.*
 import mindustry.net.ArcNetProvider
 import mindustry.net.NetConnection
 import kotlin.reflect.full.declaredFunctions
@@ -107,7 +106,7 @@ class FiltersRegistry {
                     if (functionParameters.size != 1)
                         throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly one parameter PlayerAction")
 
-                    if (functionParameters[0].type.classifier != Player::class)
+                    if (functionParameters[0].type.classifier != PlayerAction::class)
                         throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept PlayerAction as the first parameter")
 
                     if (function.returnType.classifier != Boolean::class)
