@@ -8,6 +8,7 @@ import kennarddh.genesis.core.filters.FiltersRegistry
 import kennarddh.genesis.core.handlers.Handler
 import kennarddh.genesis.core.packets.PacketRegistry
 import kennarddh.genesis.core.server.packets.ServerPacketsRegistry
+import kennarddh.genesis.core.timers.TimersRegistry
 
 class Genesis : AbstractPlugin() {
     override fun init() {
@@ -16,6 +17,7 @@ class Genesis : AbstractPlugin() {
         packetRegistry.init()
         serverPacketsRegistry.init()
         filtersRegistry.init()
+        timersRegistry.init()
 
         Log.info("[GenesisCore] Loaded")
     }
@@ -28,6 +30,7 @@ class Genesis : AbstractPlugin() {
         private val packetRegistry = PacketRegistry()
         private val serverPacketsRegistry = ServerPacketsRegistry()
         private val filtersRegistry = FiltersRegistry()
+        private val timersRegistry = TimersRegistry()
 
         fun addHandler(handler: Handler) {
             handlers.add(handler)
@@ -37,6 +40,7 @@ class Genesis : AbstractPlugin() {
             packetRegistry.registerHandler(handler)
             serverPacketsRegistry.registerHandler(handler)
             filtersRegistry.registerHandler(handler)
+            timersRegistry.registerHandler(handler)
         }
     }
 }
