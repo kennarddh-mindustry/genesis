@@ -22,6 +22,7 @@ class Genesis : AbstractPlugin() {
 
     companion object {
         private val handlers: MutableList<Handler> = mutableListOf()
+
         val commandRegistry = CommandRegistry()
         private val eventRegistry = EventRegistry()
         private val packetRegistry = PacketRegistry()
@@ -30,8 +31,6 @@ class Genesis : AbstractPlugin() {
 
         fun addHandler(handler: Handler) {
             handlers.add(handler)
-
-            handler.onInit()
 
             commandRegistry.registerHandler(handler)
             eventRegistry.registerHandler(handler)
