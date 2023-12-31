@@ -29,3 +29,4 @@
 - [x] Enum parameter support
 - [x] Handle server annotation for `net.handleServer`
 - [ ] Command validation with player as parameter for the validator function
+- [ ] Player as parameter. Need converter. Prioritize id then search for name.
