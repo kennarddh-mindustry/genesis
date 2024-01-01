@@ -8,6 +8,7 @@ import arc.util.Log
 import kennarddh.genesis.core.commands.annotations.*
 import kennarddh.genesis.core.commands.events.CommandsChanged
 import kennarddh.genesis.core.commands.exceptions.DuplicateCommandNameException
+import kennarddh.genesis.core.commands.exceptions.DuplicateParameterTypeException
 import kennarddh.genesis.core.commands.exceptions.InvalidCommandMethodException
 import kennarddh.genesis.core.commands.parameters.CommandParameterData
 import kennarddh.genesis.core.commands.parameters.CommandParameterValidator
@@ -90,6 +91,8 @@ class CommandRegistry {
         parameterType: CommandParameter<*>
     ) {
         // TODO: Check if parameter type already registered
+        if (_parameterTypes.contains(from))
+            throw DuplicateParameterTypeException("Parameter type for type ${from.qualifiedName} has already been registered")
 
         _parameterTypes[from] = parameterType
     }
