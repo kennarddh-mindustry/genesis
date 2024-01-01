@@ -90,7 +90,6 @@ class CommandRegistry {
         from: KClass<*>,
         parameterType: CommandParameter<*>
     ) {
-        // TODO: Check if parameter type already registered
         if (_parameterTypes.contains(from))
             throw DuplicateParameterTypeException("Parameter type for type ${from.qualifiedName} has already been registered")
 
