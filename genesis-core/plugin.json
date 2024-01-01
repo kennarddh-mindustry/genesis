@@ -1,14 +1,14 @@
 {
-    "name": "genesis-core",
-    "displayName": "GenesisCore",
-    "author": "Kennarddh",
-    "description": "Plugin",
-    "minGameVersion": "146",
-    "java": true,
-    "main": "kennarddh.genesis.core.Genesis",
-    "version": "1.0.1",
-    "repo": "kennarddh-mindustry/genesis",
-    "dependencies": [
-        "kotlin-runtime"
-    ]
+  "name": "genesis-core",
+  "displayName": "GenesisCore",
+  "author": "Kennarddh",
+  "description": "Plugin",
+  "minGameVersion": "146",
+  "java": true,
+  "main": "kennarddh.genesis.core.Genesis",
+  "version": "1.1.0",
+  "repo": "kennarddh-mindustry/genesis",
+  "dependencies": [
+    "kotlin-runtime"
+  ]
 }
