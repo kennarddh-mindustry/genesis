@@ -5,6 +5,7 @@ import fr.xpdustry.toxopid.task.GithubArtifactDownload
 
 plugins {
     kotlin("jvm") version "1.9.10"
+    java
     `maven-publish`
     id("fr.xpdustry.toxopid") version "3.2.0"
 }
@@ -91,9 +92,7 @@ val downloadKotlinRuntime =
 tasks.runMindustryServer {
     dependsOn(":genesis-core:jar")
 
-    val genesisCore = project(":genesis-core").file("./build/libs/genesis-core-1.1.0.jar")
-
-    mods.setFrom(setOf(genesisCore, tasks.jar, downloadKotlinRuntime))
+    mods.setFrom(setOf(project(":genesis-core").tasks.jar, tasks.jar, downloadKotlinRuntime))
 }
 
 publishing {
