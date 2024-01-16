@@ -88,11 +88,13 @@ val downloadKotlinRuntime =
         version.set("v3.1.0-k.1.9.10")
     }
 
+val genesisCorePlugin: File? = project.file("../genesis-core/build/libs/genesis-core-1.0.1.jar")
+
+if (genesisCorePlugin == null)
+    throw Exception("Core artifact missing. Built it before running this")
 
 tasks.runMindustryServer {
-    dependsOn(":genesis-core:jar")
-
-    mods.setFrom(setOf(project(":genesis-core").tasks.jar, tasks.jar, downloadKotlinRuntime))
+    mods.setFrom(setOf(tasks.jar, downloadKotlinRuntime, genesisCorePlugin))
 }
 
 publishing {
