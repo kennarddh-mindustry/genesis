@@ -63,6 +63,7 @@ sourceSets {
 configurations.runtimeClasspath {
     exclude(group = "org.jetbrains.kotlin")
     exclude(group = "org.jetbrains.kotlinx")
+    exclude("org.slf4j")
 }
 
 tasks {
