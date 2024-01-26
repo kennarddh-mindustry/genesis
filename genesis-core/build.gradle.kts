@@ -100,7 +100,7 @@ publishing {
     }
     publications {
         create<MavenPublication>("maven") {
-            groupId = "kennarddh"
+            groupId = groupId
             artifactId = metadata.name
             version = version
             from(components["java"])
