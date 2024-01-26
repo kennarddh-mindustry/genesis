@@ -19,7 +19,6 @@ import kotlin.time.Duration
 
 class CommandsHandler : Handler() {
     override fun onInit() {
-
         Genesis.commandRegistry.registerParameterType(Boolean::class, BooleanParameter())
         Genesis.commandRegistry.registerParameterType(Char::class, CharParameter())
         Genesis.commandRegistry.registerParameterType(String::class, StringParameter())
