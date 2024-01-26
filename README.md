@@ -11,7 +11,7 @@
 - [x] Command Usage. Auto generated.
 - [x] Command with more than 1 name/aliases
 - [x] Separate core with common. Common will include like host command.
-- [ ] Publish artifact
+- [x] Publish artifact
 - [x] Event on command changed
 - [x] Foo support
 - [x] Command description
