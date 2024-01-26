@@ -4,7 +4,7 @@ import fr.xpdustry.toxopid.spec.ModPlatform
 import fr.xpdustry.toxopid.task.GithubArtifactDownload
 
 plugins {
-    kotlin("jvm") version "1.9.10"
+    kotlin("jvm") version "1.9.22"
     java
     `maven-publish`
     id("fr.xpdustry.toxopid") version "3.2.0"
@@ -37,7 +37,7 @@ project.version = metadata.version
 dependencies {
     mindustryDependencies()
 
-    compileOnly("com.xpdustry:kotlin-runtime:3.1.0-k.1.9.10")
+    compileOnly("com.xpdustry:kotlin-runtime:3.1.1-k.1.9.22")
 
     implementation("org.slf4j:slf4j-api:2.0.11")
 }
@@ -79,7 +79,7 @@ val downloadKotlinRuntime =
         user.set("xpdustry")
         repo.set("kotlin-runtime")
         name.set("kotlin-runtime.jar")
-        version.set("v3.1.0-k.1.9.10")
+        version.set("v3.1.1-k.1.9.22")
     }
 
 tasks.runMindustryServer {
