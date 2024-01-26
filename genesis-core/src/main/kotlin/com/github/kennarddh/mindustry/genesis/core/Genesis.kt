@@ -29,10 +29,6 @@ class Genesis : AbstractPlugin() {
 
                 Logger.info("Stopped")
             }
-
-            override fun exit() {
-                handlers.forEach { it.onExit() }
-            }
         })
 
         Logger.info("Loaded")
