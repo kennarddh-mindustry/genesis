@@ -35,10 +35,10 @@ jobs:
           field: version
           value: ${{ github.event.inputs.version }}
 
-      - name: Update Common plugin.json Version
+      - name: Update Standard plugin.json Version
         uses: jossef/action-set-json-field@v2.1
         with:
-          file: ./genesis-common/plugin.json
+          file: ./genesis-standard/plugin.json
           field: version
           value: ${{ github.event.inputs.version }}
 
@@ -48,7 +48,7 @@ jobs:
       - name: Get artifact path
         run: |
           echo "GENESIS_CORE_ARTIFACT_PATH=$(./gradlew :genesis-core:getArtifactPath -q)" >> $GITHUB_ENV
-          echo "GENESIS_COMMON_ARTIFACT_PATH=$(./gradlew :genesis-common:getArtifactPath -q)" >> $GITHUB_ENV
+          echo "GENESIS_STANDARD_ARTIFACT_PATH=$(./gradlew :genesis-standard:getArtifactPath -q)" >> $GITHUB_ENV
 
       - name: Publish
         run: |
@@ -65,7 +65,7 @@ jobs:
             Version ${{ github.event.inputs.version }}
           files: |
             ${{ env.GENESIS_CORE_ARTIFACT_PATH }}
-            ${{ env.GENESIS_COMMON_ARTIFACT_PATH }}
+            ${{ env.GENESIS_STANDARD_ARTIFACT_PATH }}
 
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5
