@@ -1,0 +1,15 @@
+{
+    "name": "genesis-standard",
+    "displayName": "GenesisStandard",
+    "author": "Kennarddh",
+    "description": "Plugin",
+    "minGameVersion": "146",
+    "java": true,
+    "main": "com.github.kennarddh.mindustry.genesis.standard.GenesisStandard",
+    "version": "1.1.0",
+    "repo": "kennarddh-mindustry/genesis",
+    "dependencies": [
+        "kotlin-runtime",
+        "genesis-core"
+    ]
+}

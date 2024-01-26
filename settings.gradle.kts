@@ -11,4 +11,4 @@ plugins {
 
 rootProject.name = "genesis"
 include(":genesis-core")
-include(":genesis-common")
+include(":genesis-standard")

@@ -8,8 +8,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/genesis-common" />
             <option value="$PROJECT_DIR$/genesis-core" />
+            <option value="$PROJECT_DIR$/genesis-standard" />
           </set>
         </option>
       </GradleProjectSettings>
