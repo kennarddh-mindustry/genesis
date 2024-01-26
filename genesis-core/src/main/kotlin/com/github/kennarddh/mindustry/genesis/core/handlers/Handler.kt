@@ -4,4 +4,6 @@ abstract class Handler {
     open fun onInit() {}
 
     open fun onExit() {}
+
+    open fun onDispose() {}
 }
