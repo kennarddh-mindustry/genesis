@@ -67,9 +67,10 @@ jobs:
             ${{ env.GENESIS_CORE_ARTIFACT_PATH }}
             ${{ env.GENESIS_STANDARD_ARTIFACT_PATH }}
 
+      # Lower the chance that commit will fail because branch was changed at the same time with this workflow
       - name: Pull Git Changes
         run: git pull
-        
+
       - name: Commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
