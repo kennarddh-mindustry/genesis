@@ -10,8 +10,8 @@ class GenesisStandard : AbstractPlugin() {
     override fun init() {
         Logger.info("Loaded")
 
-        Genesis.addHandler(CommandsHandler())
-        Genesis.addHandler(ServerHandler())
-        Genesis.addHandler(FooHandler())
+        Genesis.registerHandler(CommandsHandler())
+        Genesis.registerHandler(ServerHandler())
+        Genesis.registerHandler(FooHandler())
     }
 }
