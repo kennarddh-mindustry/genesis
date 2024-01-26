@@ -41,7 +41,7 @@ class CommandsHandler : Handler() {
         Genesis.commandRegistry.registerParameterType(Duration::class, DurationParameter())
         Genesis.commandRegistry.registerParameterType(Player::class, PlayerParameter())
 
-        Genesis.commandRegistry.registerValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             GT::class, listOf(
                 Float::class,
                 Double::class,
@@ -51,7 +51,7 @@ class CommandsHandler : Handler() {
                 Long::class,
             ), ::validateGT
         )
-        Genesis.commandRegistry.registerValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             GTE::class, listOf(
                 Float::class,
                 Double::class,
@@ -61,7 +61,7 @@ class CommandsHandler : Handler() {
                 Long::class,
             ), ::validateGTE
         )
-        Genesis.commandRegistry.registerValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             LT::class, listOf(
                 Float::class,
                 Double::class,
@@ -71,7 +71,7 @@ class CommandsHandler : Handler() {
                 Long::class,
             ), ::validateLT
         )
-        Genesis.commandRegistry.registerValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             LTE::class, listOf(
                 Float::class,
                 Double::class,
