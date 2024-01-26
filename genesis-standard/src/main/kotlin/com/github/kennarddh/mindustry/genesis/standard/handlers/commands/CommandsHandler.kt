@@ -2,10 +2,7 @@ package com.github.kennarddh.mindustry.genesis.standard.handlers.commands
 
 import com.github.kennarddh.mindustry.genesis.core.Genesis
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
-import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.BooleanParameter
-import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.CharParameter
-import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.EnumParameter
-import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.StringParameter
+import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.*
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.floating.DoubleParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.floating.FloatParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.integer.ByteParameter
@@ -17,6 +14,7 @@ import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.unsigned.integer.ULongParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.unsigned.integer.UShortParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.*
+import kotlin.time.Duration
 
 class CommandsHandler : Handler() {
     override fun onInit() {
@@ -39,6 +37,8 @@ class CommandsHandler : Handler() {
         Genesis.commandRegistry.registerParameterType(ULong::class, ULongParameter())
 
         Genesis.commandRegistry.registerParameterType(Enum::class, EnumParameter())
+
+        Genesis.commandRegistry.registerParameterType(Duration::class, DurationParameter())
 
         Genesis.commandRegistry.registerValidationAnnotation(
             GT::class, listOf(
