@@ -91,10 +91,8 @@ val downloadKotlinRuntime =
         version.set("v3.1.0-k.1.9.10")
     }
 
-val genesisCorePlugin: File = project.file("../genesis-core/build/libs/genesis-core-1.1.0.jar")
-
 tasks.runMindustryServer {
-    mods.setFrom(setOf(tasks.jar, downloadKotlinRuntime, genesisCorePlugin))
+    mods.setFrom(setOf(tasks.jar, downloadKotlinRuntime, project(":genesis-core").tasks.jar))
 }
 
 publishing {
