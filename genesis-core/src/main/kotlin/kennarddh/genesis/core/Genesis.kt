@@ -19,7 +19,7 @@ class Genesis : AbstractPlugin() {
         filtersRegistry.init()
         timersRegistry.init()
 
-        Logger.info("[GenesisCore] Loaded")
+        Logger.info("Loaded")
     }
 
     companion object {
