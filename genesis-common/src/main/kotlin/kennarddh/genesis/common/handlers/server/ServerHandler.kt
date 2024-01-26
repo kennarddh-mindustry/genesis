@@ -1,12 +1,16 @@
 package kennarddh.genesis.common.handlers.server
 
 import arc.Core
-import arc.util.*
+import arc.util.OS
+import arc.util.Reflect
+import arc.util.Strings
+import arc.util.Timer
 import arc.util.serialization.JsonReader
 import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
 import com.xpdustry.kotlin.KotlinRuntimePlugin
 import kennarddh.genesis.common.GenesisCommon
+import kennarddh.genesis.common.Logger
 import kennarddh.genesis.common.commands.parameters.types.BooleanParameter
 import kennarddh.genesis.common.commands.parameters.types.numbers.signed.integer.IntParameter
 import kennarddh.genesis.common.commands.parameters.validations.numbers.GTE
@@ -223,10 +227,10 @@ class ServerHandler : Handler() {
         } else {
             map = maps.shuffleMode.next(gameMode, state.map)
 
-            Log.info("Randomized next map to be @.", map.plainName())
+            Logger.info("Randomized next map to be @.", map.plainName())
         }
 
-        Log.info("Loading map...")
+        Logger.info("Loading map...")
 
         Core.app.post {
             logic.reset()
@@ -242,7 +246,7 @@ class ServerHandler : Handler() {
                 state.rules = map.applyRules(gameMode)
                 logic.play()
 
-                Log.info("Map loaded.")
+                Logger.info("Map loaded.")
 
                 netServer.openServer()
 
