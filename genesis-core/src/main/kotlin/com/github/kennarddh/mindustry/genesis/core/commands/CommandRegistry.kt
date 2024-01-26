@@ -6,6 +6,9 @@ import arc.struct.Seq
 import arc.util.CommandHandler
 import arc.util.Log
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.*
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidation
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.commandValidationDescriptionAnnotationToString
 import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChanged
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.CommandValidationException
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateCommandNameException
@@ -265,11 +268,24 @@ class CommandRegistry {
             command.validator.forEach {
                 val validator = commandValidator[it.annotationClass]!!
 
-                val invalidReason = validator.invoke(it, player)
+                val isValid = validator.invoke(it, player)
 
-                // If null it's valid
-                if (invalidReason != null)
-                    throw CommandValidationException("Command validation failed. Reason: $invalidReason")
+                if (!isValid) {
+                    val descriptionAnnotation =
+                        it.annotationClass.findAnnotation<CommandValidationDescription>()
+
+                    val errorMessage =
+                        if (descriptionAnnotation != null)
+                            commandValidationDescriptionAnnotationToString(
+                                descriptionAnnotation,
+                                it,
+                                command.names[0]
+                            )
+                        else
+                            "Command validation failed."
+
+                    throw CommandValidationException(errorMessage)
+                }
             }
 
             val parameters = parseCommandParameters(command, parametersString, player)
@@ -307,7 +323,7 @@ class CommandRegistry {
             )
         } catch (error: Exception) {
             Logger.error("Unknown Invoke Command Exception Occurred", error)
-            
+
             CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
         }
 

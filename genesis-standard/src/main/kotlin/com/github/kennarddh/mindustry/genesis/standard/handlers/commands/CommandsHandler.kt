@@ -3,8 +3,8 @@ package com.github.kennarddh.mindustry.genesis.standard.handlers.commands
 import com.github.kennarddh.mindustry.genesis.core.Genesis
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.ClientSide
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command
-import com.github.kennarddh.mindustry.genesis.core.commands.annotations.CommandValidation
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.ServerSide
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidation
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.*
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.floating.DoubleParameter
