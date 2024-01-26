@@ -39,6 +39,7 @@ class CommandRegistry {
         mutableMapOf()
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
         mutableMapOf()
+    private val commandValidator: MutableMap<KClass<*>, CommandValidator> = mutableMapOf()
 
     val parameterTypes
         get() = _parameterTypes.toMap()
@@ -84,6 +85,15 @@ class CommandRegistry {
 
             parameterValidator[it]!![annotation] = validator
         }
+    }
+
+    fun <T : Any> registerCommandValidationAnnotation(
+        annotation: KClass<T>,
+        validator: CommandValidator
+    ) {
+        if (commandValidator.contains(annotation)) return
+
+        commandValidator[annotation] = validator
     }
 
     fun registerParameterType(

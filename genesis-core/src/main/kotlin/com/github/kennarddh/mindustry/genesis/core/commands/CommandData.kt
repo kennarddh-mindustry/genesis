@@ -3,9 +3,12 @@ package com.github.kennarddh.mindustry.genesis.core.commands
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.CommandParameterData
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.CommandParameter
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
+import mindustry.gen.Player
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.isSubclassOf
+
+typealias CommandValidator = (annotation: Annotation, player: Player) -> Boolean
 
 data class CommandData(
     val commandRegistry: CommandRegistry,
