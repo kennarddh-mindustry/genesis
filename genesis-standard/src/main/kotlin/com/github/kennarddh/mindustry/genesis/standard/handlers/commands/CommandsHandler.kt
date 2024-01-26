@@ -1,10 +1,6 @@
 package com.github.kennarddh.mindustry.genesis.standard.handlers.commands
 
 import com.github.kennarddh.mindustry.genesis.core.Genesis
-import com.github.kennarddh.mindustry.genesis.core.commands.annotations.ClientSide
-import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command
-import com.github.kennarddh.mindustry.genesis.core.commands.annotations.ServerSide
-import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidation
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.*
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.floating.DoubleParameter
@@ -20,13 +16,6 @@ import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.*
 import mindustry.gen.Player
 import kotlin.time.Duration
-
-@Target(AnnotationTarget.FUNCTION)
-@Retention(AnnotationRetention.RUNTIME)
-@MustBeDocumented
-@CommandValidation
-annotation class Test
-
 
 class CommandsHandler : Handler() {
     override fun onInit() {
@@ -92,21 +81,5 @@ class CommandsHandler : Handler() {
                 Long::class,
             ), ::validateLTE
         )
-
-        Genesis.commandRegistry.registerCommandValidationAnnotation(
-            Test::class
-        ) { annotation: Annotation, player: Player? ->
-            println(annotation)
-            println(player)
-            null
-        }
-    }
-
-    @Test
-    @Command(["test"])
-    @ClientSide
-    @ServerSide
-    fun test(player: Player? = null) {
-        println("Test $player")
     }
 }
