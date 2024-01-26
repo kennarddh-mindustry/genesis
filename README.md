@@ -15,7 +15,7 @@
 - [x] Event on command changed
 - [x] Foo support
 - [x] Command description
-- [x] (common) Help command
+- [x] Help command
 - [x] Remove command
 - [x] Enum parameter support
 - [x] Handle server annotation for `net.handleServer`
