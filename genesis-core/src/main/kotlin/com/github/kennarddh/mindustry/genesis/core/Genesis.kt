@@ -1,5 +1,7 @@
 package com.github.kennarddh.mindustry.genesis.core
 
+import arc.ApplicationListener
+import arc.Core
 import com.github.kennarddh.mindustry.genesis.core.commands.CommandRegistry
 import com.github.kennarddh.mindustry.genesis.core.commons.AbstractPlugin
 import com.github.kennarddh.mindustry.genesis.core.events.EventRegistry
@@ -18,6 +20,24 @@ class Genesis : AbstractPlugin() {
         serverPacketsRegistry.init()
         filtersRegistry.init()
         timersRegistry.init()
+
+        Core.app.addListener(object : ApplicationListener {
+            override fun dispose() {
+                Logger.info("Gracefully shutting down")
+
+                handlers.forEach { it.onDispose() }
+
+                Logger.info("Stopped")
+            }
+
+            override fun exit() {
+                Logger.info("Gracefully shutting down")
+
+                handlers.forEach { it.onExit() }
+
+                Logger.info("Stopped")
+            }
+        })
 
         Logger.info("Loaded")
     }
