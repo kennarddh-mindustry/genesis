@@ -21,3 +21,4 @@
 - [x] Handle server annotation for `net.handleServer`
 - [x] Command validation with player as parameter for the validator function
 - [x] Player as parameter. Need converter. Prioritize id then search for name.
+- [ ] Version command should show every mods/plugins version
