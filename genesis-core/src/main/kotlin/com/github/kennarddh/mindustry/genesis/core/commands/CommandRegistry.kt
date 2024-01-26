@@ -24,6 +24,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResultStatus
 import com.github.kennarddh.mindustry.genesis.core.commons.*
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
+import com.github.kennarddh.mindustry.genesis.core.logging.Logger
 import mindustry.Vars
 import mindustry.gen.Player
 import mindustry.server.ServerControl
@@ -305,8 +306,8 @@ class CommandRegistry {
                 CommandResultStatus.Failed
             )
         } catch (error: Exception) {
-            // TODO: Add proper logging
-            error.printStackTrace()
+            Logger.error("Unknown Invoke Command Exception Occurred", error)
+            
             CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
         }
 
