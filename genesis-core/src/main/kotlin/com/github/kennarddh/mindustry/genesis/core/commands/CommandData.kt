@@ -8,7 +8,10 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.isSubclassOf
 
-typealias CommandValidator = (annotation: Annotation, player: Player) -> Boolean
+/**
+ * Return non-null reason string if it's not valid
+ */
+typealias CommandValidator = (annotation: Annotation, player: Player?) -> String?
 
 data class CommandData(
     val commandRegistry: CommandRegistry,
@@ -18,7 +21,8 @@ data class CommandData(
     var sides: Array<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,
-    val parametersType: Array<CommandParameterData>
+    val parametersType: Array<CommandParameterData>,
+    val validator: Array<Annotation>,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

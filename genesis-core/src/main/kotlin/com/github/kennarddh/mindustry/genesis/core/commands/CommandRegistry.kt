@@ -7,6 +7,7 @@ import arc.util.CommandHandler
 import arc.util.Log
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.*
 import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChanged
+import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.CommandValidationException
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateCommandNameException
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateParameterTypeException
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.InvalidCommandMethodException
@@ -163,6 +164,14 @@ class CommandRegistry {
 
             val parameters: MutableList<CommandParameterData> = mutableListOf()
 
+            val commandValidationAnnotations: List<Annotation> =
+                function.annotations.filter { it.annotationClass.hasAnnotation<CommandValidation>() }
+
+            commandValidationAnnotations.forEach {
+                if (!commandValidator.containsKey(it.annotationClass))
+                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} command with validator ${it.annotationClass} is not registered.")
+            }
+
             functionParameters.forEachIndexed { index, functionParameter ->
                 if (isClientSide && index == 0) {
                     parameters.add(
@@ -183,10 +192,10 @@ class CommandRegistry {
                 if (parameterTypeFilterResult.isEmpty())
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass is not registered.")
 
-                val validationAnnotations: List<Annotation> =
+                val parameterValidationAnnotations: List<Annotation> =
                     functionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
 
-                validationAnnotations.forEach {
+                parameterValidationAnnotations.forEach {
                     if (parameterValidator[functionParameter.type.classifier]?.contains(it.annotationClass) != true)
                         throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with validator ${it.annotationClass} is not registered for ${parameterTypeKClass}.")
                 }
@@ -194,7 +203,7 @@ class CommandRegistry {
                 parameters.add(
                     CommandParameterData(
                         functionParameter,
-                        validationAnnotations.toTypedArray(),
+                        parameterValidationAnnotations.toTypedArray(),
                     )
                 )
             }
@@ -207,7 +216,8 @@ class CommandRegistry {
                 sides,
                 handler,
                 function,
-                parameters.toTypedArray()
+                parameters.toTypedArray(),
+                commandValidationAnnotations.toTypedArray()
             )
 
             commands.add(command)
@@ -251,6 +261,16 @@ class CommandRegistry {
             return CommandResult("Command $name not found.", CommandResultStatus.Failed)
 
         val result = try {
+            command.validator.forEach {
+                val validator = commandValidator[it.annotationClass]!!
+
+                val invalidReason = validator.invoke(it, player)
+
+                // If null it's valid
+                if (invalidReason != null)
+                    throw CommandValidationException("Command validation failed. Reason: $invalidReason")
+            }
+
             val parameters = parseCommandParameters(command, parametersString, player)
 
             try {
@@ -272,6 +292,11 @@ class CommandRegistry {
         } catch (error: CommandParameterParsingException) {
             CommandResult(
                 error.message ?: "Unknown Parameter Conversion Exception Occurred",
+                CommandResultStatus.Failed
+            )
+        } catch (error: CommandValidationException) {
+            CommandResult(
+                error.message ?: "Unknown Command Validation Exception Occurred",
                 CommandResultStatus.Failed
             )
         } catch (error: CommandParameterValidationException) {
