@@ -1,11 +1,11 @@
 package kennarddh.genesis.core
 
-import arc.util.Log
 import kennarddh.genesis.core.commands.CommandRegistry
 import kennarddh.genesis.core.commons.AbstractPlugin
 import kennarddh.genesis.core.events.EventRegistry
 import kennarddh.genesis.core.filters.FiltersRegistry
 import kennarddh.genesis.core.handlers.Handler
+import kennarddh.genesis.core.logging.Logger
 import kennarddh.genesis.core.packets.PacketRegistry
 import kennarddh.genesis.core.server.packets.ServerPacketsRegistry
 import kennarddh.genesis.core.timers.TimersRegistry
@@ -19,7 +19,7 @@ class Genesis : AbstractPlugin() {
         filtersRegistry.init()
         timersRegistry.init()
 
-        Log.info("[GenesisCore] Loaded")
+        Logger.info("[GenesisCore] Loaded")
     }
 
     companion object {

@@ -38,6 +38,8 @@ dependencies {
     mindustryDependencies()
 
     compileOnly("com.xpdustry:kotlin-runtime:3.1.0-k.1.9.10")
+
+    implementation("org.slf4j:slf4j-api:2.0.11")
 }
 
 kotlin {
