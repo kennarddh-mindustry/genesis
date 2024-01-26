@@ -11,6 +11,7 @@ import com.github.kennarddh.mindustry.genesis.core.logging.Logger
 import com.github.kennarddh.mindustry.genesis.core.packets.PacketRegistry
 import com.github.kennarddh.mindustry.genesis.core.server.packets.ServerPacketsRegistry
 import com.github.kennarddh.mindustry.genesis.core.timers.TimersRegistry
+import mindustry.Vars
 
 class Genesis : AbstractPlugin() {
     override fun init() {
@@ -26,6 +27,19 @@ class Genesis : AbstractPlugin() {
                 Logger.info("Gracefully shutting down")
 
                 handlers.forEach { it.onDispose() }
+
+                // Reversed because needs to dispose dependant mod/plugin plugin before the dependencies
+                val mods = Vars.mods.orderedMods().toList().reversed()
+
+                mods.forEach {
+                    if (!it.isJava) return@forEach
+                    if (!it.enabled()) return@forEach
+                    if (it.main !is AbstractPlugin) return@forEach
+
+                    val plugin = it.main as AbstractPlugin
+
+                    plugin.dispose()
+                }
 
                 Logger.info("Stopped")
             }
