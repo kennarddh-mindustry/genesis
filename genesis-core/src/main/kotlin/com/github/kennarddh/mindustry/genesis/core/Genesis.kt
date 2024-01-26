@@ -31,11 +31,7 @@ class Genesis : AbstractPlugin() {
             }
 
             override fun exit() {
-                Logger.info("Gracefully shutting down")
-
                 handlers.forEach { it.onExit() }
-
-                Logger.info("Stopped")
             }
         })
 
