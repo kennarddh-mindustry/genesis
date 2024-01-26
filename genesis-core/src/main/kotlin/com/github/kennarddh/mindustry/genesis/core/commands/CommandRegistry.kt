@@ -75,7 +75,7 @@ class CommandRegistry {
     internal fun init() {
     }
 
-    fun <T : Any, V : Any> registerValidationAnnotation(
+    fun <T : Any, V : Any> registerParameterValidationAnnotation(
         annotation: KClass<T>,
         parametersType: List<KClass<out V>>,
         validator: CommandParameterValidator<V>
@@ -183,10 +183,10 @@ class CommandRegistry {
                 if (parameterTypeFilterResult.isEmpty())
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass is not registered.")
 
-                val validationsAnnotation: List<Annotation> =
+                val validationAnnotations: List<Annotation> =
                     functionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
 
-                validationsAnnotation.forEach {
+                validationAnnotations.forEach {
                     if (parameterValidator[functionParameter.type.classifier]?.contains(it.annotationClass) != true)
                         throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with validator ${it.annotationClass} is not registered for ${parameterTypeKClass}.")
                 }
@@ -194,7 +194,7 @@ class CommandRegistry {
                 parameters.add(
                     CommandParameterData(
                         functionParameter,
-                        validationsAnnotation.toTypedArray(),
+                        validationAnnotations.toTypedArray(),
                     )
                 )
             }
@@ -211,7 +211,6 @@ class CommandRegistry {
             )
 
             commands.add(command)
-
 
             names.forEach {
                 val arcCommand = ArcCommand(this, it, description, brief, if (it == names[0]) null else names[0])
