@@ -14,6 +14,7 @@ import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.unsigned.integer.ULongParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.unsigned.integer.UShortParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.*
+import mindustry.gen.Player
 import kotlin.time.Duration
 
 class CommandsHandler : Handler() {
@@ -39,6 +40,7 @@ class CommandsHandler : Handler() {
         Genesis.commandRegistry.registerParameterType(Enum::class, EnumParameter())
 
         Genesis.commandRegistry.registerParameterType(Duration::class, DurationParameter())
+        Genesis.commandRegistry.registerParameterType(Player::class, PlayerParameter())
 
         Genesis.commandRegistry.registerValidationAnnotation(
             GT::class, listOf(
