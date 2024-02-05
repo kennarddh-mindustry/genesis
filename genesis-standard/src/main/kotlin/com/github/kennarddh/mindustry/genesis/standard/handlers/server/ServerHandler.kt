@@ -569,16 +569,18 @@ class ServerHandler : Handler() {
         var commandResultOutput: CommandResult
 
         if (type == ConfigCommandType.list) {
-            val output = StringBuilder()
+            val output = buildString {
+                appendLine("All config values:")
 
-            output.appendLine("All config values:")
+                for (config in Administration.Config.all) {
+                    appendLine("\t| ${config.name}: ${config.get()}")
+                    appendLine("\t| | ${config.description}")
+                }
 
-            for (config in Administration.Config.all) {
-                output.appendLine("\t| ${config.name}: ${config.get()}")
-                output.appendLine("\t| | ${config.description}")
+                trimEnd('\n')
             }
 
-            return CommandResult(output.trimEnd('\n').toString())
+            return CommandResult(output)
         }
 
         val config = Administration.Config.all.find { it.name.equals(name, ignoreCase = true) }
