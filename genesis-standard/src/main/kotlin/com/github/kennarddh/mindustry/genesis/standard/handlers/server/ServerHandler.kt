@@ -22,7 +22,6 @@ import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.integer.IntParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.GTE
-import com.xpdustry.kotlin.KotlinRuntimePlugin
 import mindustry.Vars.*
 import mindustry.core.GameState
 import mindustry.core.Version
@@ -279,9 +278,6 @@ class ServerHandler : Handler() {
                 Arch: ${System.getProperty("os.arch")}
                 Name: ${System.getProperty("os.name")}
                 Version: ${System.getProperty("os.version")}
-            Genesis Core: ${mods.getMod(Genesis::class.java).meta.version}
-            Genesis Common: ${mods.getMod(com.github.kennarddh.mindustry.genesis.standard.GenesisStandard::class.java).meta.version}
-            Kotlin Runtime: ${mods.getMod(KotlinRuntimePlugin::class.java).meta.version}
             """.trimIndent()
         )
     }
