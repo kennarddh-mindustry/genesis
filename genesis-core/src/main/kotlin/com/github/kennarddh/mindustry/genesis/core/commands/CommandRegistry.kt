@@ -352,12 +352,8 @@ class CommandRegistry {
             else
                 command.parametersType.size
 
-        val prefix = if (player == null) serverPrefix else clientPrefix
-
-        val fullUsage = "${prefix}${command.names[0]} ${command.toUsage()}"
-
         if (actualParametersSize < parsedString.size) {
-            throw InvalidCommandParameterException("Too much parameters supplied. Usage: \"$fullUsage\"")
+            throw InvalidCommandParameterException("Too much parameters supplied.")
         }
 
         val errorMessages: MutableList<String> = mutableListOf()
@@ -367,7 +363,7 @@ class CommandRegistry {
 
             if (i > parsedString.size - 1) {
                 if (!parameter.isOptional)
-                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped. Usage: \"$fullUsage\"")
+                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped.")
 
                 continue
             }
@@ -376,7 +372,7 @@ class CommandRegistry {
 
             if (passedParameter is SkipToken) {
                 if (!parameter.isOptional)
-                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped. Usage: \"$fullUsage\"")
+                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped.")
 
                 continue
             }
@@ -411,7 +407,7 @@ class CommandRegistry {
                                     parameter.name
                                 )
                             else
-                                "Parameter validation for parameter ${parameter.name} failed. Usage: \"$fullUsage\""
+                                "Parameter validation for parameter ${parameter.name} failed."
 
                             errorMessages.add(errorMessage)
                         }
@@ -424,8 +420,15 @@ class CommandRegistry {
             }
         }
 
-        if (errorMessages.isNotEmpty())
+        if (errorMessages.isNotEmpty()) {
+
+            val prefix = if (player == null) serverPrefix else clientPrefix
+
+            val fullUsage = "${prefix}${command.names[0]} ${command.toUsage()}"
+
+            errorMessages.add("Usage: \"$fullUsage\"")
             throw CommandParameterValidationException(errorMessages.toTypedArray())
+        }
 
         return parameters.toMap()
     }
