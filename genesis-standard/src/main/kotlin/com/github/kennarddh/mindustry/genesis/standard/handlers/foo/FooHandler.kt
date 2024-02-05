@@ -27,11 +27,7 @@ class FooHandler : Handler() {
     /** @since v1 Client transmission forwarding */
     @PacketHandler(["fooTransmission"])
     fun fooTransmission(player: Player, content: String) {
-        val output = StringBuilder()
-
-        output.append(player.id).append(" ").append(content)
-
-        Call.clientPacketReliable("fooTransmission", output.toString())
+        Call.clientPacketReliable("fooTransmission", "${player.id} $content")
     }
 
     @EventHandler
