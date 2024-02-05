@@ -18,42 +18,42 @@ class StringParser {
                 var isEscaping = false
                 var isInQuote = false
 
-                val output = StringBuilder()
+                val output = buildString {
+                    for (char in input) {
+                        if (isEscaping) {
+                            if (escapedCharactersMap.contains(char)) {
+                                append(escapedCharactersMap[char])
 
-                for (char in input) {
-                    if (isEscaping) {
-                        if (escapedCharactersMap.contains(char)) {
-                            output.append(escapedCharactersMap[char])
+                                isEscaping = false
 
-                            isEscaping = false
-
-                            continue
-                        } else {
-                            throw InvalidEscapedCharacterException("$char is not a valid character to be escaped")
-                        }
-                    }
-
-                    when (char) {
-                        '\\' -> isEscaping = true
-                        '"' -> isInQuote = !isInQuote
-                        '*' -> {
-                            if (!isInQuote && output.isEmpty())
-                                yield(SkipToken())
-                            else
-                                output.append(char)
+                                continue
+                            } else {
+                                throw InvalidEscapedCharacterException("$char is not a valid character to be escaped")
+                            }
                         }
 
-                        ' ' -> {
-                            if (!isInQuote) {
-                                if (output.isNotEmpty()) {
-                                    yield(StringToken(output.toString()))
-                                    output.clear()
-                                }
-                            } else
-                                output.append(char)
-                        }
+                        when (char) {
+                            '\\' -> isEscaping = true
+                            '"' -> isInQuote = !isInQuote
+                            '*' -> {
+                                if (!isInQuote && isEmpty())
+                                    yield(SkipToken())
+                                else
+                                    append(char)
+                            }
 
-                        else -> output.append(char)
+                            ' ' -> {
+                                if (!isInQuote) {
+                                    if (isNotEmpty()) {
+                                        yield(StringToken(toString()))
+                                        clear()
+                                    }
+                                } else
+                                    append(char)
+                            }
+
+                            else -> append(char)
+                        }
                     }
                 }
 
