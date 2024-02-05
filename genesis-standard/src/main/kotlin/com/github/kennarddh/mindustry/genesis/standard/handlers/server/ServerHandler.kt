@@ -300,35 +300,38 @@ class ServerHandler : Handler() {
             )
         }
 
-        val output = StringBuilder()
+        val output = buildString {
+            if (!maps.all().isEmpty) {
+                val all: MutableList<Map> = mutableListOf()
 
-        if (!maps.all().isEmpty) {
-            val all: MutableList<Map> = mutableListOf()
+                if (showCustom) all.addAll(maps.customMaps())
+                if (showDefault) all.addAll(maps.defaultMaps())
 
-            if (showCustom) all.addAll(maps.customMaps())
-            if (showDefault) all.addAll(maps.defaultMaps())
+                if (all.isEmpty() && !showDefault) {
+                    appendLine("No custom maps loaded. Set default as the first parameter to show default maps.")
+                } else {
+                    appendLine("Maps:")
 
-            if (all.isEmpty() && !showDefault)
-                output.appendLine("No custom maps loaded. Set default as the first parameter to show default maps.")
-            else {
-                output.appendLine("Maps:")
+                    for (map in all) {
+                        val mapName = map.plainName().replace(' ', '_')
 
-                for (map in all) {
-                    val mapName = map.plainName().replace(' ', '_')
-
-                    if (map.custom) {
-                        output.appendLine("\t${mapName} (${map.file.name()}): Custom / ${map.width}x${map.height}")
-                    } else {
-                        output.appendLine("\t${mapName}: Default / ${map.width}x${map.height}")
+                        if (map.custom) {
+                            appendLine("\t${mapName} (${map.file.name()}): Custom / ${map.width}x${map.height}")
+                        } else {
+                            appendLine("\t${mapName}: Default / ${map.width}x${map.height}")
+                        }
                     }
                 }
+            } else {
+                appendLine("No maps found.")
             }
-        } else
-            output.appendLine("No maps found.")
 
-        output.appendLine("Map directory: ${customMapDirectory.file().getAbsoluteFile()}")
+            appendLine("Map directory: ${customMapDirectory.file().getAbsoluteFile()}")
 
-        return CommandResult(output.trimEnd('\n').toString())
+            trimEnd('\n')
+        }
+
+        return CommandResult(output)
     }
 
     @Command(["mods", "plugins"])
