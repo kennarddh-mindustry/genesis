@@ -72,41 +72,38 @@ class ArcLogger(private val loggerName: String?) : AbstractLogger() {
         val newArguments = arguments?.toMutableList()
         var newThrowable = throwable
 
-        val builder = StringBuilder()
-
-        if (loggerName != ROOT_LOGGER_NAME) {
-            builder
-                .append(getColorCode(level))
-                .append('[')
-                .append(name)
-                .append(']')
-                .append(ColorCodes.reset)
-                .append(' ')
-        }
-
-        if (level == Level.ERROR)
-            builder.append(this.getColorCode(level))
-
-        if (newThrowable == null &&
-            !newArguments.isNullOrEmpty()
-        ) {
-            val lastArgument = newArguments.last()
-
-            if (lastArgument is Throwable) {
-                newThrowable = lastArgument
-
-                newArguments.removeLastOrNull()
+        val string = buildString {
+            if (loggerName != ROOT_LOGGER_NAME) {
+                append(getColorCode(level))
+                append('[')
+                append(name)
+                append(']')
+                append(ColorCodes.reset)
+                append(' ')
             }
-        }
 
-        builder.append(
-            MessageFormatter.basicArrayFormat(
-                messagePattern.replace("{}", "&fb&lb{}&fr"),
-                newArguments?.toTypedArray()
+            if (level == Level.ERROR)
+                append(this@ArcLogger.getColorCode(level))
+
+            if (newThrowable == null &&
+                !newArguments.isNullOrEmpty()
+            ) {
+                val lastArgument = newArguments.last()
+
+                if (lastArgument is Throwable) {
+                    newThrowable = lastArgument
+
+                    newArguments.removeLastOrNull()
+                }
+            }
+
+            append(
+                MessageFormatter.basicArrayFormat(
+                    messagePattern.replace("{}", "&fb&lb{}&fr"),
+                    newArguments?.toTypedArray()
+                )
             )
-        )
-
-        val string = builder.toString()
+        }
 
         synchronized(WRITE_LOCK) {
             if (newThrowable != null && newArguments.isNullOrEmpty()) {
