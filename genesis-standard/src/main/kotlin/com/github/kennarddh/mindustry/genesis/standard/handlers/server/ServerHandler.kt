@@ -1,7 +1,6 @@
 package com.github.kennarddh.mindustry.genesis.standard.handlers.server
 
 import arc.Core
-import arc.util.OS
 import arc.util.Reflect
 import arc.util.Strings
 import arc.util.Timer
@@ -267,7 +266,19 @@ class ServerHandler : Handler() {
         return CommandResult(
             """
             Version: Mindustry ${Version.number}-${Version.modifier} ${Version.type} / build ${Version.build} ${if (Version.revision == 0) "" else ".${Version.revision}"}
-            Java Version: ${OS.javaVersion}
+            Java Version:
+                ${System.getProperty("java.vendor")}
+                Version: "${System.getProperty("java.version")}" ${System.getProperty("java.version.date")}
+                ${System.getProperty("java.runtime.name")} (build ${System.getProperty("java.runtime.version")})
+                ${System.getProperty("java.vm.name")} (build ${System.getProperty("java.runtime.version")}, ${
+                System.getProperty(
+                    "java.vm.info"
+                )
+            })
+            Operating System:
+                Arch: ${System.getProperty("os.arch")}
+                Name: ${System.getProperty("os.name")}
+                Version: ${System.getProperty("os.version")}
             Genesis Core: ${mods.getMod(Genesis::class.java).meta.version}
             Genesis Common: ${mods.getMod(com.github.kennarddh.mindustry.genesis.standard.GenesisStandard::class.java).meta.version}
             Kotlin Runtime: ${mods.getMod(KotlinRuntimePlugin::class.java).meta.version}
