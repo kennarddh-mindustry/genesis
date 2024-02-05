@@ -38,6 +38,7 @@ import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.typeOf
 
 class CommandRegistry {
+    // TODO: This may not be reliable if any genesis controller command is removed using Mindustry remove command instead of genesis one
     private val commands: MutableList<CommandData> = mutableListOf()
 
     private val _parameterTypes: MutableMap<KClass<*>, CommandParameter<*>> =
