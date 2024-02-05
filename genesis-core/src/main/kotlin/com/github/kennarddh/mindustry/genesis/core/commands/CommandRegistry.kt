@@ -102,6 +102,28 @@ class CommandRegistry {
         commandValidator[annotation] = validator
     }
 
+    fun <T : Any, V : Any> replaceParameterValidationAnnotationValidator(
+        annotation: KClass<T>,
+        parametersType: List<KClass<out V>>,
+        validator: CommandParameterValidator<V>
+    ) {
+        parametersType.forEach {
+            if (!parameterValidator.contains(it)) return@forEach
+            if (!parameterValidator[it]!!.contains(annotation)) return@forEach
+
+            parameterValidator[it]!![annotation] = validator
+        }
+    }
+
+    fun <T : Any> replaceCommandValidationAnnotationValidator(
+        annotation: KClass<T>,
+        newValidator: CommandValidator
+    ) {
+        if (!commandValidator.contains(annotation)) return
+
+        commandValidator[annotation] = newValidator
+    }
+
     fun registerParameterType(
         from: KClass<*>,
         parameterType: CommandParameter<*>
