@@ -292,10 +292,10 @@ class CommandRegistry {
 
             try {
                 command.function.callBy(parameters)
-            } catch (e: Exception) {
-                //TODO: Proper command stack trace handling
-                Log.err("Command exception occurred")
-                e.printStackTrace()
+            } catch (error: Exception) {
+                Logger.error("Unknown Command Function Invoke Exception Occurred", error)
+
+                CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
             }
         } catch (error: InvalidCommandParameterException) {
             CommandResult(
