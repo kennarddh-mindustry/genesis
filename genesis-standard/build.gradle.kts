@@ -54,6 +54,11 @@ kotlin {
     jvmToolchain(17)
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 sourceSets {
     main {
         java.srcDir("src/main/kotlin")
