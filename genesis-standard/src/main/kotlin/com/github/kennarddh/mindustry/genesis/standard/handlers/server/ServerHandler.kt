@@ -71,8 +71,6 @@ class ServerHandler : Handler() {
             commandName = commandOrPage
         }
 
-        val output = StringBuilder()
-
         val isServer = player == null
 
         val commands = if (isServer)
@@ -80,117 +78,119 @@ class ServerHandler : Handler() {
         else
             Genesis.commandRegistry.clientCommands.toList()
 
-        if (page != null) {
-            output.appendLine("Commands:")
+        val output = buildString {
+            if (page != null) {
+                appendLine("Commands:")
 
-            if (page <= 0)
-                return CommandResult("Parameter page must be greater than 0", CommandResultStatus.Failed)
+                if (page <= 0)
+                    return CommandResult("Parameter page must be greater than 0", CommandResultStatus.Failed)
 
-            val maxPage = ceil(commands.size.toDouble() / commandsPerPage).toInt()
+                val maxPage = ceil(commands.size.toDouble() / commandsPerPage).toInt()
 
-            if (page > maxPage)
-                return CommandResult(
-                    "Help max page is $maxPage",
-                    CommandResultStatus.Failed
-                )
+                if (page > maxPage)
+                    return CommandResult(
+                        "Help max page is $maxPage",
+                        CommandResultStatus.Failed
+                    )
 
-            commands.subList((page - 1) * commandsPerPage, min(page * commandsPerPage, commands.size)).forEach {
-                // Ignore alias command
-                if (it is ArcCommand && it.isAlias) return@forEach
+                commands.subList((page - 1) * commandsPerPage, min(page * commandsPerPage, commands.size)).forEach {
+                    // Ignore alias command
+                    if (it is ArcCommand && it.isAlias) return@forEach
 
-                val name = if (it is ArcCommand) it.realName else it.text
-                val usage = if (it is ArcCommand) it.usage else it.paramText
-                val brief = if (it is ArcCommand) it.brief else it.description
+                    val name = if (it is ArcCommand) it.realName else it.text
+                    val usage = if (it is ArcCommand) it.usage else it.paramText
+                    val brief = if (it is ArcCommand) it.brief else it.description
 
-                output.append("\t")
+                    append("\t")
+
+                    if (!isServer)
+                        append("[orange]")
+
+                    append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
+
+                    append(name)
+
+                    if (!isServer)
+                        append("[lightgray]")
+
+                    append(' ')
+                    append(usage)
+
+                    if (brief.isNotEmpty()) {
+                        if (usage.isNotEmpty())
+                            append(' ')
+
+                        if (!isServer)
+                            append("[gray]")
+
+                        append("- ")
+
+                        append(brief)
+                    }
+
+                    append('\n')
+                }
+            } else {
+                val command = commands.find { if (it is ArcCommand) it.name == commandName else it.text == commandName }
+                    ?: return CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
+
+                val name = if (command is ArcCommand) command.realName else command.text
+                val usage = if (command is ArcCommand) command.usage else command.paramText
+                val brief = if (command is ArcCommand) command.brief else command.description
+                val description = command.description
+
+                appendLine("Command $name:")
+
+                append("\t")
 
                 if (!isServer)
-                    output.append("[orange]")
+                    append("[orange]")
 
-                output.append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
+                append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
 
-                output.append(name)
+                append(name)
 
                 if (!isServer)
-                    output.append("[lightgray]")
+                    append("[lightgray]")
 
-                output.append(' ')
-                output.append(usage)
+                append(' ')
+                append(usage)
 
                 if (brief.isNotEmpty()) {
                     if (usage.isNotEmpty())
-                        output.append(' ')
+                        append(' ')
 
                     if (!isServer)
-                        output.append("[gray]")
+                        append("[gray]")
 
-                    output.append("- ")
+                    append("- ")
 
-                    output.append(brief)
+                    append(brief)
                 }
 
-                output.append('\n')
-            }
-        } else {
-            val command = commands.find { if (it is ArcCommand) it.name == commandName else it.text == commandName }
-                ?: return CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
+                if (description.isNotEmpty() && brief != description) {
+                    append('\n')
+                    append(description)
+                }
 
-            val name = if (command is ArcCommand) command.realName else command.text
-            val usage = if (command is ArcCommand) command.usage else command.paramText
-            val brief = if (command is ArcCommand) command.brief else command.description
-            val description = command.description
+                append('\n')
 
-            output.appendLine("Command $name:")
+                if (command is ArcCommand) {
+                    command.commandData.parametersType.forEach {
+                        it.validator.forEach { validator ->
+                            val validatorDescriptionAnnotation =
+                                validator.annotationClass.findAnnotation<ParameterValidationDescription>()
 
-            output.append("\t")
-
-            if (!isServer)
-                output.append("[orange]")
-
-            output.append(if (isServer) Genesis.commandRegistry.serverPrefix else Genesis.commandRegistry.clientPrefix)
-
-            output.append(name)
-
-            if (!isServer)
-                output.append("[lightgray]")
-
-            output.append(' ')
-            output.append(usage)
-
-            if (brief.isNotEmpty()) {
-                if (usage.isNotEmpty())
-                    output.append(' ')
-
-                if (!isServer)
-                    output.append("[gray]")
-
-                output.append("- ")
-
-                output.append(brief)
-            }
-
-            if (description.isNotEmpty() && brief != description) {
-                output.append('\n')
-                output.append(description)
-            }
-
-            output.append('\n')
-
-            if (command is ArcCommand) {
-                command.commandData.parametersType.forEach {
-                    it.validator.forEach { validator ->
-                        val validatorDescriptionAnnotation =
-                            validator.annotationClass.findAnnotation<ParameterValidationDescription>()
-
-                        if (validatorDescriptionAnnotation != null) {
-                            output.append("\t- ")
-                            output.appendLine(
-                                parameterValidationDescriptionAnnotationToString(
-                                    validatorDescriptionAnnotation,
-                                    validator,
-                                    it.name
+                            if (validatorDescriptionAnnotation != null) {
+                                append("\t- ")
+                                appendLine(
+                                    parameterValidationDescriptionAnnotationToString(
+                                        validatorDescriptionAnnotation,
+                                        validator,
+                                        it.name
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
