@@ -362,21 +362,24 @@ class ServerHandler : Handler() {
     @ServerSide
     @Description("Display information about a loaded mod/plugin.")
     fun mod(name: String): CommandResult {
-        val output = StringBuilder()
+        val output = buildString {
+            val mod = mods.list().find { it.meta.name.equals(name, ignoreCase = true) }
 
-        val mod = mods.list().find { it.meta.name.equals(name, ignoreCase = true) }
+            if (mod != null) {
+                appendLine("Name: ${mod.meta.displayName}")
+                appendLine("Internal Name: ${mod.name}")
+                appendLine("Version: ${mod.meta.version}")
+                appendLine("Author: ${mod.meta.author}")
+                appendLine("Path: ${mod.file.path()}")
+                appendLine("Description: ${mod.meta.description}")
+            } else {
+                appendLine("No mod with name $name found.")
+            }
 
-        if (mod != null) {
-            output.appendLine("Name: ${mod.meta.displayName}")
-            output.appendLine("Internal Name: ${mod.name}")
-            output.appendLine("Version: ${mod.meta.version}")
-            output.appendLine("Author: ${mod.meta.author}")
-            output.appendLine("Path: ${mod.file.path()}")
-            output.appendLine("Description: ${mod.meta.description}")
-        } else
-            output.appendLine("No mod with name $name found.")
+            trimEnd('\n')
+        }
 
-        return CommandResult(output.trimEnd('\n').toString())
+        return CommandResult(output)
     }
 
     @Command(["javascript", "js"])
