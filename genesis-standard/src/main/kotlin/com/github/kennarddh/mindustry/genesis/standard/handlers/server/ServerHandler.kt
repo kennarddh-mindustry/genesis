@@ -338,19 +338,24 @@ class ServerHandler : Handler() {
     @ServerSide
     @Description("Display all loaded mods/plugins.")
     fun mods(): CommandResult {
-        val output = StringBuilder()
+        val output = buildString {
 
-        if (!mods.list().isEmpty) {
-            output.appendLine("Mods:")
+            if (!mods.list().isEmpty) {
+                appendLine("Mods:")
 
-            for (mod in mods.list())
-                output.appendLine("\t${mod.meta.displayName}: ${mod.meta.name}@${mod.meta.version} ${if (mod.enabled()) "" else " (${mod.state})"}")
-        } else
-            output.appendLine("No mods found.")
+                for (mod in mods.list()) {
+                    appendLine("\t${mod.meta.displayName}: ${mod.meta.name}@${mod.meta.version} ${if (mod.enabled()) "" else " (${mod.state})"}")
+                }
+            } else {
+                appendLine("No mods found.")
+            }
 
-        output.appendLine("Mod directory: ${modDirectory.file().getAbsoluteFile()}")
+            appendLine("Mod directory: ${modDirectory.file().getAbsoluteFile()}")
 
-        return CommandResult(output.trimEnd('\n').toString())
+            trimEnd('\n')
+        }
+
+        return CommandResult(output)
     }
 
     @Command(["mod", "plugin"])
