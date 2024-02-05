@@ -7,6 +7,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChang
 import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandler
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
+import com.github.kennarddh.mindustry.genesis.standard.extensions.clientPacketReliable
 import mindustry.Vars
 import mindustry.gen.Call
 import mindustry.gen.Player
@@ -18,7 +19,7 @@ class FooHandler : Handler() {
     /** @since v1 Plugin presence check */
     @PacketHandler(["fooCheck"])
     fun fooCheck(player: Player) {
-        Call.clientPacketReliable(player.con, "fooCheck", version)
+        player.clientPacketReliable("fooCheck", version)
 
         enableTransmissions(player)
         sendCommands(player)
@@ -40,7 +41,7 @@ class FooHandler : Handler() {
         val enabled = true
 
         if (player != null)
-            Call.clientPacketReliable(player.con, "fooTransmissionEnabled", enabled.toString())
+            player.clientPacketReliable("fooTransmissionEnabled", enabled.toString())
         else
             Call.clientPacketReliable("fooTransmissionEnabled", enabled.toString())
     }
@@ -62,7 +63,7 @@ class FooHandler : Handler() {
             if (player == null)
                 Call.clientPacketReliable("commandList", this.toString())
             else
-                Call.clientPacketReliable(player.con, "commandList", this.toString())
+                player.clientPacketReliable("commandList", this.toString())
         }
     }
 }
