@@ -52,32 +52,30 @@ data class CommandData(
         return result
     }
 
-    fun toUsage(): String {
-        val output = StringBuilder()
-
+    fun toUsage(): String = buildString {
         val functionParameters =
             if (sides.contains(CommandSide.Client)) parametersType.drop(1).toTypedArray() else parametersType
 
         functionParameters.forEach {
-            output.append(if (it.isOptional) "[" else "<")
-            output.append(it.name)
-            output.append(":")
+            append(if (it.isOptional) "[" else "<")
+            append(it.name)
+            append(":")
 
             val parameterTypeFilterResult =
                 commandRegistry.parameterTypes.filterKeys { type -> it.kClass.isSubclassOf(type) }
 
             val parameterType = parameterTypeFilterResult.values.toTypedArray()[0]
 
-            output.append(
+            append(
                 @Suppress("UNCHECKED_CAST")
                 (parameterType as CommandParameter<Any>).toUsageType(it.kClass as KClass<Any>)
             )
 
-            output.append(if (it.isOptional) "]" else ">")
+            append(if (it.isOptional) "]" else ">")
 
-            output.append(' ')
+            append(' ')
         }
 
-        return output.trimEnd(' ').toString()
+        trimEnd(' ')
     }
 }
