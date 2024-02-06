@@ -36,14 +36,14 @@ class ServerPacketsRegistry {
             serverListeners[packetType] = MutablePriorityList()
 
             net.handleServer(packetType.java) { connection, packet ->
-                var isStopped = false
-
                 val previousListeners =
                     Reflect.get<ObjectMap<Class<*>, Cons2<NetConnection, Any>>>(net, "serverListeners")
 
                 val previousListener = previousListeners.get(packetType.java)
 
                 CoroutineScopes.Main.launch {
+                    var isStopped = false
+
                     serverListeners[packetType]!!.forEachPrioritized {
                         if (isStopped)
                             return@forEachPrioritized
@@ -53,10 +53,10 @@ class ServerPacketsRegistry {
                         if (!result)
                             isStopped = true
                     }
-                }
 
-                // Previous packet listener will always get called even if genesis listener failed
-                previousListener.get(connection, packet)
+                    // Previous packet listener will always get called even if genesis listener failed
+                    previousListener.get(connection, packet)
+                }
             }
         }
 
