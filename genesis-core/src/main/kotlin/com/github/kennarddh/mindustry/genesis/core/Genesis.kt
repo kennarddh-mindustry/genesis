@@ -45,7 +45,9 @@ class Genesis : AbstractPlugin() {
 
                         val plugin = it.main as AbstractPlugin
 
-                        plugin.dispose()
+                        launch {
+                            plugin.dispose()
+                        }
                     }
 
                     Logger.info("Stopped")
