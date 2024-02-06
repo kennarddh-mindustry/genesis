@@ -39,7 +39,7 @@ import kotlin.reflect.full.findAnnotation
 
 
 class ServerHandler : Handler() {
-    override fun onInit() {
+    override suspend fun onInit() {
         Genesis.commandRegistry.removeCommand("help")
         Genesis.commandRegistry.removeCommand("host")
         Genesis.commandRegistry.removeCommand("version")
