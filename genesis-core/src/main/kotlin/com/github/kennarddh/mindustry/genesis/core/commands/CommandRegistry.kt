@@ -277,8 +277,7 @@ class CommandRegistry {
         return null
     }
 
-    // TODO: Make internal
-    fun invokeCommand(name: String, parametersString: String, player: Player?) {
+    internal fun invokeCommand(name: String, parametersString: String, player: Player?) {
         val command = getCommandFromCommandName(name)
 
         if (
