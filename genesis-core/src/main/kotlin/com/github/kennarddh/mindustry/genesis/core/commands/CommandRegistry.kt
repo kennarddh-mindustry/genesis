@@ -5,6 +5,7 @@ import arc.Events
 import arc.struct.Seq
 import arc.util.CommandHandler
 import arc.util.Log
+import com.github.kennarddh.mindustry.genesis.core.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.*
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidation
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
@@ -28,6 +29,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.commons.*
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.logging.Logger
+import kotlinx.coroutines.launch
 import mindustry.Vars
 import mindustry.gen.Player
 import mindustry.server.ServerControl
@@ -262,6 +264,7 @@ class CommandRegistry {
             addedCommandCounter += 1
         }
 
+        // TODO: Run in mindustry main thread
         if (addedCommandCounter > 0)
             Events.fire(CommandsChanged())
     }
@@ -274,83 +277,94 @@ class CommandRegistry {
         return null
     }
 
-    fun invokeCommand(
-        name: String,
-        parametersString: String,
-        player: Player?
-    ): Any {
+    // TODO: Make internal
+    fun invokeCommand(name: String, parametersString: String, player: Player?) {
         val command = getCommandFromCommandName(name)
 
-        if (command == null ||
+        if (
+            command == null ||
             (player == null && !command.sides.contains(CommandSide.Server)) ||
             (player != null && !command.sides.contains(CommandSide.Client))
-        )
-            return CommandResult("Command $name not found.", CommandResultStatus.Failed)
+        ) {
+            val result = CommandResult("Command $name not found.", CommandResultStatus.Failed)
 
-        val result = try {
-            command.validator.forEach {
-                val validator = commandValidator[it.annotationClass]!!
+            handleCommandHandlerResult(result, player)
 
-                val isValid = validator.invoke(it, player)
+            return
+        }
 
-                if (!isValid) {
-                    val descriptionAnnotation =
-                        it.annotationClass.findAnnotation<CommandValidationDescription>()
+        CoroutineScopes.Main.launch {
+            val result = try {
+                command.validator.forEach {
+                    val validator = commandValidator[it.annotationClass]!!
 
-                    val errorMessage =
-                        if (descriptionAnnotation != null)
-                            commandValidationDescriptionAnnotationToString(
-                                descriptionAnnotation,
-                                it,
-                                command.names[0]
-                            )
-                        else
-                            "Command validation failed."
+                    val isValid = validator.invoke(it, player)
 
-                    throw CommandValidationException(errorMessage)
+                    if (!isValid) {
+                        val descriptionAnnotation =
+                            it.annotationClass.findAnnotation<CommandValidationDescription>()
+
+                        val errorMessage =
+                            if (descriptionAnnotation != null)
+                                commandValidationDescriptionAnnotationToString(
+                                    descriptionAnnotation,
+                                    it,
+                                    command.names[0]
+                                )
+                            else
+                                "Command validation failed."
+
+                        throw CommandValidationException(errorMessage)
+                    }
                 }
-            }
 
-            val parameters = parseCommandParameters(command, parametersString, player)
+                val parameters = parseCommandParameters(command, parametersString, player)
 
-            try {
-                command.function.callBy(parameters)
+                try {
+                    command.function.callSuspendBy(parameters)
+                } catch (error: Exception) {
+                    Logger.error("Unknown Command Function Invoke Exception Occurred", error)
+
+                    CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
+                }
+            } catch (error: InvalidCommandParameterException) {
+                CommandResult(
+                    error.message ?: "Unknown Invalid Command Parameter Exception Occurred",
+                    CommandResultStatus.Failed
+                )
+            } catch (error: UnterminatedStringException) {
+                CommandResult(
+                    error.message ?: "Unknown Unterminated String Exception Occurred",
+                    CommandResultStatus.Failed
+                )
+            } catch (error: InvalidEscapedCharacterException) {
+                CommandResult(
+                    error.message ?: "Unknown Escaped Character Exception Occurred",
+                    CommandResultStatus.Failed
+                )
+            } catch (error: CommandParameterParsingException) {
+                CommandResult(
+                    error.message ?: "Unknown Parameter Conversion Exception Occurred",
+                    CommandResultStatus.Failed
+                )
+            } catch (error: CommandValidationException) {
+                CommandResult(
+                    error.message ?: "Unknown Command Validation Exception Occurred",
+                    CommandResultStatus.Failed
+                )
+            } catch (error: CommandParameterValidationException) {
+                CommandResult(
+                    error.message,
+                    CommandResultStatus.Failed
+                )
             } catch (error: Exception) {
-                Logger.error("Unknown Command Function Invoke Exception Occurred", error)
+                Logger.error("Unknown Invoke Command Exception Occurred", error)
 
                 CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
             }
-        } catch (error: InvalidCommandParameterException) {
-            CommandResult(
-                error.message ?: "Unknown Invalid Command Parameter Exception Occurred",
-                CommandResultStatus.Failed
-            )
-        } catch (error: UnterminatedStringException) {
-            CommandResult(error.message ?: "Unknown Unterminated String Exception Occurred", CommandResultStatus.Failed)
-        } catch (error: InvalidEscapedCharacterException) {
-            CommandResult(error.message ?: "Unknown Escaped Character Exception Occurred", CommandResultStatus.Failed)
-        } catch (error: CommandParameterParsingException) {
-            CommandResult(
-                error.message ?: "Unknown Parameter Conversion Exception Occurred",
-                CommandResultStatus.Failed
-            )
-        } catch (error: CommandValidationException) {
-            CommandResult(
-                error.message ?: "Unknown Command Validation Exception Occurred",
-                CommandResultStatus.Failed
-            )
-        } catch (error: CommandParameterValidationException) {
-            CommandResult(
-                error.message,
-                CommandResultStatus.Failed
-            )
-        } catch (error: Exception) {
-            Logger.error("Unknown Invoke Command Exception Occurred", error)
 
-            CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
+            handleCommandHandlerResult(result, player)
         }
-
-        return handleCommandHandlerResult(result, player)
     }
 
     private fun parseCommandParameters(
