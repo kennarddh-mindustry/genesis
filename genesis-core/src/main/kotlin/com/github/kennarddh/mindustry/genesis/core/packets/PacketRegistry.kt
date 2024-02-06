@@ -1,10 +1,13 @@
 package com.github.kennarddh.mindustry.genesis.core.packets
 
+import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
 import com.github.kennarddh.mindustry.genesis.core.packets.exceptions.InvalidPacketHandlerMethodException
+import kotlinx.coroutines.launch
 import mindustry.Vars.netServer
 import mindustry.gen.Player
+import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
@@ -40,12 +43,14 @@ class PacketRegistry {
 
             names.forEach {
                 netServer.addPacketHandler(it) { player, data ->
-                    if (acceptName)
-                        function.call(handler, player, data, it)
-                    else if (acceptContent)
-                        function.call(handler, player, data)
-                    else
-                        function.call(handler, player)
+                    CoroutineScopes.Main.launch {
+                        if (acceptName)
+                            function.callSuspend(handler, player, data, it)
+                        else if (acceptContent)
+                            function.callSuspend(handler, player, data)
+                        else
+                            function.callSuspend(handler, player)
+                    }
                 }
             }
         }
