@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 import mindustry.Vars.net
 import mindustry.net.NetConnection
 import kotlin.reflect.KClass
+import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
@@ -91,7 +92,7 @@ class ServerPacketsRegistry {
             val packetType = functionParameters[1].type.classifier as KClass<*>
 
             addServerListener(packetType, priority) { connection, packet ->
-                function.call(handler, connection, packet) as Boolean
+                function.callSuspend(handler, connection, packet) as Boolean
             }
         }
     }
