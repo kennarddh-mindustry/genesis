@@ -13,17 +13,29 @@ import kotlinx.coroutines.launch
 import mindustry.Vars
 import mindustry.Vars.net
 import mindustry.gen.Player
-import mindustry.net.Administration.*
+import mindustry.net.Administration.PlayerAction
 import mindustry.net.ArcNetProvider
+import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
 
+fun interface SuspendedChatFilter {
+    suspend fun filter(player: Player, message: String): String
+}
+
+fun interface SuspendedActionFilter {
+    suspend fun allow(action: PlayerAction): Boolean
+}
+
+fun interface SuspendedServerConnectFilter {
+    suspend fun accept(address: String): Boolean
+}
 
 class FiltersRegistry {
-    private val chatFilters: MutablePriorityList<ChatFilter> = MutablePriorityList()
-    private val actionFilters: MutablePriorityList<ActionFilter> = MutablePriorityList()
-    private val connectFilters: MutablePriorityList<ServerConnectFilter> = MutablePriorityList()
+    private val chatFilters: MutablePriorityList<SuspendedChatFilter> = MutablePriorityList()
+    private val actionFilters: MutablePriorityList<SuspendedActionFilter> = MutablePriorityList()
+    private val connectFilters: MutablePriorityList<SuspendedServerConnectFilter> = MutablePriorityList()
 
     internal fun init() {
         val provider = Reflect.get<ArcNetProvider>(net, "provider")
@@ -34,8 +46,10 @@ class FiltersRegistry {
         Vars.netServer.admins.addChatFilter { player, message ->
             var output = message
 
-            chatFilters.forEachPrioritized {
-                output = it.filter(player, output)
+            CoroutineScopes.Main.launch {
+                chatFilters.forEachPrioritized {
+                    output = it.filter(player, output)
+                }
             }
 
             return@addChatFilter output
@@ -44,11 +58,13 @@ class FiltersRegistry {
         Vars.netServer.admins.addActionFilter { action ->
             var output = true
 
-            actionFilters.forEachPrioritized {
-                if (!output)
-                    return@forEachPrioritized
+            CoroutineScopes.Main.launch {
+                actionFilters.forEachPrioritized {
+                    if (!output)
+                        return@forEachPrioritized
 
-                output = it.allow(action)
+                    output = it.allow(action)
+                }
             }
 
             return@addActionFilter output
@@ -58,11 +74,13 @@ class FiltersRegistry {
             server.setConnectFilter { address ->
                 var output = true
 
-                connectFilters.forEachPrioritized {
-                    if (!output)
-                        return@forEachPrioritized
+                CoroutineScopes.Main.launch {
+                    connectFilters.forEachPrioritized {
+                        if (!output)
+                            return@forEachPrioritized
 
-                    output = it.accept(address)
+                        output = it.accept(address)
+                    }
                 }
 
                 if (output)
@@ -98,8 +116,8 @@ class FiltersRegistry {
                     if (function.returnType.classifier != String::class)
                         throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return string")
 
-                    val filter = ChatFilter { player, message ->
-                        function.call(handler, player, message) as String
+                    val filter = SuspendedChatFilter { player, message ->
+                        function.callSuspend(handler, player, message) as String
                     }
 
                     chatFilters.add(PriorityContainer(priority, filter))
@@ -115,8 +133,8 @@ class FiltersRegistry {
                     if (function.returnType.classifier != Boolean::class)
                         throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
-                    val filter = ActionFilter { action ->
-                        function.call(handler, action) as Boolean
+                    val filter = SuspendedActionFilter { action ->
+                        function.callSuspend(handler, action) as Boolean
                     }
 
                     actionFilters.add(PriorityContainer(priority, filter))
@@ -132,8 +150,8 @@ class FiltersRegistry {
                     if (function.returnType.classifier != Boolean::class)
                         throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
-                    val filter = ServerConnectFilter { address ->
-                        function.call(handler, address) as Boolean
+                    val filter = SuspendedServerConnectFilter { address ->
+                        function.callSuspend(handler, address) as Boolean
                     }
 
                     connectFilters.add(PriorityContainer(priority, filter))
