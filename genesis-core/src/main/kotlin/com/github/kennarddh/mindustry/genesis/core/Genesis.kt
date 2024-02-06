@@ -77,6 +77,8 @@ class Genesis : AbstractPlugin() {
             serverPacketsRegistry.registerHandler(handler)
             filtersRegistry.registerHandler(handler)
             timersRegistry.registerHandler(handler)
+
+            handler.onRegistered()
         }
     }
 }
