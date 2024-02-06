@@ -3,12 +3,14 @@ package com.github.kennarddh.mindustry.genesis.core.server.packets
 import arc.func.Cons2
 import arc.struct.ObjectMap
 import arc.util.Reflect
+import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityEnum
 import com.github.kennarddh.mindustry.genesis.core.events.exceptions.InvalidServerPacketHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.server.packets.annotations.ServerPacketHandler
+import kotlinx.coroutines.launch
 import mindustry.Vars.net
 import mindustry.net.NetConnection
 import kotlin.reflect.KClass
@@ -18,7 +20,7 @@ import kotlin.reflect.jvm.isAccessible
 
 
 class ServerPacketsRegistry {
-    private val serverListeners: MutableMap<KClass<Any>, MutablePriorityList<(NetConnection, Any) -> Boolean>> =
+    private val serverListeners: MutableMap<KClass<Any>, MutablePriorityList<suspend (NetConnection, Any) -> Boolean>> =
         mutableMapOf()
 
     internal fun init() {
@@ -27,7 +29,7 @@ class ServerPacketsRegistry {
     private fun <T : Any> addServerListener(
         packetType: KClass<T>,
         priority: PriorityEnum,
-        handler: (NetConnection, T) -> Boolean
+        handler: suspend (NetConnection, T) -> Boolean
     ) {
         @Suppress("UNCHECKED_CAST")
         if (!serverListeners.contains(packetType as KClass<Any>)) {
@@ -41,14 +43,16 @@ class ServerPacketsRegistry {
 
                 val previousListener = previousListeners.get(packetType.java)
 
-                serverListeners[packetType]!!.forEachPrioritized {
-                    if (isStopped)
-                        return@forEachPrioritized
+                CoroutineScopes.Main.launch {
+                    serverListeners[packetType]!!.forEachPrioritized {
+                        if (isStopped)
+                            return@forEachPrioritized
 
-                    val result = it(connection, packet)
+                        val result = it(connection, packet)
 
-                    if (!result)
-                        isStopped = true
+                        if (!result)
+                            isStopped = true
+                    }
                 }
 
                 // Previous packet listener will always get called even if genesis listener failed
@@ -57,7 +61,12 @@ class ServerPacketsRegistry {
         }
 
         @Suppress("UNCHECKED_CAST")
-        serverListeners[packetType]!!.add(PriorityContainer(priority, handler as (NetConnection, Any) -> Boolean))
+        serverListeners[packetType]!!.add(
+            PriorityContainer(
+                priority,
+                handler as suspend (NetConnection, Any) -> Boolean
+            )
+        )
     }
 
     fun registerHandler(handler: Handler) {
