@@ -11,6 +11,8 @@ import com.github.kennarddh.mindustry.genesis.core.logging.Logger
 import com.github.kennarddh.mindustry.genesis.core.packets.PacketRegistry
 import com.github.kennarddh.mindustry.genesis.core.server.packets.ServerPacketsRegistry
 import com.github.kennarddh.mindustry.genesis.core.timers.TimersRegistry
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mindustry.Vars
 
 class Genesis : AbstractPlugin() {
@@ -24,24 +26,30 @@ class Genesis : AbstractPlugin() {
 
         Core.app.addListener(object : ApplicationListener {
             override fun dispose() {
-                Logger.info("Gracefully shutting down")
+                runBlocking {
+                    Logger.info("Gracefully shutting down")
 
-                handlers.forEach { it.onDispose() }
+                    handlers.forEach {
+                        launch {
+                            it.onDispose()
+                        }
+                    }
 
-                // Reversed because needs to dispose dependant mod/plugin plugin before the dependencies
-                val mods = Vars.mods.orderedMods().toList().reversed()
+                    // Reversed because needs to dispose dependant mod/plugin plugin before the dependencies
+                    val mods = Vars.mods.orderedMods().toList().reversed()
 
-                mods.forEach {
-                    if (!it.isJava) return@forEach
-                    if (!it.enabled()) return@forEach
-                    if (it.main !is AbstractPlugin) return@forEach
+                    mods.forEach {
+                        if (!it.isJava) return@forEach
+                        if (!it.enabled()) return@forEach
+                        if (it.main !is AbstractPlugin) return@forEach
 
-                    val plugin = it.main as AbstractPlugin
+                        val plugin = it.main as AbstractPlugin
 
-                    plugin.dispose()
+                        plugin.dispose()
+                    }
+
+                    Logger.info("Stopped")
                 }
-
-                Logger.info("Stopped")
             }
         })
 
