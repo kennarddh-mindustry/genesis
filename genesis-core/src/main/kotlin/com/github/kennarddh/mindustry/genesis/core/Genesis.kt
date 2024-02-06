@@ -49,9 +49,9 @@ class Genesis : AbstractPlugin() {
                             plugin.dispose()
                         }
                     }
-
-                    Logger.info("Stopped")
                 }
+
+                Logger.info("Stopped")
             }
         })
 
