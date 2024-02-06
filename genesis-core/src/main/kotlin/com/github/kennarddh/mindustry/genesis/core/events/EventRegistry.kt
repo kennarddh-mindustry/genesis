@@ -1,10 +1,13 @@
 package com.github.kennarddh.mindustry.genesis.core.events
 
 import arc.Events
+import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandler
 import com.github.kennarddh.mindustry.genesis.core.events.exceptions.InvalidEventHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
+import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
+import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.jvm.isAccessible
@@ -27,7 +30,9 @@ class EventRegistry {
             val eventType = functionParameters[0].type.classifier as KClass<*>
 
             Events.on(eventType.java) {
-                function.call(handler, it)
+                CoroutineScopes.Main.launch {
+                    function.callSuspend(handler, it)
+                }
             }
         }
     }
