@@ -13,7 +13,7 @@ import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 class EventRegistry {
-    fun init() {
+    internal fun init() {
     }
 
     fun registerHandler(handler: Handler) {

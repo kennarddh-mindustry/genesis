@@ -13,7 +13,7 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 class PacketRegistry {
-    fun init() {
+    internal fun init() {
     }
 
     fun registerHandler(handler: Handler) {
