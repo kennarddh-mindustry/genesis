@@ -135,7 +135,7 @@ class CommandRegistry {
         _parameterTypes[from] = parameterType
     }
 
-    fun registerHandler(handler: Handler) {
+    suspend fun registerHandler(handler: Handler) {
         var addedCommandCounter = 0
 
         for (function in handler::class.declaredFunctions) {
@@ -263,9 +263,11 @@ class CommandRegistry {
             addedCommandCounter += 1
         }
 
-        // TODO: Run in mindustry main thread
         if (addedCommandCounter > 0)
-            Events.fire(CommandsChanged())
+            runOnMindustryThread {
+                Events.fire(CommandsChanged())
+            }
+
     }
 
     fun getCommandFromCommandName(commandName: String?): CommandData? {

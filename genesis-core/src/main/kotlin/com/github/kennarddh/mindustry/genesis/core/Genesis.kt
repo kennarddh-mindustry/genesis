@@ -58,7 +58,7 @@ class Genesis : AbstractPlugin() {
         private val filtersRegistry = FiltersRegistry()
         private val timersRegistry = TimersRegistry()
 
-        fun registerHandler(handler: Handler) {
+        suspend fun registerHandler(handler: Handler) {
             handlers.add(handler)
 
             handler.onInit()
