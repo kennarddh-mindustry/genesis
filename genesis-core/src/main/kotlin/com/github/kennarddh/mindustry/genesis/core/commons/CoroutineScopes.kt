@@ -1,4 +1,4 @@
-package com.github.kennarddh.mindustry.genesis.core
+package com.github.kennarddh.mindustry.genesis.core.commons
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -5,7 +5,6 @@ import arc.Events
 import arc.struct.Seq
 import arc.util.CommandHandler
 import arc.util.Log
-import com.github.kennarddh.mindustry.genesis.core.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.*
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidation
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
