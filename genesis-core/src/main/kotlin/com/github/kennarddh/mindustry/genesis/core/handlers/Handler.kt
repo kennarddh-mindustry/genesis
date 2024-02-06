@@ -13,6 +13,8 @@ abstract class Handler {
 
     /**
      * Called when the Application is destroyed.
+     *
+     * Will be run at the same time for every handler's onDispose including AbstractPlugin dispose.
      */
     open suspend fun onDispose() {}
 }
