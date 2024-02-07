@@ -59,7 +59,7 @@ class ServerHandler : Handler() {
     @ServerSide
     @ClientSide
     @Description("Display the command list, or get help for a specific command.")
-    fun help(player: Player? = null, commandOrPage: String = "1"): CommandResult {
+    suspend fun help(player: Player? = null, commandOrPage: String = "1"): CommandResult {
         val commandsPerPage = 10
 
         var page: Int? = null
@@ -98,7 +98,8 @@ class ServerHandler : Handler() {
                     if (it is ArcCommand && it.isAlias) return@forEach
 
                     val name = if (it is ArcCommand) it.realName else it.text
-                    val usage = if (it is ArcCommand) it.usage else it.paramText
+                    // TODO: Get usages concurrently with async
+                    val usage = if (it is ArcCommand) it.toUsage() else it.paramText
                     val brief = if (it is ArcCommand) it.brief else it.description
 
                     append("\t")
@@ -140,7 +141,7 @@ class ServerHandler : Handler() {
                     ?: return CommandResult("Command $commandName not found.", CommandResultStatus.Failed)
 
                 val name = if (command is ArcCommand) command.realName else command.text
-                val usage = if (command is ArcCommand) command.usage else command.paramText
+                val usage = if (command is ArcCommand) command.toUsage() else command.paramText
                 val brief = if (command is ArcCommand) command.brief else command.description
                 val description = command.description
 

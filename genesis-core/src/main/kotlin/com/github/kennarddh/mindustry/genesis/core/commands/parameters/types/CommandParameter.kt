@@ -5,5 +5,5 @@ import kotlin.reflect.KClass
 interface CommandParameter<T : Any> {
     suspend fun parse(instance: KClass<T>, input: String): T
 
-    fun toUsageType(input: KClass<T>): String
+    suspend fun toUsageType(input: KClass<T>): String
 }

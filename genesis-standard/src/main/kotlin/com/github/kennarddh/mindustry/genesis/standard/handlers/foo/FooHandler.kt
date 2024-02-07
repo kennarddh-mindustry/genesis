@@ -28,7 +28,7 @@ class FooHandler : Handler() {
 
     /** Plugin presence check */
     @PacketHandler(["fooCheck"])
-    fun fooCheck(player: Player) {
+    suspend fun fooCheck(player: Player) {
         playersWithFoo.add(player)
 
         player.clientPacketReliable("fooCheck", version)
@@ -44,7 +44,7 @@ class FooHandler : Handler() {
     }
 
     @EventHandler
-    private fun onCommandsChanged(event: CommandsChanged) {
+    private suspend fun onCommandsChanged(event: CommandsChanged) {
         sendCommands()
     }
 
@@ -59,14 +59,14 @@ class FooHandler : Handler() {
     }
 
     /** Sends the list of commands to a player */
-    private fun sendCommands(player: Player? = null) {
+    private suspend fun sendCommands(player: Player? = null) {
         with(Jval.newObject()) {
             add("prefix", GenesisAPI.commandRegistry.clientPrefix)
 
             add("commands", Jval.newObject().apply {
                 GenesisAPI.commandRegistry.clientCommands.forEach {
                     val name = if (it is ArcCommand) it.realName else it.text
-                    val usage = if (it is ArcCommand) it.usage else it.paramText
+                    val usage = if (it is ArcCommand) it.toUsage() else it.paramText
 
                     add(name, usage)
                 }

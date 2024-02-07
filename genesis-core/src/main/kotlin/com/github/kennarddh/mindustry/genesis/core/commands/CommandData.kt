@@ -49,7 +49,7 @@ data class CommandData(
         return result
     }
 
-    fun toUsage(): String = buildString {
+    suspend fun toUsage(): String = buildString {
         val functionParameters =
             if (sides.contains(CommandSide.Client)) parametersType.drop(1).toTypedArray() else parametersType
 
