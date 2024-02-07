@@ -39,7 +39,7 @@ import kotlin.reflect.typeOf
 
 class CommandRegistry {
     // TODO: This may not be reliable if any genesis controlled command is removed using Mindustry remove command instead of genesis one
-    private val commands: MutableList<CommandData> = mutableListOf()
+    private val backingCommands: MutableList<CommandData> = mutableListOf()
 
     private val backingParameterTypes: MutableMap<KClass<*>, CommandParameter<*>> =
         mutableMapOf()
@@ -47,8 +47,17 @@ class CommandRegistry {
         mutableMapOf()
     private val commandValidator: MutableMap<KClass<*>, CommandValidator> = mutableMapOf()
 
+    val commands
+        get() = backingCommands.toList()
+
     val parameterTypes
         get() = backingParameterTypes.toMap()
+
+    val clientHandler: CommandHandler
+        get() = Vars.netServer.clientCommands
+
+    val serverHandler: CommandHandler
+        get() = ServerControl.instance.handler
 
     val clientCommands: Seq<CommandHandler.Command>
         get() = clientHandler.commandList
@@ -62,18 +71,10 @@ class CommandRegistry {
     val genesisServerCommands
         get() = commands.filter { it.sides.contains(CommandSide.Server) }
 
-    private val clientHandler: CommandHandler
-        get() = Vars.netServer.clientCommands
-
-    private val serverHandler: CommandHandler
-        get() = ServerControl.instance.handler
-
-    @Suppress("UNUSED")
     var clientPrefix: String
         get() = clientHandler.getPrefix()
         set(newPrefix) = clientHandler.setPrefix(newPrefix)
 
-    @Suppress("UNUSED")
     var serverPrefix: String
         get() = serverHandler.getPrefix()
         set(newPrefix) = serverHandler.setPrefix(newPrefix)
@@ -134,7 +135,7 @@ class CommandRegistry {
         backingParameterTypes[from] = parameterType
     }
 
-    suspend fun registerHandler(handler: Handler) {
+    fun registerHandler(handler: Handler) {
         var addedCommandCounter = 0
 
         for (function in handler::class.declaredFunctions) {
@@ -247,7 +248,7 @@ class CommandRegistry {
                 commandValidationAnnotations.toTypedArray()
             )
 
-            commands.add(command)
+            backingCommands.add(command)
 
             names.forEach {
                 val arcCommand = ArcCommand(this, it, description, brief, if (it == names[0]) null else names[0])
@@ -269,11 +270,41 @@ class CommandRegistry {
     }
 
     fun getCommandFromCommandName(commandName: String?): CommandData? {
-        for (command in commands) {
+        for (command in backingCommands) {
             if (command.names.contains(commandName)) return command
         }
 
         return null
+    }
+
+    /**
+     * This method won't fail even if the command doesn't exist. It will just fail silently.
+     */
+    fun removeCommand(name: String, side: CommandSide) {
+        val command = getCommandFromCommandName(name)
+
+        if (side == CommandSide.Client) {
+            clientHandler.removeCommand(name)
+
+            if (command != null && command.sides.contains(CommandSide.Client))
+                command.sides = command.sides.filter { it != CommandSide.Client }.toTypedArray()
+        } else if (side == CommandSide.Server) {
+            serverHandler.removeCommand(name)
+
+            if (command != null && command.sides.contains(CommandSide.Server))
+                command.sides = command.sides.filter { it != CommandSide.Server }.toTypedArray()
+        }
+
+        if (command != null && command.sides.isEmpty())
+            backingCommands.remove(command)
+    }
+
+    /**
+     * This method won't fail even if the command doesn't exist. It will just fail silently.
+     */
+    fun removeCommand(name: String) {
+        removeCommand(name, CommandSide.Client)
+        removeCommand(name, CommandSide.Server)
     }
 
     internal fun invokeCommand(name: String, parametersString: String, player: Player?) {
@@ -496,35 +527,5 @@ class CommandRegistry {
                 else -> Log.warn("Unknown CommandResultStatus ${result.status}: ${result.response}")
             }
         }
-    }
-
-    /**
-     * This method won't fail even if the command doesn't exist. It will just fail silently.
-     */
-    fun removeCommand(name: String, side: CommandSide) {
-        val command = getCommandFromCommandName(name)
-
-        if (side == CommandSide.Client) {
-            clientHandler.removeCommand(name)
-
-            if (command != null && command.sides.contains(CommandSide.Client))
-                command.sides = command.sides.filter { it != CommandSide.Client }.toTypedArray()
-        } else if (side == CommandSide.Server) {
-            serverHandler.removeCommand(name)
-
-            if (command != null && command.sides.contains(CommandSide.Server))
-                command.sides = command.sides.filter { it != CommandSide.Server }.toTypedArray()
-        }
-
-        if (command != null && command.sides.isEmpty())
-            commands.remove(command)
-    }
-
-    /**
-     * This method won't fail even if the command doesn't exist. It will just fail silently.
-     */
-    fun removeCommand(name: String) {
-        removeCommand(name, CommandSide.Client)
-        removeCommand(name, CommandSide.Server)
     }
 }

@@ -16,6 +16,18 @@ import kotlinx.coroutines.runBlocking
 import mindustry.Vars
 
 class Genesis : AbstractPlugin() {
+    private val backingHandlers: MutableList<Handler> = mutableListOf()
+
+    val handlers: List<Handler>
+        get() = backingHandlers.toList()
+
+    internal val commandRegistry = CommandRegistry()
+    internal val eventRegistry = EventRegistry()
+    internal val packetRegistry = PacketRegistry()
+    internal val serverPacketsRegistry = ServerPacketsRegistry()
+    internal val filtersRegistry = FiltersRegistry()
+    internal val timersRegistry = TimersRegistry()
+
     override fun init() {
         commandRegistry.init()
         eventRegistry.init()
@@ -58,36 +70,18 @@ class Genesis : AbstractPlugin() {
         Logger.info("Loaded")
     }
 
-    companion object {
-        private val backingHandlers: MutableList<Handler> = mutableListOf()
+    suspend fun registerHandler(handler: Handler) {
+        backingHandlers.add(handler)
 
-        val handlers: List<Handler>
-            get() = backingHandlers.toList()
+        handler.onInit()
 
-        val commandRegistry = CommandRegistry()
-        private val eventRegistry = EventRegistry()
-        private val packetRegistry = PacketRegistry()
-        private val serverPacketsRegistry = ServerPacketsRegistry()
-        private val filtersRegistry = FiltersRegistry()
-        private val timersRegistry = TimersRegistry()
+        commandRegistry.registerHandler(handler)
+        eventRegistry.registerHandler(handler)
+        packetRegistry.registerHandler(handler)
+        serverPacketsRegistry.registerHandler(handler)
+        filtersRegistry.registerHandler(handler)
+        timersRegistry.registerHandler(handler)
 
-        inline fun <reified T : Handler> getHandler(): T? = handlers.find { it is T } as T?
-
-        inline fun <reified T : Handler> getHandlers(): List<T> = handlers.filterIsInstance<T>()
-
-        suspend fun registerHandler(handler: Handler) {
-            backingHandlers.add(handler)
-
-            handler.onInit()
-
-            commandRegistry.registerHandler(handler)
-            eventRegistry.registerHandler(handler)
-            packetRegistry.registerHandler(handler)
-            serverPacketsRegistry.registerHandler(handler)
-            filtersRegistry.registerHandler(handler)
-            timersRegistry.registerHandler(handler)
-
-            handler.onRegistered()
-        }
+        handler.onRegistered()
     }
 }
