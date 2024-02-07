@@ -1,6 +1,5 @@
 package com.github.kennarddh.mindustry.genesis.core.commands
 
-import arc.Core
 import arc.Events
 import arc.struct.Seq
 import arc.util.CommandHandler
@@ -487,7 +486,7 @@ class CommandRegistry {
             else
                 ""
 
-            Core.app.post {
+            runOnMindustryThread {
                 player.sendMessage("${colorString}${result.response}")
             }
         } else {

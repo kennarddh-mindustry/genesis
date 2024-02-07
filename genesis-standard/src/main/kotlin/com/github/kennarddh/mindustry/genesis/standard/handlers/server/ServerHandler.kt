@@ -19,7 +19,9 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validatio
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResultStatus
+import com.github.kennarddh.mindustry.genesis.core.commons.runOnMindustryThread
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
+import com.github.kennarddh.mindustry.genesis.standard.Logger
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.integer.IntParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.GTE
 import mindustry.Vars.*
@@ -205,7 +207,7 @@ class ServerHandler : Handler() {
         if (state.isGame)
             return CommandResult("Already hosting. Type 'stop' to stop hosting first.", CommandResultStatus.Failed)
 
-        Core.app.post {
+        runOnMindustryThread {
             // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
             Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
         }
@@ -222,12 +224,12 @@ class ServerHandler : Handler() {
         } else {
             map = maps.shuffleMode.next(gameMode, state.map)
 
-            com.github.kennarddh.mindustry.genesis.standard.Logger.info("Randomized next map to be @.", map.plainName())
+            Logger.info("Randomized next map to be @.", map.plainName())
         }
 
-        com.github.kennarddh.mindustry.genesis.standard.Logger.info("Loading map...")
+        Logger.info("Loading map...")
 
-        Core.app.post {
+        runOnMindustryThread {
             logic.reset()
 
             ServerControl.instance.lastMode = gameMode
@@ -236,12 +238,12 @@ class ServerHandler : Handler() {
         }
 
         try {
-            Core.app.post {
+            runOnMindustryThread {
                 world.loadMap(map, map.applyRules(ServerControl.instance.lastMode))
                 state.rules = map.applyRules(gameMode)
                 logic.play()
 
-                com.github.kennarddh.mindustry.genesis.standard.Logger.info("Map loaded.")
+                Logger.info("Map loaded.")
 
                 netServer.openServer()
 

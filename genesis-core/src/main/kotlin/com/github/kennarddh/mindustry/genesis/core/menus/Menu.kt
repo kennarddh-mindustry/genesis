@@ -1,6 +1,6 @@
 package com.github.kennarddh.mindustry.genesis.core.menus
 
-import arc.Core
+import com.github.kennarddh.mindustry.genesis.core.commons.runOnMindustryThread
 import mindustry.gen.Call
 import mindustry.gen.Player
 import mindustry.ui.Menus
@@ -35,7 +35,7 @@ class Menu(
 
         continuations[player] = continuation
 
-        Core.app.post {
+        runOnMindustryThread {
             Call.textInput(player.con, id, title, message, maxLength, default, numeric)
         }
     }
