@@ -3,7 +3,7 @@ package com.github.kennarddh.mindustry.genesis.core.commands.parameters
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 
-typealias CommandParameterValidator<T> = (annotation: Annotation, value: T) -> Boolean
+typealias CommandParameterValidator<T> = suspend (annotation: Annotation, value: T) -> Boolean
 
 data class CommandParameterData(
     val kParameter: KParameter,

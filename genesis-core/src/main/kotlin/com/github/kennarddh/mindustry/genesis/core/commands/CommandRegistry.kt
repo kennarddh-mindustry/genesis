@@ -27,6 +27,9 @@ import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.commons.*
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.logging.Logger
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import mindustry.Vars
 import mindustry.gen.Player
@@ -324,10 +327,17 @@ class CommandRegistry {
 
         CoroutineScopes.Main.launch {
             val result = try {
-                command.validator.forEach {
+                val deferredValidatorsResult = command.validator.map {
                     val validator = commandValidator[it.annotationClass]!!
 
-                    val isValid = validator.invoke(it, player)
+                    async { validator.invoke(it, player) }
+                }
+
+
+                val validatorsResult = deferredValidatorsResult.awaitAll()
+
+                command.validator.forEachIndexed { index, it ->
+                    val isValid = validatorsResult[index]
 
                     if (!isValid) {
                         val descriptionAnnotation =
@@ -396,11 +406,11 @@ class CommandRegistry {
         }
     }
 
-    private fun parseCommandParameters(
+    private suspend fun parseCommandParameters(
         command: CommandData,
         commandStringWithoutCommandName: String,
         player: Player?
-    ): Map<KParameter, Any?> {
+    ): Map<KParameter, Any?> = coroutineScope {
         val parameters: MutableMap<KParameter, Any?> =
             mutableMapOf(command.function.instanceParameter!! to command.handler)
 
@@ -456,11 +466,21 @@ class CommandRegistry {
                         passedParameter.value
                     )
 
-                    parameter.validator.forEach {
+                    parameters[parameter.kParameter] = output
+
+                    val deferredValidatorsResult = parameter.validator.map {
                         val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
 
-                        @Suppress("UNCHECKED_CAST")
-                        val isValid = (validator as CommandParameterValidator<Any>).invoke(it, output)
+                        async {
+                            @Suppress("UNCHECKED_CAST")
+                            (validator as CommandParameterValidator<Any>).invoke(it, output)
+                        }
+                    }
+
+                    val validatorsResult = deferredValidatorsResult.awaitAll()
+
+                    parameter.validator.forEachIndexed { index, it ->
+                        val isValid = validatorsResult[index]
 
                         if (!isValid) {
                             val descriptionAnnotation =
@@ -478,8 +498,6 @@ class CommandRegistry {
                             errorMessages.add(errorMessage)
                         }
                     }
-
-                    parameters[parameter.kParameter] = output
                 }
             } catch (error: CommandParameterParsingException) {
                 errorMessages.add(error.toParametrizedString(parameter.name))
@@ -487,16 +505,16 @@ class CommandRegistry {
         }
 
         if (errorMessages.isNotEmpty()) {
-
             val prefix = if (player == null) serverPrefix else clientPrefix
 
             val fullUsage = "${prefix}${command.names[0]} ${command.toUsage()}"
 
             errorMessages.add("Usage: \"$fullUsage\"")
+
             throw CommandParameterValidationException(errorMessages.toTypedArray())
         }
 
-        return parameters.toMap()
+        return@coroutineScope parameters.toMap()
     }
 
     private fun handleCommandHandlerResult(result: Any?, player: Player?) {

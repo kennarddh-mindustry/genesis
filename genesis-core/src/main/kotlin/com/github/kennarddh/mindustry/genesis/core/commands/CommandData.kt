@@ -8,7 +8,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.isSubclassOf
 
-typealias CommandValidator = (annotation: Annotation, player: Player?) -> Boolean
+typealias CommandValidator = suspend (annotation: Annotation, player: Player?) -> Boolean
 
 data class CommandData(
     val commandRegistry: CommandRegistry,
