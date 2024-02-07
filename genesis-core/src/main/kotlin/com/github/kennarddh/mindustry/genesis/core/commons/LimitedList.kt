@@ -3,8 +3,15 @@ package com.github.kennarddh.mindustry.genesis.core.commons
 class LimitedListSizeGreaterThanCapacityException(message: String) : Exception(message)
 
 @Suppress("UNUSED")
-class LimitedList<E>(@Suppress("MemberVisibilityCanBePrivate") val capacity: Int) : Iterable<E> {
-    private val backingMutableList: MutableList<E> = mutableListOf()
+open class LimitedList<E>(capacity: Int) : Iterable<E> {
+    protected val backingMutableList: MutableList<E> = mutableListOf()
+
+    var capacity: Int
+        protected set
+
+    init {
+        this.capacity = capacity
+    }
 
     constructor(capacity: Int, original: Collection<E>) : this(capacity) {
         if (original.size > capacity)
