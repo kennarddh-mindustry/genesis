@@ -9,6 +9,7 @@ import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
 import com.github.kennarddh.mindustry.genesis.standard.extensions.clientPacketReliable
 import mindustry.Vars
+import mindustry.game.EventType
 import mindustry.gen.Call
 import mindustry.gen.Player
 
@@ -16,9 +17,18 @@ import mindustry.gen.Player
 class FooHandler : Handler() {
     private val version by lazy { Vars.mods.getMod(com.github.kennarddh.mindustry.genesis.standard.GenesisStandard::class.java).meta.version }
 
+    val playersWithFoo: MutableList<Player> = mutableListOf()
+
+    @EventHandler
+    fun onPlayerLeave(event: EventType.PlayerLeave) {
+        playersWithFoo.remove(event.player)
+    }
+
     /** @since v1 Plugin presence check */
     @PacketHandler(["fooCheck"])
     fun fooCheck(player: Player) {
+        playersWithFoo.add(player)
+
         player.clientPacketReliable("fooCheck", version)
 
         enableTransmissions(player)
