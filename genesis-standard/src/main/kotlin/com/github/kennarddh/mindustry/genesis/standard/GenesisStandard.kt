@@ -8,12 +8,11 @@ import com.github.kennarddh.mindustry.genesis.standard.handlers.server.ServerHan
 import kotlinx.coroutines.runBlocking
 
 class GenesisStandard : AbstractPlugin() {
-    override fun init() =
-        runBlocking {
-            Genesis.registerHandler(CommandsHandler())
-            Genesis.registerHandler(ServerHandler())
-            Genesis.registerHandler(FooHandler())
+    override fun init() = runBlocking {
+        Genesis.registerHandler(CommandsHandler())
+        Genesis.registerHandler(ServerHandler())
+        Genesis.registerHandler(FooHandler())
 
-            Logger.info("Loaded")
-        }
+        Logger.info("Loaded")
+    }
 }
