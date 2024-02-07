@@ -59,7 +59,10 @@ class Genesis : AbstractPlugin() {
     }
 
     companion object {
-        private val handlers: MutableList<Handler> = mutableListOf()
+        private val backingHandlers: MutableList<Handler> = mutableListOf()
+
+        val handlers: List<Handler>
+            get() = backingHandlers.toList()
 
         val commandRegistry = CommandRegistry()
         private val eventRegistry = EventRegistry()
@@ -69,7 +72,7 @@ class Genesis : AbstractPlugin() {
         private val timersRegistry = TimersRegistry()
 
         suspend fun registerHandler(handler: Handler) {
-            handlers.add(handler)
+            backingHandlers.add(handler)
 
             handler.onInit()
 
