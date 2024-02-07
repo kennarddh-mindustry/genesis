@@ -6,7 +6,7 @@ class InvalidEscapedCharacterException(message: String) : Exception(message)
 
 open class StringParserToken
 
-class SkipToken : StringParserToken()
+data object SkipToken : StringParserToken()
 data class StringToken(val value: String) : StringParserToken()
 
 class StringParser {
@@ -37,7 +37,7 @@ class StringParser {
                             '"' -> isInQuote = !isInQuote
                             '*' -> {
                                 if (!isInQuote && isEmpty())
-                                    yield(SkipToken())
+                                    yield(SkipToken)
                                 else
                                     append(char)
                             }
