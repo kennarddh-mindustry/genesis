@@ -8,7 +8,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-suspend fun <T> runOnMindustryThread(timeout: Duration = 5.seconds, task: () -> T): T =
+suspend fun <T> runOnMindustryThreadSuspended(timeout: Duration = 5.seconds, task: () -> T): T =
     withTimeout(timeout) {
         suspendCancellableCoroutine { continuation ->
             Core.app.post {
@@ -17,3 +17,7 @@ suspend fun <T> runOnMindustryThread(timeout: Duration = 5.seconds, task: () -> 
             }
         }
     }
+
+
+fun runOnMindustryThread(task: () -> Unit) =
+    Core.app.post(task)
