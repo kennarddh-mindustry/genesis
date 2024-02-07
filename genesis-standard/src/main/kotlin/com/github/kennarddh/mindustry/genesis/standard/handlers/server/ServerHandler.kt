@@ -224,7 +224,7 @@ class ServerHandler : Handler() {
         } else {
             map = maps.shuffleMode.next(gameMode, state.map)
 
-            Logger.info("Randomized next map to be @.", map.plainName())
+            Logger.info("Randomized next map to be ${map.plainName()}.")
         }
 
         Logger.info("Loading map...")
