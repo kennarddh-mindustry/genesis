@@ -41,14 +41,14 @@ class CommandRegistry {
     // TODO: This may not be reliable if any genesis controlled command is removed using Mindustry remove command instead of genesis one
     private val commands: MutableList<CommandData> = mutableListOf()
 
-    private val _parameterTypes: MutableMap<KClass<*>, CommandParameter<*>> =
+    private val backingParameterTypes: MutableMap<KClass<*>, CommandParameter<*>> =
         mutableMapOf()
     private val parameterValidator: MutableMap<KClass<*>, MutableMap<KClass<*>, CommandParameterValidator<*>>> =
         mutableMapOf()
     private val commandValidator: MutableMap<KClass<*>, CommandValidator> = mutableMapOf()
 
     val parameterTypes
-        get() = _parameterTypes.toMap()
+        get() = backingParameterTypes.toMap()
 
     val clientCommands: Seq<CommandHandler.Command>
         get() = clientHandler.commandList
@@ -128,10 +128,10 @@ class CommandRegistry {
         from: KClass<*>,
         parameterType: CommandParameter<*>
     ) {
-        if (_parameterTypes.contains(from))
+        if (backingParameterTypes.contains(from))
             throw DuplicateParameterTypeException("Parameter type for type ${from.qualifiedName} has already been registered")
 
-        _parameterTypes[from] = parameterType
+        backingParameterTypes[from] = parameterType
     }
 
     suspend fun registerHandler(handler: Handler) {
@@ -214,7 +214,7 @@ class CommandRegistry {
                 val parameterTypeKClass = functionParameter.type.classifier
 
                 val parameterTypeFilterResult =
-                    _parameterTypes.filterKeys { (parameterTypeKClass as KClass<*>).isSubclassOf(it) }
+                    backingParameterTypes.filterKeys { (parameterTypeKClass as KClass<*>).isSubclassOf(it) }
 
                 if (parameterTypeFilterResult.isEmpty())
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass is not registered.")
@@ -415,7 +415,7 @@ class CommandRegistry {
             try {
                 if (passedParameter is StringToken) {
                     val parameterTypeFilterResult =
-                        _parameterTypes.filterKeys { parameter.kClass.isSubclassOf(it) }
+                        backingParameterTypes.filterKeys { parameter.kClass.isSubclassOf(it) }
 
                     val parameterType = parameterTypeFilterResult.values.toTypedArray()[0]
 
