@@ -5,7 +5,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class ULongParameter : CommandParameter<ULong> {
-    override fun parse(instance: KClass<ULong>, input: String): ULong {
+    override suspend fun parse(instance: KClass<ULong>, input: String): ULong {
         try {
             return input.toULong()
         } catch (error: NumberFormatException) {
@@ -13,5 +13,5 @@ class ULongParameter : CommandParameter<ULong> {
         }
     }
 
-    override fun toUsageType(input: KClass<ULong>): String = "uLong"
+    override suspend fun toUsageType(input: KClass<ULong>): String = "uLong"
 }

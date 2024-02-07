@@ -4,9 +4,9 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class StringParameter : CommandParameter<String> {
-    override fun parse(instance: KClass<String>, input: String): String {
+    override suspend fun parse(instance: KClass<String>, input: String): String {
         return input
     }
 
-    override fun toUsageType(input: KClass<String>): String = "string"
+    override suspend fun toUsageType(input: KClass<String>): String = "string"
 }

@@ -5,7 +5,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class DoubleParameter : CommandParameter<Double> {
-    override fun parse(instance: KClass<Double>, input: String): Double {
+    override suspend fun parse(instance: KClass<Double>, input: String): Double {
         try {
             return input.toDouble()
         } catch (error: NumberFormatException) {
@@ -13,5 +13,5 @@ class DoubleParameter : CommandParameter<Double> {
         }
     }
 
-    override fun toUsageType(input: KClass<Double>): String = "double"
+    override suspend fun toUsageType(input: KClass<Double>): String = "double"
 }

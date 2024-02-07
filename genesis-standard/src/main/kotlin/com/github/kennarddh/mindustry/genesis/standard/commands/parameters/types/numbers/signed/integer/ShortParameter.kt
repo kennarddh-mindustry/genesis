@@ -5,7 +5,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class ShortParameter : CommandParameter<Short> {
-    override fun parse(instance: KClass<Short>, input: String): Short {
+    override suspend fun parse(instance: KClass<Short>, input: String): Short {
         try {
             return input.toShort()
         } catch (error: NumberFormatException) {
@@ -13,5 +13,5 @@ class ShortParameter : CommandParameter<Short> {
         }
     }
 
-    override fun toUsageType(input: KClass<Short>): String = "short"
+    override suspend fun toUsageType(input: KClass<Short>): String = "short"
 }

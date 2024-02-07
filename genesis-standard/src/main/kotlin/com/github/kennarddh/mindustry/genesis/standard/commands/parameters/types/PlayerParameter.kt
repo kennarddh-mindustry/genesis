@@ -7,7 +7,7 @@ import mindustry.gen.Player
 import kotlin.reflect.KClass
 
 class PlayerParameter : CommandParameter<Player> {
-    override fun parse(instance: KClass<Player>, input: String): Player {
+    override suspend fun parse(instance: KClass<Player>, input: String): Player {
         return try {
             Groups.player.find { it.id == input.toInt() }
         } catch (error: NumberFormatException) {
@@ -16,5 +16,5 @@ class PlayerParameter : CommandParameter<Player> {
         }
     }
 
-    override fun toUsageType(input: KClass<Player>): String = "player"
+    override suspend fun toUsageType(input: KClass<Player>): String = "player"
 }

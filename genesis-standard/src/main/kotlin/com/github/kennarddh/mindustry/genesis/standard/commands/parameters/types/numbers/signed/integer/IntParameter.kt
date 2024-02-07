@@ -5,7 +5,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class IntParameter : CommandParameter<Int> {
-    override fun parse(instance: KClass<Int>, input: String): Int {
+    override suspend fun parse(instance: KClass<Int>, input: String): Int {
         try {
             return input.toInt()
         } catch (error: NumberFormatException) {
@@ -13,5 +13,5 @@ class IntParameter : CommandParameter<Int> {
         }
     }
 
-    override fun toUsageType(input: KClass<Int>): String = "int"
+    override suspend fun toUsageType(input: KClass<Int>): String = "int"
 }

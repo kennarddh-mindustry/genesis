@@ -5,7 +5,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class FloatParameter : CommandParameter<Float> {
-    override fun parse(instance: KClass<Float>, input: String): Float {
+    override suspend fun parse(instance: KClass<Float>, input: String): Float {
         try {
             return input.toFloat()
         } catch (error: NumberFormatException) {
@@ -13,5 +13,5 @@ class FloatParameter : CommandParameter<Float> {
         }
     }
 
-    override fun toUsageType(input: KClass<Float>): String = "float"
+    override suspend fun toUsageType(input: KClass<Float>): String = "float"
 }

@@ -22,6 +22,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.commons.runOnMindustryThread
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.standard.Logger
+import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.BooleanParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.integer.IntParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.GTE
 import mindustry.Vars.*
@@ -543,7 +544,7 @@ class ServerHandler : Handler() {
     @Command(["config"])
     @ServerSide
     @Description("Configure server settings.")
-    fun config(
+    suspend fun config(
         type: ConfigCommandType = ConfigCommandType.list,
         name: String? = null,
         value: String? = null
@@ -613,10 +614,7 @@ class ServerHandler : Handler() {
                     if (type == ConfigCommandType.remove) {
                         config.set(config.defaultValue)
                     } else if (config.isBool) {
-                        config.set(
-                            com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.BooleanParameter()
-                                .parse(Boolean::class, value!!)
-                        )
+                        config.set(BooleanParameter().parse(Boolean::class, value!!))
                     } else if (config.isNum) {
                         config.set(IntParameter().parse(Int::class, value!!))
                     } else if (config.isString) {

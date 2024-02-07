@@ -5,7 +5,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class UByteParameter : CommandParameter<UByte> {
-    override fun parse(instance: KClass<UByte>, input: String): UByte {
+    override suspend fun parse(instance: KClass<UByte>, input: String): UByte {
         try {
             return input.toUByte()
         } catch (error: NumberFormatException) {
@@ -13,5 +13,5 @@ class UByteParameter : CommandParameter<UByte> {
         }
     }
 
-    override fun toUsageType(input: KClass<UByte>): String = "uByte"
+    override suspend fun toUsageType(input: KClass<UByte>): String = "uByte"
 }

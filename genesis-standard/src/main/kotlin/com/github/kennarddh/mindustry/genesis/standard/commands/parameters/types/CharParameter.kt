@@ -5,7 +5,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import kotlin.reflect.KClass
 
 class CharParameter : CommandParameter<Char> {
-    override fun parse(instance: KClass<Char>, input: String): Char {
+    override suspend fun parse(instance: KClass<Char>, input: String): Char {
         val charArray = input.toCharArray()
 
         if (charArray.size == 1) return charArray[0]
@@ -13,5 +13,5 @@ class CharParameter : CommandParameter<Char> {
         throw CommandParameterParsingException("Cannot convert $input into char for parameter :parameterName:.")
     }
 
-    override fun toUsageType(input: KClass<Char>): String = "char"
+    override suspend fun toUsageType(input: KClass<Char>): String = "char"
 }
