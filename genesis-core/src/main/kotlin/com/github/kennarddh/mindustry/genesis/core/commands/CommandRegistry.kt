@@ -267,7 +267,6 @@ class CommandRegistry {
             runOnMindustryThread {
                 Events.fire(CommandsChanged())
             }
-
     }
 
     fun getCommandFromCommandName(commandName: String?): CommandData? {
