@@ -1,7 +1,7 @@
 package com.github.kennarddh.mindustry.genesis.standard.handlers.foo
 
 import arc.util.serialization.Jval
-import com.github.kennarddh.mindustry.genesis.core.Genesis
+import com.github.kennarddh.mindustry.genesis.core.GenesisAPI
 import com.github.kennarddh.mindustry.genesis.core.commands.ArcCommand
 import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChanged
 import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandler
@@ -61,10 +61,10 @@ class FooHandler : Handler() {
     /** Sends the list of commands to a player */
     private fun sendCommands(player: Player? = null) {
         with(Jval.newObject()) {
-            add("prefix", Genesis.commandRegistry.clientPrefix)
+            add("prefix", GenesisAPI.commandRegistry.clientPrefix)
 
             add("commands", Jval.newObject().apply {
-                Genesis.commandRegistry.clientCommands.forEach {
+                GenesisAPI.commandRegistry.clientCommands.forEach {
                     val name = if (it is ArcCommand) it.realName else it.text
                     val usage = if (it is ArcCommand) it.usage else it.paramText
 
