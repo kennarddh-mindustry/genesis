@@ -71,6 +71,10 @@ class Genesis : AbstractPlugin() {
         private val filtersRegistry = FiltersRegistry()
         private val timersRegistry = TimersRegistry()
 
+        inline fun <reified T : Handler> getHandler(): T? = handlers.find { it is T } as T?
+
+        inline fun <reified T : Handler> getHandlers(): List<T> = handlers.filterIsInstance<T>()
+
         suspend fun registerHandler(handler: Handler) {
             backingHandlers.add(handler)
 
