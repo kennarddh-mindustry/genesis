@@ -8,9 +8,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.isSubclassOf
 
-/**
- * Return non-null reason string if it's not valid
- */
 typealias CommandValidator = (annotation: Annotation, player: Player?) -> Boolean
 
 data class CommandData(
