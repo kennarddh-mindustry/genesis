@@ -26,7 +26,7 @@ class FooHandler : Handler() {
 
     fun Player.isUsingFooClient() = playersWithFoo.contains(this)
 
-    /** @since v1 Plugin presence check */
+    /** Plugin presence check */
     @PacketHandler(["fooCheck"])
     fun fooCheck(player: Player) {
         playersWithFoo.add(player)
@@ -37,7 +37,7 @@ class FooHandler : Handler() {
         sendCommands(player)
     }
 
-    /** @since v1 Client transmission forwarding */
+    /** Client transmission forwarding */
     @PacketHandler(["fooTransmission"])
     fun fooTransmission(player: Player, content: String) {
         Call.clientPacketReliable("fooTransmission", "${player.id} $content")
@@ -48,7 +48,7 @@ class FooHandler : Handler() {
         sendCommands()
     }
 
-    /** @since v2 Informs clients of the transmission forwarding state. When [player] is null, the status is sent to everyone */
+    /** Informs clients of the transmission forwarding state. When [player] is null, the status is sent to everyone */
     private fun enableTransmissions(player: Player? = null) {
         val enabled = true
 
@@ -58,7 +58,7 @@ class FooHandler : Handler() {
             Call.clientPacketReliable("fooTransmissionEnabled", enabled.toString())
     }
 
-    /** @since v2 Sends the list of commands to a player */
+    /** Sends the list of commands to a player */
     private fun sendCommands(player: Player? = null) {
         with(Jval.newObject()) {
             add("prefix", Genesis.commandRegistry.clientPrefix)
