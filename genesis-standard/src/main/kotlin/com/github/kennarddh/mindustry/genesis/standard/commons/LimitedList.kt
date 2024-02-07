@@ -1,8 +1,7 @@
-package com.github.kennarddh.mindustry.genesis.core.commons
+package com.github.kennarddh.mindustry.genesis.standard.commons
 
 class LimitedListSizeGreaterThanCapacityException(message: String) : Exception(message)
 
-@Suppress("UNUSED")
 open class LimitedList<E>(capacity: Int) : Iterable<E> {
     protected val backingMutableList: MutableList<E> = mutableListOf()
 
