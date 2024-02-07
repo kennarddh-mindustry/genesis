@@ -24,6 +24,8 @@ class FooHandler : Handler() {
         playersWithFoo.remove(event.player)
     }
 
+    fun Player.isUsingFooClient() = playersWithFoo.contains(this)
+
     /** @since v1 Plugin presence check */
     @PacketHandler(["fooCheck"])
     fun fooCheck(player: Player) {
