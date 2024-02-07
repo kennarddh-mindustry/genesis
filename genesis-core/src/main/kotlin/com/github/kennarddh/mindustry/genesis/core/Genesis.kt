@@ -70,7 +70,7 @@ class Genesis : AbstractPlugin() {
         Logger.info("Loaded")
     }
 
-    suspend fun registerHandler(handler: Handler) {
+    internal suspend fun registerHandler(handler: Handler) {
         backingHandlers.add(handler)
 
         handler.onInit()
