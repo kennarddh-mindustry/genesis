@@ -6,6 +6,7 @@ import mindustry.entities.Effect
 import mindustry.game.MapObjectives
 import mindustry.game.Rules
 import mindustry.gen.Call
+import mindustry.gen.KickCallPacket
 import mindustry.gen.Player
 import mindustry.world.Tile
 
@@ -182,4 +183,13 @@ fun Player.warningToast(
     text: String
 ) {
     Call.warningToast(this.con, unicode, text)
+}
+
+fun Player.kickWithoutLogging(reason: String) {
+    val packet = KickCallPacket()
+
+    packet.reason = reason
+
+    this.con.send(packet, true)
+    this.con.close()
 }
