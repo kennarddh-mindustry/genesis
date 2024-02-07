@@ -6,8 +6,19 @@ class LimitedListSizeGreaterThanCapacityException(message: String) : Exception(m
 open class LimitedList<E>(capacity: Int) : Iterable<E> {
     protected val backingMutableList: MutableList<E> = mutableListOf()
 
+    private var backingCapacity: Int = 0
+
     var capacity: Int
-        protected set
+        get() = backingCapacity
+        protected set(value) {
+            backingCapacity = value
+
+            if (value < backingMutableList.size) {
+                for (i in 0..<backingMutableList.size - value) {
+                    backingMutableList.removeAt(i)
+                }
+            }
+        }
 
     init {
         this.capacity = capacity
