@@ -27,13 +27,11 @@ import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.commons.*
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.logging.Logger
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import mindustry.Vars
 import mindustry.gen.Player
 import mindustry.server.ServerControl
+import java.util.*
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.*
@@ -432,77 +430,85 @@ class CommandRegistry {
             throw InvalidCommandParameterException("Too much parameters supplied.")
         }
 
-        val errorMessages: MutableList<String> = mutableListOf()
+        val errorMessages = Collections.synchronizedList(mutableListOf<String>())
+
+        val deferredCommandParameters: MutableList<Deferred<Unit>> = mutableListOf()
 
         for (i in 0..<actualParametersSize) {
-            val parameter = command.parametersType[i + if (isClientSupported) 1 else 0]
+            deferredCommandParameters.add(
+                async {
+                    val parameter = command.parametersType[i + if (isClientSupported) 1 else 0]
 
-            if (i > parsedString.size - 1) {
-                if (!parameter.isOptional)
-                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped.")
+                    if (i > parsedString.size - 1) {
+                        if (!parameter.isOptional)
+                            errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped.")
 
-                continue
-            }
-
-            val passedParameter = parsedString[i]
-
-            if (passedParameter is SkipToken) {
-                if (!parameter.isOptional)
-                    errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped.")
-
-                continue
-            }
-
-            try {
-                if (passedParameter is StringToken) {
-                    val parameterTypeFilterResult =
-                        backingParameterTypes.filterKeys { parameter.kClass.isSubclassOf(it) }
-
-                    val parameterType = parameterTypeFilterResult.values.toTypedArray()[0]
-
-                    @Suppress("UNCHECKED_CAST")
-                    val output = (parameterType as CommandParameter<Any>).parse(
-                        parameter.kClass as KClass<Any>,
-                        passedParameter.value
-                    )
-
-                    parameters[parameter.kParameter] = output
-
-                    val deferredValidatorsResult = parameter.validator.map {
-                        val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
-
-                        async {
-                            @Suppress("UNCHECKED_CAST")
-                            (validator as CommandParameterValidator<Any>).invoke(it, output)
-                        }
+                        return@async
                     }
 
-                    val validatorsResult = deferredValidatorsResult.awaitAll()
+                    val passedParameter = parsedString[i]
 
-                    parameter.validator.forEachIndexed { index, it ->
-                        val isValid = validatorsResult[index]
+                    if (passedParameter is SkipToken) {
+                        if (!parameter.isOptional)
+                            errorMessages.add("Parameter ${parameter.name} is required and cannot be skipped.")
 
-                        if (!isValid) {
-                            val descriptionAnnotation =
-                                it.annotationClass.findAnnotation<ParameterValidationDescription>()
+                        return@async
+                    }
 
-                            val errorMessage = if (descriptionAnnotation != null)
-                                parameterValidationDescriptionAnnotationToString(
-                                    descriptionAnnotation,
-                                    it,
-                                    parameter.name
-                                )
-                            else
-                                "Parameter validation for parameter ${parameter.name} failed."
+                    try {
+                        if (passedParameter is StringToken) {
+                            val parameterTypeFilterResult =
+                                backingParameterTypes.filterKeys { parameter.kClass.isSubclassOf(it) }
 
-                            errorMessages.add(errorMessage)
+                            val parameterType = parameterTypeFilterResult.values.toTypedArray()[0]
+
+                            @Suppress("UNCHECKED_CAST")
+                            val output = (parameterType as CommandParameter<Any>).parse(
+                                parameter.kClass as KClass<Any>,
+                                passedParameter.value
+                            )
+
+                            parameters[parameter.kParameter] = output
+
+                            val deferredValidatorsResult = parameter.validator.map {
+                                val validator = parameterValidator[parameter.kClass]!![it.annotationClass]
+
+                                async {
+                                    @Suppress("UNCHECKED_CAST")
+                                    (validator as CommandParameterValidator<Any>).invoke(it, output)
+                                }
+                            }
+
+                            val validatorsResult = deferredValidatorsResult.awaitAll()
+
+                            parameter.validator.forEachIndexed { index, it ->
+                                val isValid = validatorsResult[index]
+
+                                if (!isValid) {
+                                    val descriptionAnnotation =
+                                        it.annotationClass.findAnnotation<ParameterValidationDescription>()
+
+                                    val errorMessage = if (descriptionAnnotation != null)
+                                        parameterValidationDescriptionAnnotationToString(
+                                            descriptionAnnotation,
+                                            it,
+                                            parameter.name
+                                        )
+                                    else
+                                        "Parameter validation for parameter ${parameter.name} failed."
+
+                                    errorMessages.add(errorMessage)
+                                }
+                            }
                         }
+                    } catch (error: CommandParameterParsingException) {
+                        errorMessages.add(error.toParametrizedString(parameter.name))
                     }
                 }
-            } catch (error: CommandParameterParsingException) {
-                errorMessages.add(error.toParametrizedString(parameter.name))
-            }
+            )
         }
+
+        deferredCommandParameters.awaitAll()
 
         if (errorMessages.isNotEmpty()) {
             val prefix = if (player == null) serverPrefix else clientPrefix
