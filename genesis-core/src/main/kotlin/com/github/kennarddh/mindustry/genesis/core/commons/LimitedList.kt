@@ -79,4 +79,6 @@ open class LimitedList<E>(capacity: Int) : Iterable<E> {
 
         return true
     }
+
+    operator fun get(index: Int): E = backingMutableList[index]
 }
