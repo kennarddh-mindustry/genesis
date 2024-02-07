@@ -80,4 +80,6 @@ open class LimitedList<E>(capacity: Int) : Iterable<E> {
     }
 
     operator fun get(index: Int): E = backingMutableList[index]
+
+    operator fun set(index: Int, value: E): E = backingMutableList.set(index, value)
 }
