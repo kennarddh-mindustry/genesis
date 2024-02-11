@@ -6,7 +6,7 @@
   "minGameVersion": "146",
   "java": true,
   "main": "com.github.kennarddh.mindustry.genesis.core.Genesis",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.4",
   "repo": "kennarddh-mindustry/genesis",
   "dependencies": [
     "kotlin-runtime"
