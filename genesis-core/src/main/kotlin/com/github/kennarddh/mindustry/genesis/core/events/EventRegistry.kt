@@ -30,7 +30,8 @@ class EventRegistry {
 
             if (functionParameters.isEmpty() && eventHandlerTriggerAnnotation == null)
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must have EventHandlerTrigger annotation because it doesn't have any parameter")
-            else if (functionParameters.size != 1)
+
+            if (functionParameters.size != 1 && eventHandlerTriggerAnnotation == null)
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly one parameter with the event type or use EventHandlerTrigger annotation")
 
             if (eventHandlerTriggerAnnotation != null) {
