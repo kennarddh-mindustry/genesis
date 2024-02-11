@@ -22,3 +22,4 @@
 - [x] Command validation with player as parameter for the validator function
 - [x] Player as parameter. Need converter. Prioritize id then search for name.
 - [x] Version command should show detailed mindustry, java, os version and not mods version
+- [ ] Add async init function to `AbstractPlugin` that will be called on genesis init
