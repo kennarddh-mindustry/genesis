@@ -9,10 +9,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validati
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.commandValidationDescriptionAnnotationToString
 import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChanged
-import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.CommandValidationException
-import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateCommandNameException
-import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateParameterTypeException
-import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.InvalidCommandMethodException
+import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.*
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.CommandParameterData
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.CommandParameterValidator
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
@@ -126,9 +123,19 @@ class CommandRegistry {
         commandValidator[annotation] = newValidator
     }
 
-    fun registerParameterType(
-        from: KClass<*>,
-        parameterType: CommandParameter<*>
+    fun <T : Any> replaceParameterType(
+        from: KClass<T>,
+        parameterType: CommandParameter<T>
+    ) {
+        if (!backingParameterTypes.contains(from))
+            throw NotFoundParameterTypeException("Parameter type for type ${from.qualifiedName} has not been registered")
+
+        backingParameterTypes[from] = parameterType
+    }
+
+    fun <T : Any> registerParameterType(
+        from: KClass<T>,
+        parameterType: CommandParameter<T>
     ) {
         if (backingParameterTypes.contains(from))
             throw DuplicateParameterTypeException("Parameter type for type ${from.qualifiedName} has already been registered")
