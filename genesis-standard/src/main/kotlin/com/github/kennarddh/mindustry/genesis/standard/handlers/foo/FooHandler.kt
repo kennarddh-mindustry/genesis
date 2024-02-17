@@ -30,19 +30,23 @@ class FooHandler : Handler() {
 
     /** Plugin presence check */
     @PacketHandler(["fooCheck"], PriorityEnum.Normal)
-    suspend fun fooCheck(player: Player) {
+    suspend fun fooCheck(player: Player): Boolean {
         playersWithFoo.add(player)
 
         player.clientPacketReliable("fooCheck", version)
 
         enableTransmissions(player)
         sendCommands(player)
+
+        return true
     }
 
     /** Client transmission forwarding */
     @PacketHandler(["fooTransmission"], PriorityEnum.Normal)
-    fun fooTransmission(player: Player, content: String) {
+    fun fooTransmission(player: Player, content: String): Boolean {
         Call.clientPacketReliable("fooTransmission", "${player.id} $content")
+
+        return true
     }
 
     @EventHandler
