@@ -18,6 +18,8 @@ abstract class AbstractPlugin : Plugin() {
 
     /**
      * Will be run at genesis plugin init and at the same time with every AbstractPlugin asyncInit.
+     *
+     * Order is not guaranteed because it will be called at the same time.
      */
     open suspend fun onAsyncInit() = Unit
 
@@ -25,6 +27,9 @@ abstract class AbstractPlugin : Plugin() {
      * Will be run at genesis plugin init.
      *
      * Blocking this function will block genesis init.
+     *
+     * Guaranteed to be called ordered.
+     * If the plugin has any AbstractPlugin dependencies, it's onGenesisInit will be called before this plugin onGenesisInit.
      */
     open suspend fun onGenesisInit() = Unit
 
