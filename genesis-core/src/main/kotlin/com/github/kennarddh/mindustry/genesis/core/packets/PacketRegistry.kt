@@ -76,7 +76,6 @@ class PacketRegistry {
             if (acceptName && functionParameters[2].type.classifier != String::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept string as the third parameter")
 
-
             if (function.returnType.classifier != Boolean::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
