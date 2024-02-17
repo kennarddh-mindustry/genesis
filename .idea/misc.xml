@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <list size="11">
+    <list size="12">
       <item index="0" class="java.lang.String" itemvalue="com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command" />
       <item index="1" class="java.lang.String" itemvalue="com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandler" />
       <item index="2" class="java.lang.String" itemvalue="com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler" />
-      <item index="3" class="java.lang.String" itemvalue="kennarddh.genesis.commands.annotations.Command" />
-      <item index="4" class="java.lang.String" itemvalue="kennarddh.genesis.core.commands.annotations.Command" />
-      <item index="5" class="java.lang.String" itemvalue="kennarddh.genesis.core.events.annotations.EventHandler" />
-      <item index="6" class="java.lang.String" itemvalue="kennarddh.genesis.core.filters.annotations.Filter" />
-      <item index="7" class="java.lang.String" itemvalue="kennarddh.genesis.core.packets.annotations.PacketHandler" />
-      <item index="8" class="java.lang.String" itemvalue="kennarddh.genesis.core.server.packets.annotations.ServerPacketHandler" />
-      <item index="9" class="java.lang.String" itemvalue="kennarddh.genesis.core.timers.annotations.TimerTask" />
-      <item index="10" class="java.lang.String" itemvalue="kennarddh.genesis.events.annotations.EventHandler" />
+      <item index="3" class="java.lang.String" itemvalue="com.github.kennarddh.mindustry.genesis.core.server.packets.annotations.ServerPacketHandler" />
+      <item index="4" class="java.lang.String" itemvalue="kennarddh.genesis.commands.annotations.Command" />
+      <item index="5" class="java.lang.String" itemvalue="kennarddh.genesis.core.commands.annotations.Command" />
+      <item index="6" class="java.lang.String" itemvalue="kennarddh.genesis.core.events.annotations.EventHandler" />
+      <item index="7" class="java.lang.String" itemvalue="kennarddh.genesis.core.filters.annotations.Filter" />
+      <item index="8" class="java.lang.String" itemvalue="kennarddh.genesis.core.packets.annotations.PacketHandler" />
+      <item index="9" class="java.lang.String" itemvalue="kennarddh.genesis.core.server.packets.annotations.ServerPacketHandler" />
+      <item index="10" class="java.lang.String" itemvalue="kennarddh.genesis.core.timers.annotations.TimerTask" />
+      <item index="11" class="java.lang.String" itemvalue="kennarddh.genesis.events.annotations.EventHandler" />
     </list>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
