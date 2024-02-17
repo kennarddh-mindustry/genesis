@@ -10,6 +10,7 @@ import com.github.kennarddh.mindustry.genesis.core.filters.annotations.Filter
 import com.github.kennarddh.mindustry.genesis.core.filters.exceptions.InvalidFilterHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mindustry.Vars
 import mindustry.Vars.net
 import mindustry.gen.Player
@@ -44,49 +45,51 @@ class FiltersRegistry {
         val prevConnectFilter = Reflect.get<ServerConnectFilter>(server, "connectFilter")
 
         Vars.netServer.admins.addChatFilter { player, message ->
-            var output = message
+            runBlocking {
+                var output = message
 
-            CoroutineScopes.Main.launch {
                 chatFilters.forEachPrioritized {
                     output = it.filter(player, output)
                 }
-            }
 
-            return@addChatFilter output
+                return@runBlocking output
+            }
         }
 
         Vars.netServer.admins.addActionFilter { action ->
-            var output = true
+            runBlocking {
+                var output = true
 
-            CoroutineScopes.Main.launch {
                 actionFilters.forEachPrioritized {
+                    output = it.allow(action)
+
                     if (!output)
                         return@forEachPrioritized
-
-                    output = it.allow(action)
                 }
-            }
 
-            return@addActionFilter output
+                return@runBlocking output
+            }
         }
 
         CoroutineScopes.Main.launch {
             server.setConnectFilter { address ->
-                var output = true
+                runBlocking {
+                    var output = true
 
-                CoroutineScopes.Main.launch {
-                    connectFilters.forEachPrioritized {
-                        if (!output)
-                            return@forEachPrioritized
-
-                        output = it.accept(address)
+                    CoroutineScopes.Main.launch {
+                        connectFilters.forEachPrioritized {
+                            output = it.accept(address)
+                            
+                            if (!output)
+                                return@forEachPrioritized
+                        }
                     }
+
+                    if (output)
+                        return@runBlocking true
+
+                    prevConnectFilter?.accept(address) ?: false
                 }
-
-                if (output)
-                    return@setConnectFilter true
-
-                prevConnectFilter?.accept(address) ?: false
             }
         }
     }
