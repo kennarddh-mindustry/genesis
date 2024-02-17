@@ -1,4 +1,4 @@
-package com.github.kennarddh.mindustry.genesis.standard.extensions
+package com.github.kennarddh.mindustry.genesis.core.extensions
 
 import com.github.kennarddh.mindustry.genesis.core.commons.AbstractPlugin
 import mindustry.Vars
