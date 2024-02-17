@@ -24,3 +24,4 @@
 - [x] Version command should show detailed mindustry, java, os version and not mods version
 - [x] Add async init function to `AbstractPlugin` that will be called on genesis init
 - [ ] Fire `DoubleTap` event
+- [ ] Add `runAnyway` boolean parameter to ServerPacketsRegistry and PacketRegistry annotation
