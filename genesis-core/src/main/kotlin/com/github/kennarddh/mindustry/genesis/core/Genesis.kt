@@ -78,6 +78,10 @@ class Genesis : AbstractPlugin() {
             }
         }
 
+        Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
+            it.onGenesisInit()
+        }
+
         Logger.info("Loaded")
     }
 
