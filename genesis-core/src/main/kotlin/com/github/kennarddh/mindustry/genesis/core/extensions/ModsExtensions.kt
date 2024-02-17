@@ -11,18 +11,18 @@ inline fun <reified T : Mod> Mods.getLoadedMod(): LoadedMod? = Vars.mods.getMod(
 inline fun <reified T : Mod> Mods.getLoadedMods(): List<LoadedMod> =
     orderedMods().toList().filter { it.main is T }
 
-inline fun <reified T : Mod> Mods.getEnabledLoadedMods(): List<LoadedMod> =
+inline fun <reified T : Mod> Mods.getLoadedEnabledMods(): List<LoadedMod> =
     getLoadedMods<T>().filter { it.enabled() }
 
-inline fun <reified T : Mod> Mods.getJavaLoadedMods(): List<LoadedMod> =
+inline fun <reified T : Mod> Mods.getLoadedJavaMods(): List<LoadedMod> =
     getLoadedMods<T>().filter { it.isJava }
 
 inline fun <reified T : Mod> Mods.getEnabledJavaLoadedMods(): List<LoadedMod> =
-    getEnabledLoadedMods<T>().filter { it.isJava }
+    getLoadedEnabledMods<T>().filter { it.isJava }
 
 inline fun <reified T : Mod> Mods.getMod(): Mod? = getLoadedMod<T>()?.main
 
-inline fun <reified T : Mod> Mods.getJavaMod(): Mod? {
+inline fun <reified T : Mod> Mods.getLoadedJavaMod(): Mod? {
     val loadedMod = getLoadedMod<T>() ?: return null
 
     if (!loadedMod.isJava)
@@ -31,7 +31,10 @@ inline fun <reified T : Mod> Mods.getJavaMod(): Mod? {
     return loadedMod.main
 }
 
-fun Mods.getAbstractPluginsOrdered(): List<LoadedMod> = getJavaLoadedMods<AbstractPlugin>()
+fun Mods.getLoadedAbstractPluginsOrdered(): List<LoadedMod> = getLoadedJavaMods<AbstractPlugin>()
 
-fun Mods.getEnabledAbstractPluginsOrdered(): List<LoadedMod> =
+fun Mods.getLoadedEnabledAbstractPluginsOrdered(): List<LoadedMod> =
     getEnabledJavaLoadedMods<AbstractPlugin>()
+
+fun Mods.getEnabledAbstractPluginsOrdered(): List<AbstractPlugin> =
+    getEnabledJavaLoadedMods<AbstractPlugin>().map { it.main as AbstractPlugin }
