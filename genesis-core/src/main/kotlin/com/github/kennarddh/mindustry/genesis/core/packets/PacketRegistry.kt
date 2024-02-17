@@ -1,6 +1,9 @@
 package com.github.kennarddh.mindustry.genesis.core.packets
 
 import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
+import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
+import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
+import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityEnum
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
 import com.github.kennarddh.mindustry.genesis.core.packets.exceptions.InvalidPacketHandlerMethodException
@@ -13,7 +16,38 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 class PacketRegistry {
+    private val packetListeners: MutableMap<String, MutablePriorityList<suspend (Player, String) -> Boolean>> =
+        mutableMapOf()
+
     internal fun init() {
+    }
+
+    private fun addPacketListener(
+        packetType: String,
+        priority: PriorityEnum,
+        handler: suspend (Player, String) -> Boolean
+    ) {
+        if (!packetListeners.contains(packetType)) {
+            packetListeners[packetType] = MutablePriorityList()
+
+            netServer.addPacketHandler(packetType) { player, data ->
+                CoroutineScopes.Main.launch {
+                    packetListeners[packetType]!!.forEachPrioritized {
+                        val result = it(player, data)
+
+                        if (!result)
+                            return@forEachPrioritized
+                    }
+                }
+            }
+        }
+
+        packetListeners[packetType]!!.add(
+            PriorityContainer(
+                priority,
+                handler
+            )
+        )
     }
 
     fun registerHandler(handler: Handler) {
@@ -23,6 +57,7 @@ class PacketRegistry {
             val packetHandlerAnnotation = function.findAnnotation<PacketHandler>() ?: continue
 
             val names = packetHandlerAnnotation.names
+            val priority = packetHandlerAnnotation.priority
 
             val functionParameters = function.parameters.drop(1)
 
@@ -41,16 +76,18 @@ class PacketRegistry {
             if (acceptName && functionParameters[2].type.classifier != String::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept string as the third parameter")
 
+
+            if (function.returnType.classifier != Boolean::class)
+                throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
+
             names.forEach {
-                netServer.addPacketHandler(it) { player, data ->
-                    CoroutineScopes.Main.launch {
-                        if (acceptName)
-                            function.callSuspend(handler, player, data, it)
-                        else if (acceptContent)
-                            function.callSuspend(handler, player, data)
-                        else
-                            function.callSuspend(handler, player)
-                    }
+                addPacketListener(it, priority) { player, data ->
+                    if (acceptName)
+                        function.callSuspend(handler, player, data, it) as Boolean
+                    else if (acceptContent)
+                        function.callSuspend(handler, player, data) as Boolean
+                    else
+                        function.callSuspend(handler, player) as Boolean
                 }
             }
         }
