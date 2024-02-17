@@ -17,12 +17,14 @@ abstract class AbstractPlugin : Plugin() {
     open suspend fun dispose() = Unit
 
     /**
-     * Will be fired at genesis plugin init and at the same time with every AbstractPlugin asyncInit.
+     * Will be run at genesis plugin init and at the same time with every AbstractPlugin asyncInit.
      */
     open suspend fun onAsyncInit() = Unit
 
     /**
-     * Will be fired at genesis plugin init.
+     * Will be run at genesis plugin init.
+     *
+     * Blocking this function will block genesis init.
      */
     open suspend fun onGenesisInit() = Unit
 
