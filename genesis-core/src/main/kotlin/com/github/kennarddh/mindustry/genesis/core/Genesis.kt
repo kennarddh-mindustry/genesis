@@ -50,18 +50,9 @@ class Genesis : AbstractPlugin() {
                         }
                     }
 
-                    // Reversed because needs to dispose dependant mod/plugin plugin before the dependencies
-                    val mods = Vars.mods.orderedMods().toList().reversed()
-
-                    mods.forEach {
-                        if (!it.isJava) return@forEach
-                        if (!it.enabled()) return@forEach
-                        if (it.main !is AbstractPlugin) return@forEach
-
-                        val plugin = it.main as AbstractPlugin
-
+                    Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
                         launch {
-                            plugin.dispose()
+                            it.dispose()
                         }
                     }
                 }
