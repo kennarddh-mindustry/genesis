@@ -12,9 +12,9 @@ abstract class AbstractPlugin : Plugin() {
     /**
      * Called when the Application is destroyed.
      *
-     * Will be run at the same time for every plugin's dispose including Handler onDispose.
+     * Will be run at the same time for every plugin's onDispose including Handler onDispose.
      */
-    open suspend fun dispose() = Unit
+    open suspend fun onDispose() = Unit
 
     /**
      * Will be run at genesis plugin init and at the same time with every AbstractPlugin asyncInit.

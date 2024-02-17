@@ -52,7 +52,7 @@ class Genesis : AbstractPlugin() {
 
                     Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
                         launch {
-                            it.dispose()
+                            it.onDispose()
                         }
                     }
                 }
