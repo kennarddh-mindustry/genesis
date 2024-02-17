@@ -16,7 +16,7 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 class PacketRegistry {
-    private val packetListeners: MutableMap<String, MutablePriorityList<suspend (Player, String) -> Boolean>> =
+    private val packetListeners: MutableMap<String, MutablePriorityList<PacketListener>> =
         mutableMapOf()
 
     internal fun init() {
@@ -25,18 +25,24 @@ class PacketRegistry {
     private fun addPacketListener(
         packetType: String,
         priority: PriorityEnum,
-        handler: suspend (Player, String) -> Boolean
+        runAnyway: Boolean,
+        handler: suspend (Player, String) -> Boolean?,
     ) {
         if (!packetListeners.contains(packetType)) {
             packetListeners[packetType] = MutablePriorityList()
 
             netServer.addPacketHandler(packetType) { player, data ->
                 CoroutineScopes.Main.launch {
+                    var output = true
                     packetListeners[packetType]!!.forEachPrioritized {
-                        val result = it(player, data)
+                        if (it.runAnyway || output) {
+                            val result = it.handler(player, data)
 
-                        if (!result)
-                            return@forEachPrioritized
+                            if (!it.runAnyway) {
+                                output = result!!
+                            }
+                        }
+
                     }
                 }
             }
@@ -45,7 +51,7 @@ class PacketRegistry {
         packetListeners[packetType]!!.add(
             PriorityContainer(
                 priority,
-                handler
+                PacketListener(handler, runAnyway)
             )
         )
     }
@@ -58,6 +64,7 @@ class PacketRegistry {
 
             val names = packetHandlerAnnotation.names
             val priority = packetHandlerAnnotation.priority
+            val runAnyway = packetHandlerAnnotation.runAnyway
 
             val functionParameters = function.parameters.drop(1)
 
@@ -76,17 +83,22 @@ class PacketRegistry {
             if (acceptName && functionParameters[2].type.classifier != String::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept string as the third parameter")
 
-            if (function.returnType.classifier != Boolean::class)
+            if (!runAnyway && function.returnType.classifier != Boolean::class)
                 throw InvalidPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
             names.forEach {
-                addPacketListener(it, priority) { player, data ->
-                    if (acceptName)
-                        function.callSuspend(handler, player, data, it) as Boolean
+                addPacketListener(it, priority, runAnyway) { player, data ->
+                    val result = if (acceptName)
+                        function.callSuspend(handler, player, data, it)
                     else if (acceptContent)
-                        function.callSuspend(handler, player, data) as Boolean
+                        function.callSuspend(handler, player, data)
                     else
-                        function.callSuspend(handler, player) as Boolean
+                        function.callSuspend(handler, player)
+
+                    if (runAnyway)
+                        null
+                    else
+                        result as Boolean
                 }
             }
         }
