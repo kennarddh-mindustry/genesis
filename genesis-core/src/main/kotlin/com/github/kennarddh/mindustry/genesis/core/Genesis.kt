@@ -4,7 +4,9 @@ import arc.ApplicationListener
 import arc.Core
 import com.github.kennarddh.mindustry.genesis.core.commands.CommandRegistry
 import com.github.kennarddh.mindustry.genesis.core.commons.AbstractPlugin
+import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.events.EventRegistry
+import com.github.kennarddh.mindustry.genesis.core.extensions.getEnabledAbstractPluginsOrdered
 import com.github.kennarddh.mindustry.genesis.core.filters.FiltersRegistry
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.logging.Logger
@@ -13,6 +15,7 @@ import com.github.kennarddh.mindustry.genesis.core.server.packets.ServerPacketsR
 import com.github.kennarddh.mindustry.genesis.core.timers.TimersRegistry
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import mindustry.Vars
 
 class Genesis : AbstractPlugin() {
@@ -28,7 +31,7 @@ class Genesis : AbstractPlugin() {
     internal val filtersRegistry = FiltersRegistry()
     internal val timersRegistry = TimersRegistry()
 
-    override fun init() {
+    override suspend fun onInit() {
         commandRegistry.init()
         eventRegistry.init()
         packetRegistry.init()
@@ -66,6 +69,14 @@ class Genesis : AbstractPlugin() {
                 Logger.info("Stopped")
             }
         })
+
+        Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
+            withContext(CoroutineScopes.Main.coroutineContext) {
+                launch {
+                    it.onAsyncInit()
+                }
+            }
+        }
 
         Logger.info("Loaded")
     }
