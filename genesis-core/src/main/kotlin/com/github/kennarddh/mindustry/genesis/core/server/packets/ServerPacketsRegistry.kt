@@ -36,23 +36,18 @@ class ServerPacketsRegistry {
         if (!serverListeners.contains(packetType as KClass<Any>)) {
             serverListeners[packetType] = MutablePriorityList()
 
+            val previousListeners =
+                Reflect.get<ObjectMap<Class<*>, Cons2<NetConnection, Any>>>(net, "serverListeners")
+
+            val previousListener = previousListeners.get(packetType.java)
+
             net.handleServer(packetType.java) { connection, packet ->
-                val previousListeners =
-                    Reflect.get<ObjectMap<Class<*>, Cons2<NetConnection, Any>>>(net, "serverListeners")
-
-                val previousListener = previousListeners.get(packetType.java)
-
                 CoroutineScopes.Main.launch {
-                    var isStopped = false
-
                     serverListeners[packetType]!!.forEachPrioritized {
-                        if (isStopped)
-                            return@forEachPrioritized
-
                         val result = it(connection, packet)
 
                         if (!result)
-                            isStopped = true
+                            return@forEachPrioritized
                     }
 
                     // Previous packet listener will always get called even if genesis listener failed
