@@ -50,7 +50,7 @@ class Genesis : AbstractPlugin() {
                         }
                     }
 
-                    Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
+                    Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
                         launch {
                             it.dispose()
                         }
@@ -61,7 +61,7 @@ class Genesis : AbstractPlugin() {
             }
         })
 
-        Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
+        Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
             withContext(CoroutineScopes.Main.coroutineContext) {
                 launch {
                     it.onAsyncInit()
@@ -69,7 +69,7 @@ class Genesis : AbstractPlugin() {
             }
         }
 
-        Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
+        Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
             it.onGenesisInit()
         }
 
