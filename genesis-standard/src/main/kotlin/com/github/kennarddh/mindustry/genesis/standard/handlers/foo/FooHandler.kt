@@ -17,14 +17,15 @@ import mindustry.gen.Player
 class FooHandler : Handler() {
     private val version by lazy { Vars.mods.getMod(com.github.kennarddh.mindustry.genesis.standard.GenesisStandard::class.java).meta.version }
 
-    val playersWithFoo: MutableList<Player> = mutableListOf()
+    companion object {
+        val playersWithFoo: MutableList<Player> = mutableListOf()
+    }
 
     @EventHandler
     fun onPlayerLeave(event: EventType.PlayerLeave) {
         playersWithFoo.remove(event.player)
     }
 
-    fun Player.isUsingFooClient() = playersWithFoo.contains(this)
 
     /** Plugin presence check */
     @PacketHandler(["fooCheck"])
