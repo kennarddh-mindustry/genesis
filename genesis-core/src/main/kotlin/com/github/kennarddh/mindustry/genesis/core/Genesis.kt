@@ -61,7 +61,7 @@ class Genesis : AbstractPlugin() {
             }
         })
 
-        Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
+        Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
             withContext(CoroutineScopes.Main.coroutineContext) {
                 launch {
                     it.onAsyncInit()
