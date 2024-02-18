@@ -21,7 +21,7 @@ import kotlin.reflect.jvm.isAccessible
 
 
 class ServerPacketsRegistry {
-    private val serverListeners: MutableMap<KClass<Any>, MutablePriorityList<suspend (NetConnection, Any) -> Boolean>> =
+    private val serverListeners: MutableMap<KClass<Any>, MutablePriorityList<ServerPacketListener>> =
         mutableMapOf()
 
     internal fun init() {
@@ -30,7 +30,8 @@ class ServerPacketsRegistry {
     private fun <T : Any> addServerListener(
         packetType: KClass<T>,
         priority: PriorityEnum,
-        handler: suspend (NetConnection, T) -> Boolean
+        runAnyway: Boolean,
+        handler: suspend (NetConnection, T) -> Boolean?
     ) {
         @Suppress("UNCHECKED_CAST")
         if (!serverListeners.contains(packetType as KClass<Any>)) {
@@ -43,11 +44,16 @@ class ServerPacketsRegistry {
 
             net.handleServer(packetType.java) { connection, packet ->
                 CoroutineScopes.Main.launch {
-                    serverListeners[packetType]!!.forEachPrioritized {
-                        val result = it(connection, packet)
+                    var output = true
 
-                        if (!result)
-                            return@forEachPrioritized
+                    serverListeners[packetType]!!.forEachPrioritized {
+                        if (it.runAnyway || output) {
+                            val result = it.handler(connection, packet)
+
+                            if (!it.runAnyway) {
+                                output = result
+                            }
+                        }
                     }
 
                     // Previous packet listener will always get called even if genesis listener failed
@@ -60,7 +66,7 @@ class ServerPacketsRegistry {
         serverListeners[packetType]!!.add(
             PriorityContainer(
                 priority,
-                handler as suspend (NetConnection, Any) -> Boolean
+                ServerPacketListener(handler as suspend (NetConnection, Any) -> Boolean, runAnyway)
             )
         )
     }
@@ -72,6 +78,7 @@ class ServerPacketsRegistry {
             val serverPacketHandlerAnnotation = function.findAnnotation<ServerPacketHandler>() ?: continue
 
             val priority = serverPacketHandlerAnnotation.priority
+            val runAnyway = serverPacketHandlerAnnotation.runAnyway
 
             val functionParameters = function.parameters.drop(1)
 
@@ -84,10 +91,18 @@ class ServerPacketsRegistry {
             if (function.returnType.classifier != Boolean::class)
                 throw InvalidServerPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
 
+            if (!runAnyway && function.returnType.classifier != Boolean::class)
+                throw InvalidServerPacketHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return boolean")
+
             val packetType = functionParameters[1].type.classifier as KClass<*>
 
-            addServerListener(packetType, priority) { connection, packet ->
-                function.callSuspend(handler, connection, packet) as Boolean
+            addServerListener(packetType, priority, runAnyway) { connection, packet ->
+                val result = function.callSuspend(handler, connection, packet)
+                
+                if (runAnyway)
+                    null
+                else
+                    result as Boolean
             }
         }
     }
