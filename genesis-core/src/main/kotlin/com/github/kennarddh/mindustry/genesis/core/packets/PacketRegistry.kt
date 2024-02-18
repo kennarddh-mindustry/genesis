@@ -34,6 +34,7 @@ class PacketRegistry {
             netServer.addPacketHandler(packetType) { player, data ->
                 CoroutineScopes.Main.launch {
                     var output = true
+
                     packetListeners[packetType]!!.forEachPrioritized {
                         if (it.runAnyway || output) {
                             val result = it.handler(player, data)
@@ -42,7 +43,6 @@ class PacketRegistry {
                                 output = result!!
                             }
                         }
-
                     }
                 }
             }
