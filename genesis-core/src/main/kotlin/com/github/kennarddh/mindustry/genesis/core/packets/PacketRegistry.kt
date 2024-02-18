@@ -51,7 +51,7 @@ class PacketRegistry {
         packetListeners[packetType]!!.add(
             PriorityContainer(
                 priority,
-                PacketListener(handler, runAnyway)
+                PacketListener(packetType, handler, runAnyway)
             )
         )
     }

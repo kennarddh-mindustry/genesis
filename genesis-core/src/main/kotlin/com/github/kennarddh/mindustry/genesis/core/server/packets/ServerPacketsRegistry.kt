@@ -21,7 +21,7 @@ import kotlin.reflect.jvm.isAccessible
 
 
 class ServerPacketsRegistry {
-    private val serverListeners: MutableMap<KClass<Any>, MutablePriorityList<ServerPacketListener>> =
+    private val serverListeners: MutableMap<KClass<Any>, MutablePriorityList<ServerPacketListener<Any>>> =
         mutableMapOf()
 
     internal fun init() {
@@ -51,7 +51,7 @@ class ServerPacketsRegistry {
                             val result = it.handler(connection, packet)
 
                             if (!it.runAnyway) {
-                                output = result
+                                output = result!!
                             }
                         }
                     }
@@ -66,8 +66,12 @@ class ServerPacketsRegistry {
         serverListeners[packetType]!!.add(
             PriorityContainer(
                 priority,
-                ServerPacketListener(handler as suspend (NetConnection, Any) -> Boolean, runAnyway)
-            )
+                ServerPacketListener(
+                    packetType as KClass<T>,
+                    handler,
+                    runAnyway
+                )
+            ) as PriorityContainer<ServerPacketListener<Any>>
         )
     }
 
@@ -98,7 +102,7 @@ class ServerPacketsRegistry {
 
             addServerListener(packetType, priority, runAnyway) { connection, packet ->
                 val result = function.callSuspend(handler, connection, packet)
-                
+
                 if (runAnyway)
                     null
                 else
