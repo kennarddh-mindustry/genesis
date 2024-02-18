@@ -4,6 +4,7 @@ import arc.Events
 import com.github.kennarddh.mindustry.genesis.core.commons.runOnMindustryThread
 import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandler
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
+import com.github.kennarddh.mindustry.genesis.standard.Logger
 import com.github.kennarddh.mindustry.genesis.standard.handlers.tap.events.DoubleTap
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -25,11 +26,17 @@ class DoubleTapHandler : Handler() {
             return
         }
 
+        Logger.info("x: ${Clock.System.now() - playersLastTap[event.player]!!}")
+
         if (Clock.System.now() - playersLastTap[event.player]!! <= doubleClickMaxDelay) {
             runOnMindustryThread {
                 Events.fire(DoubleTap(event.player, event.tile))
             }
+
+            playersLastTap.remove(event.player)
         }
+
+        playersLastTap[event.player] = Clock.System.now()
     }
 
     @EventHandler

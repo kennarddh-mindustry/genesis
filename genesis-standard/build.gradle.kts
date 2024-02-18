@@ -68,8 +68,12 @@ sourceSets {
 }
 
 configurations.runtimeClasspath {
-    exclude("org.jetbrains.kotlin")
-    exclude("org.jetbrains.kotlinx")
+    exclude("org.jetbrains.kotlin", "kotlin-stdlib")
+    exclude("org.jetbrains.kotlin", "kotlin-stdlib-common")
+    exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
+    exclude("org.jetbrains.kotlin", "kotlin-reflect")
+    exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-core")
+    exclude("org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8")
     exclude("org.slf4j")
 }
 
