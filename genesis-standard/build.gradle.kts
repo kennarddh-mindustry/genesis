@@ -48,6 +48,8 @@ dependencies {
     compileOnly(project(":genesis-core"))
 
     implementation("org.slf4j:slf4j-api:2.0.11")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 }
 
 kotlin {
