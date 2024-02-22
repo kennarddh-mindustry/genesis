@@ -209,7 +209,7 @@ class ServerHandler : Handler() {
             }
         }
 
-        return CommandResult(output.trimEnd('\n').toString())
+        return CommandResult(output.trimEnd('\n'))
     }
 
     @Command(["host"])
