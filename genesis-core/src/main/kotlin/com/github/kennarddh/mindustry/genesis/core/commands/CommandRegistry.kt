@@ -315,6 +315,18 @@ class CommandRegistry {
         removeCommand(name, CommandSide.Server)
     }
 
+    fun invokeServerCommand(command: String) {
+        val (name, parametersString) = command.split(' ', limit = 1)
+
+        invokeCommand(name, parametersString, null)
+    }
+
+    fun invokeClientCommand(player: Player, command: String) {
+        val (name, parametersString) = command.split(' ', limit = 1)
+
+        invokeCommand(name, parametersString, player)
+    }
+
     internal fun invokeCommand(name: String, parametersString: String, player: Player?) {
         val command = getCommandFromCommandName(name)
 
