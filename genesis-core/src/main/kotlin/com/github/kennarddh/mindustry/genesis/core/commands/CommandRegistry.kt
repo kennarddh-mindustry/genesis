@@ -316,6 +316,14 @@ class CommandRegistry {
     }
 
     fun invokeServerCommand(command: String) {
+        serverHandler.handleMessage(command)
+    }
+
+    fun invokeServerCommand(player: Player, command: String) {
+        clientHandler.handleMessage(command, player)
+    }
+
+    fun invokeGenesisServerCommand(command: String) {
         if (command == "") throw IllegalArgumentException("Command cannot be empty")
 
         val result = command.split(' ', limit = 2)
@@ -326,7 +334,7 @@ class CommandRegistry {
         invokeCommand(name, parametersString, null)
     }
 
-    fun invokeClientCommand(player: Player, command: String) {
+    fun invokeGenesisClientCommand(player: Player, command: String) {
         if (command == "") throw IllegalArgumentException("Command cannot be empty")
 
         val result = command.split(' ', limit = 2)
