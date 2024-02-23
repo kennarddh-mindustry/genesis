@@ -72,7 +72,5 @@ data class CommandData(
 
             append(' ')
         }
-
-        trimEnd(' ')
-    }
+    }.trimEnd(' ')
 }
