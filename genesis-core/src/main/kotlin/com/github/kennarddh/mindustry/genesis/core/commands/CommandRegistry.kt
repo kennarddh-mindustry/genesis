@@ -316,13 +316,23 @@ class CommandRegistry {
     }
 
     fun invokeServerCommand(command: String) {
-        val (name, parametersString) = command.split(' ', limit = 1)
+        if (command == "") throw IllegalArgumentException("Command cannot be empty")
+
+        val result = command.split(' ', limit = 2)
+
+        val name = result[0]
+        val parametersString = if (result.size >= 2) result[1] else ""
 
         invokeCommand(name, parametersString, null)
     }
 
     fun invokeClientCommand(player: Player, command: String) {
-        val (name, parametersString) = command.split(' ', limit = 1)
+        if (command == "") throw IllegalArgumentException("Command cannot be empty")
+
+        val result = command.split(' ', limit = 2)
+
+        val name = result[0]
+        val parametersString = if (result.size >= 2) result[1] else ""
 
         invokeCommand(name, parametersString, player)
     }
