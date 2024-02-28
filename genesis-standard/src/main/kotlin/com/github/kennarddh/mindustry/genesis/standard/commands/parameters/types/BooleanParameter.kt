@@ -6,8 +6,8 @@ import kotlin.reflect.KClass
 
 class BooleanParameter : CommandParameter<Boolean> {
     override suspend fun parse(instance: KClass<Boolean>, input: String): Boolean {
-        return if (input.lowercase() == "on" || input.lowercase() == "true" || input.lowercase() == "yes") true
-        else if (input.lowercase() == "off" || input.lowercase() == "false" || input.lowercase() == "no") false
+        return if (input.lowercase() == "on" || input.lowercase() == "true" || input.lowercase() == "yes" || input.lowercase() == "y") true
+        else if (input.lowercase() == "off" || input.lowercase() == "false" || input.lowercase() == "no" || input.lowercase() == "n") false
         else throw CommandParameterParsingException("Cannot convert $input into boolean for parameter :parameterName:.")
     }
 
