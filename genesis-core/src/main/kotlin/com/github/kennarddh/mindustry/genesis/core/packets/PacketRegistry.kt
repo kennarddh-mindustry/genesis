@@ -2,8 +2,8 @@ package com.github.kennarddh.mindustry.genesis.core.packets
 
 import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
+import com.github.kennarddh.mindustry.genesis.core.commons.priority.Priority
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
-import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityEnum
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
 import com.github.kennarddh.mindustry.genesis.core.packets.exceptions.InvalidPacketHandlerMethodException
@@ -24,7 +24,7 @@ class PacketRegistry {
 
     private fun addPacketListener(
         packetType: String,
-        priority: PriorityEnum,
+        priority: Priority,
         runAnyway: Boolean,
         handler: suspend (Player, String) -> Boolean?,
     ) {

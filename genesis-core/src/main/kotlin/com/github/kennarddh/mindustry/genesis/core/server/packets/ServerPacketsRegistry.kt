@@ -5,8 +5,8 @@ import arc.struct.ObjectMap
 import arc.util.Reflect
 import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
+import com.github.kennarddh.mindustry.genesis.core.commons.priority.Priority
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
-import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityEnum
 import com.github.kennarddh.mindustry.genesis.core.events.exceptions.InvalidServerPacketHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.server.packets.annotations.ServerPacketHandler
@@ -29,7 +29,7 @@ class ServerPacketsRegistry {
 
     private fun <T : Any> addServerListener(
         packetType: KClass<T>,
-        priority: PriorityEnum,
+        priority: Priority,
         runAnyway: Boolean,
         handler: suspend (NetConnection, T) -> Boolean?
     ) {

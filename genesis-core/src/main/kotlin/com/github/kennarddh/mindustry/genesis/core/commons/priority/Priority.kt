@@ -1,6 +1,6 @@
 package com.github.kennarddh.mindustry.genesis.core.commons.priority
 
-enum class PriorityEnum(val value: Int) {
+enum class Priority(val value: Int) {
     Important(50),
     High(40),
     Normal(30),

@@ -4,7 +4,7 @@ import arc.util.serialization.Jval
 import com.github.kennarddh.mindustry.genesis.core.GenesisAPI
 import com.github.kennarddh.mindustry.genesis.core.commands.ArcCommand
 import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChanged
-import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityEnum
+import com.github.kennarddh.mindustry.genesis.core.commons.priority.Priority
 import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandler
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
@@ -29,7 +29,7 @@ class FooHandler : Handler() {
 
 
     /** Plugin presence check */
-    @PacketHandler(["fooCheck"], PriorityEnum.Normal, true)
+    @PacketHandler(["fooCheck"], Priority.Normal, true)
     suspend fun fooCheck(player: Player) {
         playersWithFoo.add(player)
 
@@ -40,7 +40,7 @@ class FooHandler : Handler() {
     }
 
     /** Client transmission forwarding */
-    @PacketHandler(["fooTransmission"], PriorityEnum.Normal, true)
+    @PacketHandler(["fooTransmission"], Priority.Normal, true)
     fun fooTransmission(player: Player, content: String) {
         Call.clientPacketReliable("fooTransmission", "${player.id} $content")
     }
