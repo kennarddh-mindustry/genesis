@@ -32,12 +32,16 @@ class Genesis : AbstractPlugin() {
     internal val timersRegistry = TimersRegistry()
 
     override suspend fun onInit() {
+        Logger.info("Init")
+
         commandRegistry.init()
         eventRegistry.init()
         packetRegistry.init()
         serverPacketsRegistry.init()
         filtersRegistry.init()
         timersRegistry.init()
+
+        Logger.info("Registries initialized")
 
         Core.app.addListener(object : ApplicationListener {
             override fun dispose() {
@@ -61,6 +65,8 @@ class Genesis : AbstractPlugin() {
             }
         })
 
+        Logger.info("Dispose listener added")
+
         Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
             withContext(CoroutineScopes.Main.coroutineContext) {
                 launch {
@@ -69,14 +75,20 @@ class Genesis : AbstractPlugin() {
             }
         }
 
+        Logger.info("onAsyncInit for AbstractPlugin invoked")
+
         Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
             it.onGenesisInit()
         }
+
+        Logger.info("onGenesisInit for AbstractPlugin invoked")
 
         Logger.info("Loaded")
     }
 
     internal suspend fun registerHandler(handler: Handler) {
+        Logger.info("Registering handler: ${handler::class.qualifiedName}")
+
         backingHandlers.add(handler)
 
         handler.onInit()
@@ -89,5 +101,7 @@ class Genesis : AbstractPlugin() {
         timersRegistry.registerHandler(handler)
 
         handler.onRegistered()
+
+        Logger.info("Handler registered: ${handler::class.qualifiedName}")
     }
 }
