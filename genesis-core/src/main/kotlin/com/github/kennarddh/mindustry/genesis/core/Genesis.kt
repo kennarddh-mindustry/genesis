@@ -87,7 +87,7 @@ class Genesis : AbstractPlugin() {
     }
 
     internal suspend fun registerHandler(handler: Handler) {
-        Logger.info("Registering handler: ${handler::class.qualifiedName}")
+        Logger.info("Registering handler: ${handler::class.simpleName}, ${handler::class.qualifiedName}")
 
         backingHandlers.add(handler)
 
@@ -102,6 +102,6 @@ class Genesis : AbstractPlugin() {
 
         handler.onRegistered()
 
-        Logger.info("Handler registered: ${handler::class.qualifiedName}")
+        Logger.info("Handler registered: ${handler::class.simpleName}, ${handler::class.qualifiedName}")
     }
 }
