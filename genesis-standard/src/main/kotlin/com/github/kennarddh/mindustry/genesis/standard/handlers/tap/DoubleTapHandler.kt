@@ -12,7 +12,7 @@ import mindustry.gen.Player
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-class DoubleTapHandler : Handler() {
+class DoubleTapHandler : Handler {
     private val playersLastTap: MutableMap<Player, Instant> = mutableMapOf()
 
     val doubleClickMaxDelay: Duration = 500.milliseconds

@@ -15,7 +15,7 @@ import mindustry.gen.Call
 import mindustry.gen.Player
 
 
-class FooHandler : Handler() {
+class FooHandler : Handler {
     private val version by lazy { Vars.mods.getMod(com.github.kennarddh.mindustry.genesis.standard.GenesisStandard::class.java).meta.version }
 
     companion object {

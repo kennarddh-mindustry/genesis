@@ -41,7 +41,7 @@ import kotlin.math.min
 import kotlin.reflect.full.findAnnotation
 
 
-class ServerHandler : Handler() {
+class ServerHandler : Handler {
     override suspend fun onInit() {
         GenesisAPI.commandRegistry.removeCommand("help")
         GenesisAPI.commandRegistry.removeCommand("host")
@@ -407,7 +407,7 @@ class ServerHandler : Handler() {
     @ServerSide
     @Description("Run arbitrary Javascript.")
     fun javascript(script: String): CommandResult {
-        return CommandResult(mods.getScripts().runConsole(script))
+        return CommandResult(mods.scripts.runConsole(script))
     }
 
     @Command(["pause"])

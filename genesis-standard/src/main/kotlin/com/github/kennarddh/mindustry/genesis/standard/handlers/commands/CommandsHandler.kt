@@ -17,7 +17,7 @@ import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.valid
 import mindustry.gen.Player
 import kotlin.time.Duration
 
-class CommandsHandler : Handler() {
+class CommandsHandler : Handler {
     override suspend fun onInit() {
         GenesisAPI.commandRegistry.registerParameterType(Boolean::class, BooleanParameter())
         GenesisAPI.commandRegistry.registerParameterType(Char::class, CharParameter())
