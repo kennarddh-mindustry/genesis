@@ -39,14 +39,4 @@ class DoubleTapHandler : Handler {
     private fun onPlayerLeave(event: EventType.PlayerLeave) {
         playersLastTap.remove(event.player)
     }
-
-    @EventHandler
-    private fun ona(event: DoubleTap) {
-        println("DOUBLETAP")
-    }
-
-    @EventHandler
-    private fun ona(event: TapEvent) {
-        println("TAP")
-    }
 }
