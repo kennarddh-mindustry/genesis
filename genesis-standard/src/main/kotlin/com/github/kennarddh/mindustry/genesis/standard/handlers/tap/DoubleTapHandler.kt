@@ -8,6 +8,7 @@ import com.github.kennarddh.mindustry.genesis.standard.handlers.tap.events.Doubl
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import mindustry.game.EventType
+import mindustry.game.EventType.TapEvent
 import mindustry.gen.Player
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
@@ -19,26 +20,33 @@ class DoubleTapHandler : Handler {
     private val doubleClickMaxDelay: Duration = 500.milliseconds
 
     @EventHandler
-    private fun onTap(event: EventType.TapEvent) {
-        if (!playersLastTap.contains(event.player)) {
-            playersLastTap[event.player] = Clock.System.now()
-
-            return
-        }
+    private fun onTap(event: TapEvent) {
+        // If key is absent it should return null
+        playersLastTap.putIfAbsent(event.player, Clock.System.now()) ?: return
 
         if (Clock.System.now() - playersLastTap[event.player]!! <= doubleClickMaxDelay) {
+            playersLastTap.remove(event.player)
+
             runOnMindustryThread {
                 Events.fire(DoubleTap(event.player, event.tile))
             }
-
-            playersLastTap.remove(event.player)
+        } else {
+            playersLastTap[event.player] = Clock.System.now()
         }
-
-        playersLastTap[event.player] = Clock.System.now()
     }
 
     @EventHandler
     private fun onPlayerLeave(event: EventType.PlayerLeave) {
         playersLastTap.remove(event.player)
+    }
+
+    @EventHandler
+    private fun ona(event: DoubleTap) {
+        println("DOUBLETAP")
+    }
+
+    @EventHandler
+    private fun ona(event: TapEvent) {
+        println("TAP")
     }
 }
