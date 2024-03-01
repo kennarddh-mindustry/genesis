@@ -32,7 +32,6 @@ class FooHandler : Handler {
     /** Plugin presence check */
     @PacketHandler(["fooCheck"], Priority.Normal, true)
     suspend fun fooCheck(player: Player) {
-        println(player)
         playersWithFoo.add(player)
 
         player.clientPacketReliable("fooCheck", version)
