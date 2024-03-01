@@ -4,7 +4,6 @@ import arc.ApplicationListener
 import arc.Core
 import com.github.kennarddh.mindustry.genesis.core.commands.CommandRegistry
 import com.github.kennarddh.mindustry.genesis.core.commons.AbstractPlugin
-import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.events.EventRegistry
 import com.github.kennarddh.mindustry.genesis.core.extensions.getEnabledAbstractPluginsOrdered
 import com.github.kennarddh.mindustry.genesis.core.filters.FiltersRegistry
@@ -17,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import mindustry.Vars
 
 class Genesis : AbstractPlugin() {
@@ -99,16 +97,6 @@ class Genesis : AbstractPlugin() {
         })
 
         Logger.info("Dispose listener added")
-
-        Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
-            withContext(CoroutineScopes.Main.coroutineContext) {
-                launch {
-                    it.onAsyncInit()
-                }
-            }
-        }
-
-        Logger.info("onAsyncInit for AbstractPlugin invoked")
 
         Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
             it.onGenesisInit()

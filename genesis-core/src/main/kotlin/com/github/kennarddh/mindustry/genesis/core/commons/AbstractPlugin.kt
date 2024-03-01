@@ -20,13 +20,6 @@ abstract class AbstractPlugin : Plugin() {
     open suspend fun onDispose() = Unit
 
     /**
-     * Will be run at genesis plugin init and at the same time with every AbstractPlugin asyncInit.
-     *
-     * Order is not guaranteed because it will be called at the same time.
-     */
-    open suspend fun onAsyncInit() = Unit
-
-    /**
      * Will be run at genesis plugin init.
      *
      * Blocking this function will block genesis init.
