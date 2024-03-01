@@ -21,19 +21,48 @@ import kotlinx.coroutines.withContext
 import mindustry.Vars
 
 class Genesis : AbstractPlugin() {
-    private val backingHandlers: MutableList<Handler> = mutableListOf()
 
-    private val registerHandlerMutex = Mutex()
+    companion object {
+        val commandRegistry = CommandRegistry()
+        private val eventRegistry = EventRegistry()
+        private val packetRegistry = PacketRegistry()
+        private val serverPacketsRegistry = ServerPacketsRegistry()
+        private val filtersRegistry = FiltersRegistry()
+        private val timersRegistry = TimersRegistry()
 
-    val handlers: List<Handler>
-        get() = backingHandlers.toList()
+        private val backingHandlers: MutableList<Handler> = mutableListOf()
 
-    internal val commandRegistry = CommandRegistry()
-    internal val eventRegistry = EventRegistry()
-    internal val packetRegistry = PacketRegistry()
-    internal val serverPacketsRegistry = ServerPacketsRegistry()
-    internal val filtersRegistry = FiltersRegistry()
-    internal val timersRegistry = TimersRegistry()
+        private val registerHandlerMutex = Mutex()
+
+        val handlers: List<Handler>
+            get() = backingHandlers.toList()
+
+        inline fun <reified T : Handler> getHandler(): T? = handlers.find { it is T } as T?
+
+        @JvmName("getFilteredHandlers")
+        inline fun <reified T : Handler> getHandlers(): List<T> = handlers.filterIsInstance<T>()
+
+        suspend fun registerHandler(handler: Handler) {
+            registerHandlerMutex.withLock {
+                Logger.info("Registering handler: ${handler::class.simpleName}, ${handler::class.qualifiedName}")
+
+                backingHandlers.add(handler)
+
+                handler.onInit()
+
+                commandRegistry.registerHandler(handler)
+                eventRegistry.registerHandler(handler)
+                packetRegistry.registerHandler(handler)
+                serverPacketsRegistry.registerHandler(handler)
+                filtersRegistry.registerHandler(handler)
+                timersRegistry.registerHandler(handler)
+
+                handler.onRegistered()
+
+                Logger.info("Registered handler:  ${handler::class.simpleName}, ${handler::class.qualifiedName}")
+            }
+        }
+    }
 
     override suspend fun onInit() {
         Logger.info("Init")
@@ -88,26 +117,5 @@ class Genesis : AbstractPlugin() {
         Logger.info("onGenesisInit for AbstractPlugin invoked")
 
         Logger.info("Loaded")
-    }
-
-    internal suspend fun registerHandler(handler: Handler) {
-        registerHandlerMutex.withLock {
-            Logger.info("Registering handler: ${handler::class.simpleName}, ${handler::class.qualifiedName}")
-
-            backingHandlers.add(handler)
-
-            handler.onInit()
-
-            commandRegistry.registerHandler(handler)
-            eventRegistry.registerHandler(handler)
-            packetRegistry.registerHandler(handler)
-            serverPacketsRegistry.registerHandler(handler)
-            filtersRegistry.registerHandler(handler)
-            timersRegistry.registerHandler(handler)
-
-            handler.onRegistered()
-
-            Logger.info("Registered handler:  ${handler::class.simpleName}, ${handler::class.qualifiedName}")
-        }
     }
 }

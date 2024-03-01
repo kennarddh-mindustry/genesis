@@ -1,6 +1,6 @@
 package com.github.kennarddh.mindustry.genesis.standard.handlers.commands
 
-import com.github.kennarddh.mindustry.genesis.core.GenesisAPI
+import com.github.kennarddh.mindustry.genesis.core.Genesis
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.*
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.floating.DoubleParameter
@@ -19,29 +19,29 @@ import kotlin.time.Duration
 
 class CommandsHandler : Handler {
     override suspend fun onInit() {
-        GenesisAPI.commandRegistry.registerParameterType(Boolean::class, BooleanParameter())
-        GenesisAPI.commandRegistry.registerParameterType(Char::class, CharParameter())
-        GenesisAPI.commandRegistry.registerParameterType(String::class, StringParameter())
+        Genesis.commandRegistry.registerParameterType(Boolean::class, BooleanParameter())
+        Genesis.commandRegistry.registerParameterType(Char::class, CharParameter())
+        Genesis.commandRegistry.registerParameterType(String::class, StringParameter())
 
-        GenesisAPI.commandRegistry.registerParameterType(Float::class, FloatParameter())
-        GenesisAPI.commandRegistry.registerParameterType(Double::class, DoubleParameter())
+        Genesis.commandRegistry.registerParameterType(Float::class, FloatParameter())
+        Genesis.commandRegistry.registerParameterType(Double::class, DoubleParameter())
 
-        GenesisAPI.commandRegistry.registerParameterType(Byte::class, ByteParameter())
-        GenesisAPI.commandRegistry.registerParameterType(Short::class, ShortParameter())
-        GenesisAPI.commandRegistry.registerParameterType(Int::class, IntParameter())
-        GenesisAPI.commandRegistry.registerParameterType(Long::class, LongParameter())
+        Genesis.commandRegistry.registerParameterType(Byte::class, ByteParameter())
+        Genesis.commandRegistry.registerParameterType(Short::class, ShortParameter())
+        Genesis.commandRegistry.registerParameterType(Int::class, IntParameter())
+        Genesis.commandRegistry.registerParameterType(Long::class, LongParameter())
 
-        GenesisAPI.commandRegistry.registerParameterType(UByte::class, UByteParameter())
-        GenesisAPI.commandRegistry.registerParameterType(UShort::class, UShortParameter())
-        GenesisAPI.commandRegistry.registerParameterType(UInt::class, UIntParameter())
-        GenesisAPI.commandRegistry.registerParameterType(ULong::class, ULongParameter())
+        Genesis.commandRegistry.registerParameterType(UByte::class, UByteParameter())
+        Genesis.commandRegistry.registerParameterType(UShort::class, UShortParameter())
+        Genesis.commandRegistry.registerParameterType(UInt::class, UIntParameter())
+        Genesis.commandRegistry.registerParameterType(ULong::class, ULongParameter())
 
-        GenesisAPI.commandRegistry.registerParameterType(Enum::class, EnumParameter())
+        Genesis.commandRegistry.registerParameterType(Enum::class, EnumParameter())
 
-        GenesisAPI.commandRegistry.registerParameterType(Duration::class, DurationParameter())
-        GenesisAPI.commandRegistry.registerParameterType(Player::class, PlayerParameter())
+        Genesis.commandRegistry.registerParameterType(Duration::class, DurationParameter())
+        Genesis.commandRegistry.registerParameterType(Player::class, PlayerParameter())
 
-        GenesisAPI.commandRegistry.registerParameterValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             GT::class, listOf(
                 Float::class,
                 Double::class,
@@ -51,7 +51,7 @@ class CommandsHandler : Handler {
                 Long::class,
             ), ::validateGT
         )
-        GenesisAPI.commandRegistry.registerParameterValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             GTE::class, listOf(
                 Float::class,
                 Double::class,
@@ -61,7 +61,7 @@ class CommandsHandler : Handler {
                 Long::class,
             ), ::validateGTE
         )
-        GenesisAPI.commandRegistry.registerParameterValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             LT::class, listOf(
                 Float::class,
                 Double::class,
@@ -71,7 +71,7 @@ class CommandsHandler : Handler {
                 Long::class,
             ), ::validateLT
         )
-        GenesisAPI.commandRegistry.registerParameterValidationAnnotation(
+        Genesis.commandRegistry.registerParameterValidationAnnotation(
             LTE::class, listOf(
                 Float::class,
                 Double::class,

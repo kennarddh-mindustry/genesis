@@ -7,7 +7,7 @@ import arc.util.Timer
 import arc.util.serialization.JsonReader
 import arc.util.serialization.JsonValue
 import arc.util.serialization.JsonValue.ValueType
-import com.github.kennarddh.mindustry.genesis.core.GenesisAPI
+import com.github.kennarddh.mindustry.genesis.core.Genesis
 import com.github.kennarddh.mindustry.genesis.core.commands.ArcCommand
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.ClientSide
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command
@@ -43,17 +43,17 @@ import kotlin.reflect.full.findAnnotation
 
 class ServerHandler : Handler {
     override suspend fun onInit() {
-        GenesisAPI.commandRegistry.removeCommand("help")
-        GenesisAPI.commandRegistry.removeCommand("host")
-        GenesisAPI.commandRegistry.removeCommand("version")
-        GenesisAPI.commandRegistry.removeCommand("maps")
-        GenesisAPI.commandRegistry.removeCommand("mods")
-        GenesisAPI.commandRegistry.removeCommand("mod")
-        GenesisAPI.commandRegistry.removeCommand("js")
-        GenesisAPI.commandRegistry.removeCommand("pause")
-        GenesisAPI.commandRegistry.removeCommand("rules")
-        GenesisAPI.commandRegistry.removeCommand("config")
-        GenesisAPI.commandRegistry.removeCommand("playerlimit")
+        Genesis.commandRegistry.removeCommand("help")
+        Genesis.commandRegistry.removeCommand("host")
+        Genesis.commandRegistry.removeCommand("version")
+        Genesis.commandRegistry.removeCommand("maps")
+        Genesis.commandRegistry.removeCommand("mods")
+        Genesis.commandRegistry.removeCommand("mod")
+        Genesis.commandRegistry.removeCommand("js")
+        Genesis.commandRegistry.removeCommand("pause")
+        Genesis.commandRegistry.removeCommand("rules")
+        Genesis.commandRegistry.removeCommand("config")
+        Genesis.commandRegistry.removeCommand("playerlimit")
     }
 
     @Command(["help"])
@@ -75,9 +75,9 @@ class ServerHandler : Handler {
         val isServer = player == null
 
         val commands = if (isServer)
-            GenesisAPI.commandRegistry.serverCommands.toList()
+            Genesis.commandRegistry.serverCommands.toList()
         else
-            GenesisAPI.commandRegistry.clientCommands.toList()
+            Genesis.commandRegistry.clientCommands.toList()
 
         val output = buildString {
             if (page != null) {
@@ -110,9 +110,9 @@ class ServerHandler : Handler {
 
                     append(
                         if (isServer)
-                            GenesisAPI.commandRegistry.serverPrefix
+                            Genesis.commandRegistry.serverPrefix
                         else
-                            GenesisAPI.commandRegistry.clientPrefix
+                            Genesis.commandRegistry.clientPrefix
                     )
 
                     append(name)
@@ -155,9 +155,9 @@ class ServerHandler : Handler {
 
                 append(
                     if (isServer)
-                        GenesisAPI.commandRegistry.serverPrefix
+                        Genesis.commandRegistry.serverPrefix
                     else
-                        GenesisAPI.commandRegistry.clientPrefix
+                        Genesis.commandRegistry.clientPrefix
                 )
 
                 append(name)

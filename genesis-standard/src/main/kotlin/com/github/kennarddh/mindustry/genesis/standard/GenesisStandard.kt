@@ -1,6 +1,6 @@
 package com.github.kennarddh.mindustry.genesis.standard
 
-import com.github.kennarddh.mindustry.genesis.core.GenesisAPI
+import com.github.kennarddh.mindustry.genesis.core.Genesis
 import com.github.kennarddh.mindustry.genesis.core.commons.AbstractPlugin
 import com.github.kennarddh.mindustry.genesis.standard.handlers.commands.CommandsHandler
 import com.github.kennarddh.mindustry.genesis.standard.handlers.foo.FooHandler
@@ -9,10 +9,10 @@ import com.github.kennarddh.mindustry.genesis.standard.handlers.tap.DoubleTapHan
 
 class GenesisStandard : AbstractPlugin() {
     override suspend fun onInit() {
-        GenesisAPI.registerHandler(CommandsHandler())
-        GenesisAPI.registerHandler(ServerHandler())
-        GenesisAPI.registerHandler(FooHandler())
-        GenesisAPI.registerHandler(DoubleTapHandler())
+        Genesis.registerHandler(CommandsHandler())
+        Genesis.registerHandler(ServerHandler())
+        Genesis.registerHandler(FooHandler())
+        Genesis.registerHandler(DoubleTapHandler())
 
         Logger.info("Loaded")
     }
