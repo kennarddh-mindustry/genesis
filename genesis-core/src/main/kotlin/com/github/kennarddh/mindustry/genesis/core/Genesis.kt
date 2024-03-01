@@ -15,11 +15,15 @@ import com.github.kennarddh.mindustry.genesis.core.server.packets.ServerPacketsR
 import com.github.kennarddh.mindustry.genesis.core.timers.TimersRegistry
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import mindustry.Vars
 
 class Genesis : AbstractPlugin() {
     private val backingHandlers: MutableList<Handler> = mutableListOf()
+
+    private val registerHandlerMutex = Mutex()
 
     val handlers: List<Handler>
         get() = backingHandlers.toList()
@@ -87,21 +91,23 @@ class Genesis : AbstractPlugin() {
     }
 
     internal suspend fun registerHandler(handler: Handler) {
-        Logger.info("Registering handler: ${handler::class.simpleName}, ${handler::class.qualifiedName}")
+        registerHandlerMutex.withLock {
+            Logger.info("Registering handler: ${handler::class.simpleName}, ${handler::class.qualifiedName}")
 
-        backingHandlers.add(handler)
+            backingHandlers.add(handler)
 
-        handler.onInit()
+            handler.onInit()
 
-        commandRegistry.registerHandler(handler)
-        eventRegistry.registerHandler(handler)
-        packetRegistry.registerHandler(handler)
-        serverPacketsRegistry.registerHandler(handler)
-        filtersRegistry.registerHandler(handler)
-        timersRegistry.registerHandler(handler)
+            commandRegistry.registerHandler(handler)
+            eventRegistry.registerHandler(handler)
+            packetRegistry.registerHandler(handler)
+            serverPacketsRegistry.registerHandler(handler)
+            filtersRegistry.registerHandler(handler)
+            timersRegistry.registerHandler(handler)
 
-        handler.onRegistered()
+            handler.onRegistered()
 
-        Logger.info("Registered handler:  ${handler::class.simpleName}, ${handler::class.qualifiedName}")
+            Logger.info("Registered handler:  ${handler::class.simpleName}, ${handler::class.qualifiedName}")
+        }
     }
 }
