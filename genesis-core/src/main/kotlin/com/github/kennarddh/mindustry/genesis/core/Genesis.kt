@@ -59,7 +59,7 @@ class Genesis : AbstractPlugin() {
 
                 handler.onRegistered()
 
-                Logger.info("Registered handler:  ${handler::class.simpleName}, ${handler::class.qualifiedName}")
+                Logger.info("Registered handler : ${handler::class.simpleName}, ${handler::class.qualifiedName}")
             }
         }
     }
