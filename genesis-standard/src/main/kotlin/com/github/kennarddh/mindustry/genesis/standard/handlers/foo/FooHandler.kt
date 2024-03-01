@@ -13,14 +13,13 @@ import mindustry.Vars
 import mindustry.game.EventType
 import mindustry.gen.Call
 import mindustry.gen.Player
+import java.util.concurrent.ConcurrentSkipListSet
 
 
 class FooHandler : Handler {
     private val version by lazy { Vars.mods.getMod(com.github.kennarddh.mindustry.genesis.standard.GenesisStandard::class.java).meta.version }
 
-    companion object {
-        val playersWithFoo: MutableList<Player> = mutableListOf()
-    }
+    val playersWithFoo: ConcurrentSkipListSet<Player> = ConcurrentSkipListSet()
 
     @EventHandler
     fun onPlayerLeave(event: EventType.PlayerLeave) {
