@@ -9,6 +9,7 @@ import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandl
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
 import com.github.kennarddh.mindustry.genesis.standard.GenesisStandard
+import com.github.kennarddh.mindustry.genesis.standard.commons.PlayerComparator
 import com.github.kennarddh.mindustry.genesis.standard.extensions.clientPacketReliable
 import mindustry.Vars
 import mindustry.game.EventType
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentSkipListSet
 class FooHandler : Handler {
     private val version by lazy { Vars.mods.getMod(GenesisStandard::class.java).meta.version }
 
-    val playersWithFoo: ConcurrentSkipListSet<Player> = ConcurrentSkipListSet()
+    val playersWithFoo: ConcurrentSkipListSet<Player> = ConcurrentSkipListSet(PlayerComparator)
 
     @EventHandler
     fun onPlayerLeave(event: EventType.PlayerLeave) {
@@ -31,6 +32,7 @@ class FooHandler : Handler {
     /** Plugin presence check */
     @PacketHandler(["fooCheck"], Priority.Normal, true)
     suspend fun fooCheck(player: Player) {
+        println(player)
         playersWithFoo.add(player)
 
         player.clientPacketReliable("fooCheck", version)
