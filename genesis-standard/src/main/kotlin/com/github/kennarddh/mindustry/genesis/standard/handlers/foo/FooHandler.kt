@@ -8,6 +8,7 @@ import com.github.kennarddh.mindustry.genesis.core.commons.priority.Priority
 import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandler
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
+import com.github.kennarddh.mindustry.genesis.standard.GenesisStandard
 import com.github.kennarddh.mindustry.genesis.standard.extensions.clientPacketReliable
 import mindustry.Vars
 import mindustry.game.EventType
@@ -17,7 +18,7 @@ import java.util.concurrent.ConcurrentSkipListSet
 
 
 class FooHandler : Handler {
-    private val version by lazy { Vars.mods.getMod(com.github.kennarddh.mindustry.genesis.standard.GenesisStandard::class.java).meta.version }
+    private val version by lazy { Vars.mods.getMod(GenesisStandard::class.java).meta.version }
 
     val playersWithFoo: ConcurrentSkipListSet<Player> = ConcurrentSkipListSet()
 
