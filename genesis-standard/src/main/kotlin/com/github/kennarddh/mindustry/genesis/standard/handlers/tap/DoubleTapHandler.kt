@@ -9,13 +9,14 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import mindustry.game.EventType
 import mindustry.gen.Player
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 class DoubleTapHandler : Handler {
-    private val playersLastTap: MutableMap<Player, Instant> = mutableMapOf()
+    private val playersLastTap = ConcurrentHashMap<Player, Instant>()
 
-    val doubleClickMaxDelay: Duration = 500.milliseconds
+    private val doubleClickMaxDelay: Duration = 500.milliseconds
 
     @EventHandler
     private fun onTap(event: EventType.TapEvent) {
