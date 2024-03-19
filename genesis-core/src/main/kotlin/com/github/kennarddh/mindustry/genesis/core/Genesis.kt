@@ -98,12 +98,6 @@ class Genesis : AbstractPlugin() {
 
         Logger.info("Dispose listener added")
 
-        Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
-            it.onGenesisInit()
-        }
-
-        Logger.info("onGenesisInit for AbstractPlugin invoked")
-
         Logger.info("Loaded")
     }
 }
