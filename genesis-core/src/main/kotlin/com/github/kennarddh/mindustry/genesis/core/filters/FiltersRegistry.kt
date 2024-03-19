@@ -22,7 +22,7 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 fun interface SuspendedChatFilter {
-    suspend fun filter(player: Player, message: String): String
+    suspend fun filter(player: Player, message: String): String?
 }
 
 fun interface SuspendedActionFilter {
@@ -79,7 +79,7 @@ class FiltersRegistry {
                     CoroutineScopes.Main.launch {
                         connectFilters.forEachPrioritized {
                             output = it.accept(address)
-                            
+
                             if (!output)
                                 return@forEachPrioritized
                         }
@@ -120,7 +120,7 @@ class FiltersRegistry {
                         throw InvalidFilterHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must return string")
 
                     val filter = SuspendedChatFilter { player, message ->
-                        function.callSuspend(handler, player, message) as String
+                        function.callSuspend(handler, player, message) as String?
                     }
 
                     chatFilters.add(PriorityContainer(priority, filter))
