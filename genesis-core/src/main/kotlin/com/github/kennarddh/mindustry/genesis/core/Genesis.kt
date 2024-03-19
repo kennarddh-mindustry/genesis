@@ -85,7 +85,7 @@ class Genesis : AbstractPlugin() {
                         }
                     }
 
-                    Vars.mods.getEnabledAbstractPluginsOrdered().reversed().forEach {
+                    Vars.mods.getEnabledAbstractPluginsOrdered().forEach {
                         launch {
                             it.onDispose()
                         }
