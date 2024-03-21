@@ -61,7 +61,7 @@ object StringParser {
             } else if (isInQuote) {
                 throw UnterminatedStringException("Double quoted string $output is not terminated")
             } else if (output.isNotBlank()) {
-                yield(StringToken(output.toString()))
+                yield(StringToken(output))
             }
         }
 
