@@ -4,10 +4,10 @@ class UnterminatedStringException(message: String) : Exception(message)
 
 class InvalidEscapedCharacterException(message: String) : Exception(message)
 
-open class StringParserToken
+open class StringParserToken(open val toBeParsed: String)
 
-data object SkipToken : StringParserToken()
-data class StringToken(val value: String) : StringParserToken()
+data class SkipToken(override val toBeParsed: String) : StringParserToken(toBeParsed)
+data class StringToken(val value: String, override val toBeParsed: String) : StringParserToken(toBeParsed)
 
 object StringParser {
     private val escapedCharactersMap = mapOf('n' to "\n", '\"' to "\"", '\\' to "\\", '*' to "*")
@@ -17,8 +17,14 @@ object StringParser {
             var isEscaping = false
             var isInQuote = false
 
+            var toBeParsed = input
+
             val output = buildString {
-                for (char in input) {
+                while (toBeParsed.isNotEmpty()) {
+                    val char = toBeParsed[0]
+
+                    toBeParsed = toBeParsed.drop(1)
+
                     if (isEscaping) {
                         if (escapedCharactersMap.contains(char)) {
                             append(escapedCharactersMap[char])
@@ -36,7 +42,7 @@ object StringParser {
                         '"' -> isInQuote = !isInQuote
                         '*' -> {
                             if (!isInQuote && isEmpty())
-                                yield(SkipToken)
+                                yield(SkipToken(toBeParsed))
                             else
                                 append(char)
                         }
@@ -44,7 +50,7 @@ object StringParser {
                         ' ' -> {
                             if (!isInQuote) {
                                 if (isNotEmpty()) {
-                                    yield(StringToken(toString()))
+                                    yield(StringToken(toString(), toBeParsed))
                                     clear()
                                 }
                             } else
@@ -61,7 +67,7 @@ object StringParser {
             } else if (isInQuote) {
                 throw UnterminatedStringException("Double quoted string $output is not terminated")
             } else if (output.isNotBlank()) {
-                yield(StringToken(output))
+                yield(StringToken(output, ""))
             }
         }
 
