@@ -166,19 +166,25 @@ class CommandRegistry {
             // The first parameter is dropped because it's the instance
             val functionParameters = function.parameters.drop(1)
 
-            // TODO: Cache createType() result
-            if (!functionParameters[0].type.isSubtypeOf(CommandSender::class.createType())) {
+            if (functionParameters.isEmpty()) {
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} first parameter must be CommandSender or it's subclass.")
             }
 
-            if (functionParameters[0].isVararg) {
+            val senderParameter = functionParameters[0]
+
+            // TODO: Cache createType() result
+            if (!senderParameter.type.isSubtypeOf(CommandSender::class.createType())) {
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} first parameter must be CommandSender or it's subclass.")
+            }
+
+            if (senderParameter.isVararg) {
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} sender parameter cannot be vararg.")
             }
 
             val sides: Set<CommandSide> =
-                if (functionParameters[0].type == ServerCommandSender::class.createType()) {
+                if (senderParameter.type == ServerCommandSender::class.createType()) {
                     setOf(CommandSide.Server)
-                } else if (functionParameters[0].type.isSubtypeOf(PlayerCommandSender::class.createType())) {
+                } else if (senderParameter.type.isSubtypeOf(PlayerCommandSender::class.createType())) {
                     setOf(CommandSide.Client)
                 } else {
                     setOf(CommandSide.Server, CommandSide.Client)
@@ -245,7 +251,8 @@ class CommandRegistry {
                 handler,
                 function,
                 parameters.toTypedArray(),
-                commandValidationAnnotations.toTypedArray()
+                commandValidationAnnotations.toTypedArray(),
+                senderParameter
             )
 
             backingCommands.add(command)
@@ -448,7 +455,10 @@ class CommandRegistry {
 
             try {
                 command.function.callSuspendBy(
-                    mapOf(command.function.instanceParameter!! to command.handler) + parameters
+                    mapOf(
+                        command.function.instanceParameter!! to command.handler,
+                        command.senderParameter to sender,
+                    ) + parameters
                 )
             } catch (error: Exception) {
                 Logger.error("Unknown Command Function Invoke Exception Occurred", error)

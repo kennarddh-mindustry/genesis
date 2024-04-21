@@ -6,6 +6,7 @@ import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import mindustry.gen.Player
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.isSubclassOf
 
 typealias CommandValidator = suspend (annotation: Annotation, player: Player?) -> Boolean
@@ -20,6 +21,7 @@ data class CommandData(
     val function: KFunction<*>,
     val parametersType: Array<CommandParameterData>,
     val validator: Array<Annotation>,
+    val senderParameter: KParameter,
 ) {
 
     override fun equals(other: Any?): Boolean {
