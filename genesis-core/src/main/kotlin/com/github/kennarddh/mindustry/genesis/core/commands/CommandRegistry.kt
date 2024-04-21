@@ -3,7 +3,6 @@ package com.github.kennarddh.mindustry.genesis.core.commands
 import arc.Events
 import arc.struct.Seq
 import arc.util.CommandHandler
-import arc.util.Log
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Brief
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Description
@@ -11,7 +10,10 @@ import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validati
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.commandValidationDescriptionAnnotationToString
 import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChanged
-import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.*
+import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateCommandNameException
+import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateParameterTypeException
+import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.InvalidCommandMethodException
+import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.NotFoundParameterTypeException
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.CommandParameterData
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.CommandParameterValidator
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
@@ -21,8 +23,6 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.Com
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validations.ParameterValidation
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validations.ParameterValidationDescription
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
-import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
-import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResultStatus
 import com.github.kennarddh.mindustry.genesis.core.commands.senders.CommandSender
 import com.github.kennarddh.mindustry.genesis.core.commands.senders.PlayerCommandSender
 import com.github.kennarddh.mindustry.genesis.core.commands.senders.ServerCommandSender
@@ -370,96 +370,89 @@ class CommandRegistry {
     internal fun invokeCommand(name: String, parametersString: String, player: Player?) {
         val command = getCommandFromCommandName(name)
 
-        if (
-            command == null ||
-            (player == null && !command.sides.contains(CommandSide.Server)) ||
-            (player != null && !command.sides.contains(CommandSide.Client))
-        ) {
-            val result = CommandResult("Command $name not found.", CommandResultStatus.Failed)
-
-            handleCommandHandlerResult(result, player)
-
-            return
+        val sender = if (player != null) {
+            PlayerCommandSender(player)
+        } else {
+            ServerCommandSender()
         }
 
+        if (command == null ||
+            (player == null && !command.sides.contains(CommandSide.Server)) ||
+            (player != null && !command.sides.contains(CommandSide.Client))
+        )
+            return sender.sendError("Command $name not found.")
+
         CoroutineScopes.Main.launch {
-            val result = try {
-                val deferredValidatorsResult = command.validator.map {
-                    val validator = commandValidator[it.annotationClass]!!
+            val deferredValidatorsResult = command.validator.map {
+                val validator = commandValidator[it.annotationClass]!!
 
-                    async { validator.invoke(it, player) }
-                }
-
-
-                val validatorsResult = deferredValidatorsResult.awaitAll()
-
-                command.validator.forEachIndexed { index, it ->
-                    val isValid = validatorsResult[index]
-
-                    if (!isValid) {
-                        val descriptionAnnotation =
-                            it.annotationClass.findAnnotation<CommandValidationDescription>()
-
-                        val errorMessage =
-                            if (descriptionAnnotation != null)
-                                commandValidationDescriptionAnnotationToString(
-                                    descriptionAnnotation,
-                                    it,
-                                    command.names[0]
-                                )
-                            else
-                                "Command validation failed."
-
-                        throw CommandValidationException(errorMessage)
+                async {
+                    try {
+                        CommandParameterValidationResult(validator, validator.invoke(it, player), null)
+                    } catch (exception: Exception) {
+                        CommandParameterValidationResult(validator, false, exception)
                     }
                 }
-
-                val parameters = parseCommandParameters(command, parametersString, player)
-
-                try {
-                    command.function.callSuspendBy(parameters)
-                } catch (error: Exception) {
-                    Logger.error("Unknown Command Function Invoke Exception Occurred", error)
-
-                    CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
-                }
-            } catch (error: InvalidCommandParameterException) {
-                CommandResult(
-                    error.message ?: "Unknown Invalid Command Parameter Exception Occurred",
-                    CommandResultStatus.Failed
-                )
-            } catch (error: UnterminatedStringException) {
-                CommandResult(
-                    error.message ?: "Unknown Unterminated String Exception Occurred",
-                    CommandResultStatus.Failed
-                )
-            } catch (error: InvalidEscapedCharacterException) {
-                CommandResult(
-                    error.message ?: "Unknown Escaped Character Exception Occurred",
-                    CommandResultStatus.Failed
-                )
-            } catch (error: CommandParameterParsingException) {
-                CommandResult(
-                    error.message ?: "Unknown Parameter Conversion Exception Occurred",
-                    CommandResultStatus.Failed
-                )
-            } catch (error: CommandValidationException) {
-                CommandResult(
-                    error.message ?: "Unknown Command Validation Exception Occurred",
-                    CommandResultStatus.Failed
-                )
-            } catch (error: CommandParameterValidationException) {
-                CommandResult(
-                    error.message,
-                    CommandResultStatus.Failed
-                )
-            } catch (error: Exception) {
-                Logger.error("Unknown Invoke Command Exception Occurred", error)
-
-                CommandResult("Unknown Error Occurred", CommandResultStatus.Failed)
             }
 
-            handleCommandHandlerResult(result, player)
+            val validatorsResult = deferredValidatorsResult.awaitAll()
+
+            command.validator.forEachIndexed { index, it ->
+                val commandParameterValidationResult = validatorsResult[index]
+
+                if (!commandParameterValidationResult.isValid) {
+                    val descriptionAnnotation =
+                        it.annotationClass.findAnnotation<CommandValidationDescription>()
+
+                    val errorMessage =
+                        if (commandParameterValidationResult.exception != null) {
+                            Logger.error(
+                                "Command parameter validation \"${commandParameterValidationResult.validator::class.qualifiedName} \" should not throw exception.",
+                                commandParameterValidationResult.exception
+                            )
+
+                            "Unknown error occurred while validating command's parameter"
+                        } else if (descriptionAnnotation != null)
+                            commandValidationDescriptionAnnotationToString(
+                                descriptionAnnotation,
+                                it,
+                                command.names[0]
+                            )
+                        else
+                            "Command validation failed."
+
+
+                    return@launch sender.sendError(errorMessage)
+                }
+            }
+
+            val parameters = try {
+                parseCommandParameters(command, parametersString, player)
+            } catch (exception: CommandParameterValidationException) {
+                return@launch sender.sendError(exception.message)
+            } catch (error: UnterminatedStringException) {
+                return@launch sender.sendError(
+                    error.message ?: "Unknown Unterminated String Exception Occurred",
+                )
+            } catch (error: InvalidEscapedCharacterException) {
+                return@launch sender.sendError(
+                    error.message ?: "Unknown Escaped Character Exception Occurred",
+                )
+            } catch (error: InvalidCommandParameterException) {
+                return@launch sender.sendError(
+                    error.message ?: "Unknown Invalid Command Parameter Exception Occurred",
+                )
+            }
+
+            try {
+                command.function.callSuspendBy(
+                    mapOf(command.function.instanceParameter!! to command.handler) + parameters
+                )
+            } catch (error: Exception) {
+                Logger.error("Unknown Command Function Invoke Exception Occurred", error)
+
+                return@launch sender.sendError("Unknown Error Occurred")
+            }
         }
     }
 
@@ -468,24 +461,11 @@ class CommandRegistry {
         commandStringWithoutCommandName: String,
         player: Player?
     ): Map<KParameter, Any?> = coroutineScope {
-        val parameters: MutableMap<KParameter, Any?> =
-            mutableMapOf(command.function.instanceParameter!! to command.handler)
-
-        if (command.sides.contains(CommandSide.Client) && command.parametersType.isNotEmpty()) {
-            parameters[command.parametersType[0].kParameter] = player
-        }
+        val parameters: MutableMap<KParameter, Any?> = mutableMapOf()
 
         val parsedString = StringParser.parseToArray(commandStringWithoutCommandName)
 
-        val isClientSupported = command.sides.contains(CommandSide.Client)
-
-        val actualParametersSize =
-            if (isClientSupported && command.parametersType.isNotEmpty())
-                command.parametersType.size - 1
-            else
-                command.parametersType.size
-
-        if (actualParametersSize < parsedString.size) {
+        if (command.parametersType.size < parsedString.size) {
             throw InvalidCommandParameterException("Too much parameters supplied.")
         }
 
@@ -493,10 +473,10 @@ class CommandRegistry {
 
         val deferredCommandParameters: MutableList<Deferred<Unit>> = mutableListOf()
 
-        for (i in 0..<actualParametersSize) {
+        for (i in 0..<command.parametersType.size) {
             deferredCommandParameters.add(
                 async {
-                    val parameter = command.parametersType[i + if (isClientSupported) 1 else 0]
+                    val parameter = command.parametersType[i]
 
                     if (i > parsedString.size - 1) {
                         if (!parameter.isOptional)
@@ -562,6 +542,10 @@ class CommandRegistry {
                         }
                     } catch (error: CommandParameterParsingException) {
                         errorMessages.add(error.toParametrizedString(parameter.name))
+                    } catch (error: Exception) {
+                        Logger.error("Unknown Parameter Command Exception Occurred")
+
+                        errorMessages.add("Unknown Error Occurred.")
                     }
                 }
             )
@@ -580,35 +564,5 @@ class CommandRegistry {
         }
 
         return@coroutineScope parameters.toMap()
-    }
-
-    private fun handleCommandHandlerResult(result: Any?, player: Player?) {
-        if (result !is CommandResult) return
-
-        if (result.status == CommandResultStatus.Empty) return
-
-        if (player != null) {
-            val colorString = if (result.colorDependsOnStatus)
-                when (result.status) {
-                    CommandResultStatus.Failed -> "[#ff0000]"
-                    CommandResultStatus.Success -> "[#00ff00]"
-                    else -> {
-                        Log.warn("Unknown CommandResultStatus ${result.status}")
-                        "[#ffffff]"
-                    }
-                }
-            else
-                ""
-
-            runOnMindustryThread {
-                player.sendMessage("${colorString}${result.response}")
-            }
-        } else {
-            when (result.status) {
-                CommandResultStatus.Failed -> Log.err(result.response)
-                CommandResultStatus.Success -> Log.info(result.response)
-                else -> Log.warn("Unknown CommandResultStatus ${result.status}: ${result.response}")
-            }
-        }
     }
 }
