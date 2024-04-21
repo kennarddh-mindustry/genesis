@@ -301,7 +301,9 @@ class CommandRegistry {
                     command.sides = mutableCommandSides.toSet()
                 }
             }
-        } else if (sidesToBeRemoved.contains(CommandSide.Server)) {
+        }
+
+        if (sidesToBeRemoved.contains(CommandSide.Server)) {
             val exist = serverHandler.commandList.contains { it.text == name }
 
             if (exist) {
