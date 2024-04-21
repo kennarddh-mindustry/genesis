@@ -18,6 +18,7 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validatio
 import com.github.kennarddh.mindustry.genesis.core.commands.senders.CommandSender
 import com.github.kennarddh.mindustry.genesis.core.commands.senders.ServerCommandSender
 import com.github.kennarddh.mindustry.genesis.core.commons.runOnMindustryThread
+import com.github.kennarddh.mindustry.genesis.core.commons.runOnMindustryThreadSuspended
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.standard.Logger
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.BooleanParameter
@@ -211,41 +212,37 @@ class ServerHandler : Handler {
         mapName: String? = null,
         gameMode: Gamemode = Gamemode.survival
     ) {
-        if (state.isGame)
-            return sender.sendError("Already hosting. Type 'stop' to stop hosting first.")
-
         runOnMindustryThread {
+            if (state.isGame)
+                return@runOnMindustryThread sender.sendError("Already hosting. Type 'stop' to stop hosting first.")
+
             // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
             Reflect.get<Timer.Task>(ServerControl.instance, "lastTask")?.cancel()
-        }
 
-        val map: Map?
-        if (mapName != null) {
-            map = maps.all().find {
-                it.plainName().replace('_', ' ')
-                    .equals(Strings.stripColors(mapName).replace('_', ' '), ignoreCase = true)
+            val map: Map?
+            if (mapName != null) {
+                map = maps.all().find {
+                    it.plainName().replace('_', ' ')
+                        .equals(Strings.stripColors(mapName).replace('_', ' '), ignoreCase = true)
+                }
+
+                if (map == null)
+                    return@runOnMindustryThread sender.sendError("Map with name $mapName not found.")
+            } else {
+                map = maps.shuffleMode.next(gameMode, state.map)
+
+                Logger.info("Randomized next map to be ${map.plainName()}.")
             }
 
-            if (map == null)
-                return sender.sendError("Map with name $mapName not found.")
-        } else {
-            map = maps.shuffleMode.next(gameMode, state.map)
+            Logger.info("Loading map...")
 
-            Logger.info("Randomized next map to be ${map.plainName()}.")
-        }
-
-        Logger.info("Loading map...")
-
-        runOnMindustryThread {
             logic.reset()
 
             ServerControl.instance.lastMode = gameMode
 
             Core.settings.put("lastServerMode", ServerControl.instance.lastMode.name)
-        }
 
-        try {
-            runOnMindustryThread {
+            try {
                 world.loadMap(map, map.applyRules(ServerControl.instance.lastMode))
                 state.rules = map.applyRules(gameMode)
                 logic.play()
@@ -259,11 +256,11 @@ class ServerHandler : Handler {
 
                     Reflect.set(ServerControl.instance, "autoPaused", true)
                 }
-            }
 
-            sender.sendSuccess("Host success")
-        } catch (e: MapException) {
-            sender.sendError("${e.map.plainName()}: ${e.message}")
+                sender.sendSuccess("Host success")
+            } catch (e: MapException) {
+                sender.sendError("${e.map.plainName()}: ${e.message}")
+            }
         }
     }
 
@@ -395,20 +392,24 @@ class ServerHandler : Handler {
     @Command(["javascript", "js"])
     @Description("Run arbitrary Javascript.")
     fun javascript(sender: ServerCommandSender, script: String) {
-        sender.sendMessage(mods.scripts.runConsole(script))
+        runOnMindustryThread {
+            sender.sendMessage(mods.scripts.runConsole(script))
+        }
     }
 
     @Command(["pause"])
     @Description("Pause or unpause the game.")
     fun pause(sender: ServerCommandSender, pause: Boolean) {
-        if (state.isMenu)
-            return sender.sendError("Cannot pause without a game running.")
+        runOnMindustryThread {
+            if (state.isMenu)
+                return@runOnMindustryThread sender.sendError("Cannot pause without a game running.")
 
-        Reflect.set(ServerControl.instance, "autoPaused", false)
+            Reflect.set(ServerControl.instance, "autoPaused", false)
 
-        state.set(if (state.isPaused) GameState.State.playing else GameState.State.paused)
+            state.set(if (state.isPaused) GameState.State.playing else GameState.State.paused)
 
-        sender.sendSuccess(if (pause) "Game paused." else "Game unpaused.")
+            sender.sendSuccess(if (pause) "Game paused." else "Game unpaused.")
+        }
     }
 
     enum class RulesCommandType {
@@ -455,57 +456,61 @@ class ServerHandler : Handler {
             }
         }
 
-        val rules = Core.settings.getString("globalrules")
-        val base = JsonIO.json.fromJson<JsonValue>(null, rules)
+        runOnMindustryThread {
+            val rules = Core.settings.getString("globalrules")
+            val base = JsonIO.json.fromJson<JsonValue>(null, rules)
 
-        if (type == RulesCommandType.list) {
-            sender.sendSuccess("Rules:\n${JsonIO.print(rules)}")
-        } else if (type == RulesCommandType.remove) {
-            if (base.has(name)) {
-                base.remove(name)
+            if (type == RulesCommandType.list) {
+                sender.sendSuccess("Rules:\n${JsonIO.print(rules)}")
+            } else if (type == RulesCommandType.remove) {
+                if (base.has(name)) {
+                    base.remove(name)
 
-                sender.sendSuccess("Rule '${name}' removed.")
+                    sender.sendSuccess("Rule '${name}' removed.")
+                } else {
+                    sender.sendError("Rule not defined, so not removed.")
+                }
             } else {
-                sender.sendError("Rule not defined, so not removed.")
+                try {
+                    val jsonValue: JsonValue = JsonReader().parse(value)
+
+                    jsonValue.name = name
+
+                    val parent = JsonValue(ValueType.`object`)
+
+                    parent.addChild(jsonValue)
+
+                    JsonIO.json.readField(state.rules, jsonValue.name, parent)
+
+                    if (base.has(jsonValue.name))
+                        base.remove(jsonValue.name)
+
+                    base.addChild(name, jsonValue)
+
+                    sender.sendSuccess("Changed rule: ${jsonValue.toString().replace("\n", " ")}")
+                } catch (e: Throwable) {
+
+                    sender.sendError("Error parsing rule JSON: ${e.message}")
+                }
             }
-        } else {
-            try {
-                val jsonValue: JsonValue = JsonReader().parse(value)
 
-                jsonValue.name = name
+            Core.settings.put("globalrules", base.toString())
 
-                val parent = JsonValue(ValueType.`object`)
-
-                parent.addChild(jsonValue)
-
-                JsonIO.json.readField(state.rules, jsonValue.name, parent)
-
-                if (base.has(jsonValue.name))
-                    base.remove(jsonValue.name)
-
-                base.addChild(name, jsonValue)
-
-                sender.sendSuccess("Changed rule: ${jsonValue.toString().replace("\n", " ")}")
-            } catch (e: Throwable) {
-
-                sender.sendError("Error parsing rule JSON: ${e.message}")
-            }
+            Call.setRules(state.rules)
         }
-
-        Core.settings.put("globalrules", base.toString())
-
-        Call.setRules(state.rules)
     }
 
     @Command(["playerLimit", "playerlimit"])
     @Description("Set the server player limit. 0 to disable limit")
-    fun playerLimit(sender: ServerCommandSender, @GTE(0) limit: Int? = null) {
+    suspend fun playerLimit(sender: ServerCommandSender, @GTE(0) limit: Int? = null) {
         if (limit == null)
             return sender.sendError(
                 "Player limit is currently ${netServer.admins.playerLimit}.",
             )
 
-        netServer.admins.playerLimit = limit
+        runOnMindustryThreadSuspended {
+            netServer.admins.playerLimit = limit
+        }
 
         if (limit == 0)
             sender.sendSuccess("Player limit disabled.")
@@ -574,11 +579,10 @@ class ServerHandler : Handler {
 
         val config = Administration.Config.all.find { it.name.equals(name, ignoreCase = true) }
 
-        if (config == null) {
+        if (config == null)
             sender.sendError(
                 "Unknown config: '$name'. Run the command with list parameter to get a list of valid configs."
             )
-        }
 
         if (type == ConfigCommandType.get) {
             return sender.sendSuccess("${config.name} is currently ${config.get()}.")
@@ -586,13 +590,29 @@ class ServerHandler : Handler {
 
         try {
             if (type == ConfigCommandType.remove) {
-                config.set(config.defaultValue)
+                runOnMindustryThreadSuspended {
+                    config.set(config.defaultValue)
+                }
             } else if (config.isBool) {
-                config.set(BooleanParameter().parse(Boolean::class, value!!))
+                val boolValue = BooleanParameter().parse(Boolean::class, value!!)
+
+                runOnMindustryThreadSuspended {
+                    config.set(boolValue)
+                }
             } else if (config.isNum) {
-                config.set(IntParameter().parse(Int::class, value!!))
+                val intValue = IntParameter().parse(Int::class, value!!)
+
+                runOnMindustryThreadSuspended {
+                    config.set(intValue)
+                }
             } else if (config.isString) {
-                config.set(value!!.replace("\\n", "\n"))
+                runOnMindustryThreadSuspended {
+                    config.set(value!!.replace("\\n", "\n"))
+                }
+            }
+
+            runOnMindustryThreadSuspended {
+                Core.settings.forceSave()
             }
 
             sender.sendSuccess("${config.name} set to ${config.get()}.")
@@ -601,7 +621,5 @@ class ServerHandler : Handler {
         } catch (error: CommandParameterParsingException) {
             sender.sendError(error.toParametrizedString("value"))
         }
-
-        Core.settings.forceSave()
     }
 }
