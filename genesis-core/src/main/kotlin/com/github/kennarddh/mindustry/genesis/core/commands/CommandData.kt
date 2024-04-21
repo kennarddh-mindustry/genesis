@@ -55,10 +55,7 @@ data class CommandData(
     }
 
     suspend fun toUsage(): String = buildString {
-        val functionParameters =
-            if (sides.contains(CommandSide.Client)) parametersType.drop(1).toTypedArray() else parametersType
-
-        functionParameters.forEach {
+        parametersType.forEach {
             append(if (it.isOptional) "[" else "<")
             append(it.name)
             append(":")
