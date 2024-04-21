@@ -1,9 +1,17 @@
 package com.github.kennarddh.mindustry.genesis.core.commands.senders
 
-class PlayerCommandSender : CommandSender() {
-    override fun sendMessage(string: String) {}
+import mindustry.gen.Player
 
-    override fun sendSuccess(string: String) {}
+class PlayerCommandSender(val player: Player) : CommandSender() {
+    override fun sendMessage(string: String) {
+        player.sendMessage(string)
+    }
 
-    override fun sendError(string: String) {}
+    override fun sendSuccess(string: String) {
+        player.sendMessage("[green]$string")
+    }
+
+    override fun sendError(string: String) {
+        player.sendMessage("[scarlet]$string")
+    }
 }
