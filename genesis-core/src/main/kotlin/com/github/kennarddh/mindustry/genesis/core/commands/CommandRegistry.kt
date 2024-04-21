@@ -4,7 +4,9 @@ import arc.Events
 import arc.struct.Seq
 import arc.util.CommandHandler
 import arc.util.Log
-import com.github.kennarddh.mindustry.genesis.core.commands.annotations.*
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Brief
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Description
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidation
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.commandValidationDescriptionAnnotationToString
@@ -21,6 +23,9 @@ import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validatio
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validations.parameterValidationDescriptionAnnotationToString
 import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResult
 import com.github.kennarddh.mindustry.genesis.core.commands.result.CommandResultStatus
+import com.github.kennarddh.mindustry.genesis.core.commands.senders.CommandSender
+import com.github.kennarddh.mindustry.genesis.core.commands.senders.PlayerCommandSender
+import com.github.kennarddh.mindustry.genesis.core.commands.senders.ServerCommandSender
 import com.github.kennarddh.mindustry.genesis.core.commons.*
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.logging.Logger
@@ -33,7 +38,6 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.isAccessible
-import kotlin.reflect.typeOf
 
 class CommandRegistry {
     // TODO: This may not be reliable if any genesis controlled command is removed using Mindustry remove command instead of genesis one
@@ -151,9 +155,6 @@ class CommandRegistry {
 
             val commandAnnotation = function.findAnnotation<Command>() ?: continue
 
-            val clientSideAnnotation = function.findAnnotation<ClientSide>()
-            val serverSideAnnotation = function.findAnnotation<ServerSide>()
-
             val descriptionAnnotation = function.findAnnotation<Description>()
             val briefAnnotation = function.findAnnotation<Brief>()
 
@@ -162,27 +163,35 @@ class CommandRegistry {
             val description = descriptionAnnotation?.description ?: ""
             val brief = briefAnnotation?.brief ?: description
 
-            val isServerSide = serverSideAnnotation != null
-            val isClientSide = clientSideAnnotation != null
+            // The first parameter is dropped because it's the instance
+            val functionParameters = function.parameters.drop(1)
 
-            val sides: Array<CommandSide> = if (isServerSide && isClientSide) {
-                arrayOf(CommandSide.Server, CommandSide.Client)
-            } else if (isServerSide) {
-                arrayOf(CommandSide.Server)
-            } else if (isClientSide) {
-                arrayOf(CommandSide.Client)
-            } else {
-                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} need to have either ServerSide or ClientSide or both annotation")
+            // TODO: Cache createType() result
+            if (!functionParameters[0].type.isSubtypeOf(CommandSender::class.createType())) {
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} first parameter must be CommandSender or it's subclass.")
             }
+
+            if (functionParameters[0].isVararg) {
+                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} sender parameter cannot be vararg.")
+            }
+
+            val sides: Array<CommandSide> =
+                if (functionParameters[0].type == ServerCommandSender::class.createType()) {
+                    arrayOf(CommandSide.Server)
+                } else if (functionParameters[0].type.isSubtypeOf(PlayerCommandSender::class.createType())) {
+                    arrayOf(CommandSide.Client)
+                } else {
+                    arrayOf(CommandSide.Server, CommandSide.Client)
+                }
 
             val checkedNames: MutableList<String> = mutableListOf()
 
             for (name in names) {
-                if (isServerSide && serverHandler.commandList.find { it.text == name } != null)
-                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for server")
+                if (sides.contains(CommandSide.Server) && serverHandler.commandList.find { it.text == name } != null)
+                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for server side.")
 
-                if (isClientSide && clientHandler.commandList.find { it.text == name } != null)
-                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for client")
+                if (sides.contains(CommandSide.Client) && clientHandler.commandList.find { it.text == name } != null)
+                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for client side.")
 
                 if (checkedNames.contains(name))
                     throw DuplicateCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
@@ -190,13 +199,7 @@ class CommandRegistry {
                 checkedNames.add(name)
             }
 
-            val functionParameters = function.parameters.drop(1)
-
-            if (isClientSide && !isServerSide && functionParameters.isNotEmpty() && functionParameters[0].type == typeOf<Player?>())
-                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} support client only must accept non optional player as the first parameter")
-
-            if (isClientSide && isServerSide && functionParameters.isNotEmpty() && (!functionParameters[0].isOptional || functionParameters[0].type != typeOf<Player?>()))
-                throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} support client and server must accept optional player as the first parameter")
+            val commandParameters = functionParameters.drop(1)
 
             val parameters: MutableList<CommandParameterData> = mutableListOf()
 
@@ -208,37 +211,26 @@ class CommandRegistry {
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} command with validator ${it.annotationClass} is not registered.")
             }
 
-            functionParameters.forEachIndexed { index, functionParameter ->
-                if (isClientSide && index == 0) {
-                    parameters.add(
-                        CommandParameterData(
-                            functionParameter,
-                            arrayOf(),
-                        )
-                    )
-
-                    return@forEachIndexed
-                }
-
-                val parameterTypeKClass = functionParameter.type.classifier
+            commandParameters.forEachIndexed { index, commandParameter ->
+                val parameterTypeKClass = commandParameter.type.classifier
 
                 val parameterTypeFilterResult =
                     backingParameterTypes.filterKeys { (parameterTypeKClass as KClass<*>).isSubclassOf(it) }
 
                 if (parameterTypeFilterResult.isEmpty())
-                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with type $parameterTypeKClass is not registered.")
+                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandParameter.name} parameter with type $parameterTypeKClass is not registered.")
 
                 val parameterValidationAnnotations: List<Annotation> =
-                    functionParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
+                    commandParameter.annotations.filter { it.annotationClass.hasAnnotation<ParameterValidation>() }
 
                 parameterValidationAnnotations.forEach {
-                    if (parameterValidator[functionParameter.type.classifier]?.contains(it.annotationClass) != true)
-                        throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${functionParameter.name} parameter with validator ${it.annotationClass} is not registered for ${parameterTypeKClass}.")
+                    if (parameterValidator[commandParameter.type.classifier]?.contains(it.annotationClass) != true)
+                        throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandParameter.name} parameter with validator ${it.annotationClass} is not registered for ${parameterTypeKClass}.")
                 }
 
                 parameters.add(
                     CommandParameterData(
-                        functionParameter,
+                        commandParameter,
                         parameterValidationAnnotations.toTypedArray(),
                     )
                 )
@@ -261,10 +253,10 @@ class CommandRegistry {
             names.forEach {
                 val arcCommand = ArcCommand(this, it, description, brief, if (it == names[0]) null else names[0])
 
-                if (isClientSide)
+                if (sides.contains((CommandSide.Server)))
                     clientHandler.registerArcCommand(arcCommand)
 
-                if (isServerSide)
+                if (sides.contains((CommandSide.Client)))
                     serverHandler.registerArcCommand(arcCommand)
             }
 
@@ -277,7 +269,7 @@ class CommandRegistry {
             }
     }
 
-    fun getCommandFromCommandName(commandName: String?): CommandData? {
+    fun getCommandFromCommandName(commandName: String): CommandData? {
         for (command in backingCommands) {
             if (command.names.contains(commandName)) return command
         }
@@ -285,6 +277,7 @@ class CommandRegistry {
         return null
     }
 
+    // TODO: Fix this doesn't fire CommandsChangedEvent
     /**
      * This method won't fail even if the command doesn't exist. It will just fail silently.
      */
