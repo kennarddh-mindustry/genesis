@@ -15,37 +15,42 @@ data class CommandData(
     val names: Array<String>,
     val description: String,
     val brief: String,
-    var sides: Array<CommandSide>,
+    var sides: Set<CommandSide>,
     val handler: Handler,
     val function: KFunction<*>,
     val parametersType: Array<CommandParameterData>,
     val validator: Array<Annotation>,
 ) {
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
         other as CommandData
 
+        if (commandRegistry != other.commandRegistry) return false
         if (!names.contentEquals(other.names)) return false
         if (description != other.description) return false
         if (brief != other.brief) return false
-        if (!sides.contentEquals(other.sides)) return false
+        if (sides != other.sides) return false
         if (handler != other.handler) return false
         if (function != other.function) return false
         if (!parametersType.contentEquals(other.parametersType)) return false
+        if (!validator.contentEquals(other.validator)) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = names.contentHashCode()
+        var result = commandRegistry.hashCode()
+        result = 31 * result + names.contentHashCode()
         result = 31 * result + description.hashCode()
         result = 31 * result + brief.hashCode()
-        result = 31 * result + sides.contentHashCode()
+        result = 31 * result + sides.hashCode()
         result = 31 * result + handler.hashCode()
         result = 31 * result + function.hashCode()
         result = 31 * result + parametersType.contentHashCode()
+        result = 31 * result + validator.contentHashCode()
         return result
     }
 

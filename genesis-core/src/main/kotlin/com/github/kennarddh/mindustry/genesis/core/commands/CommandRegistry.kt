@@ -175,13 +175,13 @@ class CommandRegistry {
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} sender parameter cannot be vararg.")
             }
 
-            val sides: Array<CommandSide> =
+            val sides: Set<CommandSide> =
                 if (functionParameters[0].type == ServerCommandSender::class.createType()) {
-                    arrayOf(CommandSide.Server)
+                    setOf(CommandSide.Server)
                 } else if (functionParameters[0].type.isSubtypeOf(PlayerCommandSender::class.createType())) {
-                    arrayOf(CommandSide.Client)
+                    setOf(CommandSide.Client)
                 } else {
-                    arrayOf(CommandSide.Server, CommandSide.Client)
+                    setOf(CommandSide.Server, CommandSide.Client)
                 }
 
             val checkedNames: MutableList<String> = mutableListOf()
@@ -293,8 +293,13 @@ class CommandRegistry {
 
                 clientHandler.removeCommand(name)
 
-                if (command != null && command.sides.contains(CommandSide.Client))
-                    command.sides = command.sides.filter { it != CommandSide.Client }.toTypedArray()
+                if (command != null && command.sides.contains(CommandSide.Client)) {
+                    val mutableCommandSides = command.sides.toMutableSet()
+
+                    mutableCommandSides.remove(CommandSide.Client)
+
+                    command.sides = mutableCommandSides.toSet()
+                }
             }
         } else if (sidesToBeRemoved.contains(CommandSide.Server)) {
             val exist = serverHandler.commandList.contains { it.text == name }
@@ -304,8 +309,13 @@ class CommandRegistry {
 
                 serverHandler.removeCommand(name)
 
-                if (command != null && command.sides.contains(CommandSide.Server))
-                    command.sides = command.sides.filter { it != CommandSide.Server }.toTypedArray()
+                if (command != null && command.sides.contains(CommandSide.Server)) {
+                    val mutableCommandSides = command.sides.toMutableSet()
+
+                    mutableCommandSides.remove(CommandSide.Server)
+
+                    command.sides = mutableCommandSides.toSet()
+                }
             }
         }
 
