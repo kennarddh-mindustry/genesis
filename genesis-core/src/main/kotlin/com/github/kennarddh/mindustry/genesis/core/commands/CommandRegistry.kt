@@ -277,35 +277,54 @@ class CommandRegistry {
         return null
     }
 
-    // TODO: Fix this doesn't fire CommandsChangedEvent
     /**
      * This method won't fail even if the command doesn't exist. It will just fail silently.
      */
-    fun removeCommand(name: String, side: CommandSide) {
+    fun removeCommand(name: String, vararg sidesToBeRemoved: CommandSide) {
         val command = getCommandFromCommandName(name)
 
-        if (side == CommandSide.Client) {
-            clientHandler.removeCommand(name)
+        var removedCounter = 0
 
-            if (command != null && command.sides.contains(CommandSide.Client))
-                command.sides = command.sides.filter { it != CommandSide.Client }.toTypedArray()
-        } else if (side == CommandSide.Server) {
-            serverHandler.removeCommand(name)
+        if (sidesToBeRemoved.contains(CommandSide.Client)) {
+            val exist = clientHandler.commandList.contains { it.text == name }
 
-            if (command != null && command.sides.contains(CommandSide.Server))
-                command.sides = command.sides.filter { it != CommandSide.Server }.toTypedArray()
+            if (exist) {
+                removedCounter += 1
+
+                clientHandler.removeCommand(name)
+
+                if (command != null && command.sides.contains(CommandSide.Client))
+                    command.sides = command.sides.filter { it != CommandSide.Client }.toTypedArray()
+            }
+        } else if (sidesToBeRemoved.contains(CommandSide.Server)) {
+            val exist = serverHandler.commandList.contains { it.text == name }
+
+            if (exist) {
+                removedCounter += 1
+
+                serverHandler.removeCommand(name)
+
+                if (command != null && command.sides.contains(CommandSide.Server))
+                    command.sides = command.sides.filter { it != CommandSide.Server }.toTypedArray()
+            }
         }
 
         if (command != null && command.sides.isEmpty())
             backingCommands.remove(command)
+
+        if (removedCounter > 0)
+            runOnMindustryThread {
+                Events.fire(CommandsChanged())
+            }
     }
 
     /**
      * This method won't fail even if the command doesn't exist. It will just fail silently.
+     *
+     * Remove command from all sides.
      */
     fun removeCommand(name: String) {
-        removeCommand(name, CommandSide.Client)
-        removeCommand(name, CommandSide.Server)
+        removeCommand(name, CommandSide.Server, CommandSide.Client)
     }
 
     fun invokeServerCommand(command: String) {
