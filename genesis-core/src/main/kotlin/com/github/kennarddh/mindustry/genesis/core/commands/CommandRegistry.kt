@@ -211,7 +211,7 @@ class CommandRegistry {
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} command with validator ${it.annotationClass} is not registered.")
             }
 
-            commandParameters.forEachIndexed { index, commandParameter ->
+            commandParameters.forEach { commandParameter ->
                 val parameterTypeKClass = commandParameter.type.classifier
 
                 val parameterTypeFilterResult =
