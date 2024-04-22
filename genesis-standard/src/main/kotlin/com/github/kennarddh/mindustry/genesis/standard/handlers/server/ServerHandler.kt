@@ -24,6 +24,7 @@ import com.github.kennarddh.mindustry.genesis.standard.Logger
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.BooleanParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.integer.IntParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.GTE
+import kotlinx.coroutines.TimeoutCancellationException
 import mindustry.Vars.*
 import mindustry.core.GameState
 import mindustry.core.Version
@@ -37,6 +38,7 @@ import mindustry.server.ServerControl
 import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.reflect.full.findAnnotation
+import kotlin.time.Duration.Companion.seconds
 
 
 class ServerHandler : Handler {
@@ -391,9 +393,19 @@ class ServerHandler : Handler {
 
     @Command(["javascript", "js"])
     @Description("Run arbitrary Javascript.")
-    fun javascript(sender: ServerCommandSender, script: String) {
-        runOnMindustryThread {
-            sender.sendMessage(mods.scripts.runConsole(script))
+    suspend fun javascript(sender: ServerCommandSender, script: String) {
+        try {
+            val output = runOnMindustryThreadSuspended(5.seconds) {
+                mods.scripts.runConsole(script)
+            }
+
+            sender.sendSuccess(output)
+        } catch (error: TimeoutCancellationException) {
+            sender.sendError("Code took too long.")
+        } catch (error: Exception) {
+            Logger.error("Javascript code throws unknown error", error)
+
+            sender.sendError("Unknown error occurred while running the code.")
         }
     }
 
