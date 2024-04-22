@@ -2,6 +2,9 @@ package com.github.kennarddh.mindustry.genesis.core.commands
 
 import arc.util.CommandHandler
 
+/**
+ * [name] must not contains uppercase letter
+ */
 class ArcCommand(
     val commandRegistry: CommandRegistry,
     val name: String,

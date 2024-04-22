@@ -4,7 +4,6 @@ import arc.struct.ObjectMap
 import arc.struct.Seq
 import arc.util.CommandHandler
 import arc.util.CommandHandler.Command
-import java.util.*
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.isAccessible
 
@@ -27,6 +26,6 @@ fun CommandHandler.registerArcCommand(arcCommand: ArcCommand) {
 
     orderedCommands.remove { it.text == arcCommand.name }
 
-    commands.put(arcCommand.name.lowercase(Locale.getDefault()), arcCommand)
+    commands.put(arcCommand.name, arcCommand)
     orderedCommands.add(arcCommand)
 }

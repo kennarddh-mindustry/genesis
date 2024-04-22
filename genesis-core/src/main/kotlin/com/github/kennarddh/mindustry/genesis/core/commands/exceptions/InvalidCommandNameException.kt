@@ -1,3 +1,3 @@
 package com.github.kennarddh.mindustry.genesis.core.commands.exceptions
 
-class DuplicateCommandNameException(message: String) : Exception(message)
+class InvalidCommandNameException(message: String) : Exception(message)

@@ -10,9 +10,9 @@ import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validati
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.commandValidationDescriptionAnnotationToString
 import com.github.kennarddh.mindustry.genesis.core.commands.events.CommandsChanged
-import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateCommandNameException
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.DuplicateParameterTypeException
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.InvalidCommandMethodException
+import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.InvalidCommandNameException
 import com.github.kennarddh.mindustry.genesis.core.commands.exceptions.NotFoundParameterTypeException
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.CommandParameterData
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.CommandParameterValidator
@@ -194,13 +194,16 @@ class CommandRegistry {
 
             for (name in names) {
                 if (sides.contains(CommandSide.Server) && serverHandler.commandList.find { it.text == name } != null)
-                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for server side.")
+                    throw InvalidCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for server side.")
 
                 if (sides.contains(CommandSide.Client) && clientHandler.commandList.find { it.text == name } != null)
-                    throw DuplicateCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for client side.")
+                    throw InvalidCommandNameException("Command $name for method ${handler::class.qualifiedName}.${function.name} has already been registered for client side.")
 
                 if (checkedNames.contains(name))
-                    throw DuplicateCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
+                    throw InvalidCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
+
+                if (!name.all { !it.isUpperCase() })
+                    throw InvalidCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name but it contains uppercase letter.")
 
                 checkedNames.add(name)
             }
@@ -260,11 +263,11 @@ class CommandRegistry {
             names.forEach {
                 val arcCommand = ArcCommand(this, it, description, brief, if (it == names[0]) null else names[0])
 
-                if (sides.contains((CommandSide.Server)))
-                    clientHandler.registerArcCommand(arcCommand)
-
-                if (sides.contains((CommandSide.Client)))
+                if (sides.contains(CommandSide.Server))
                     serverHandler.registerArcCommand(arcCommand)
+
+                if (sides.contains(CommandSide.Client))
+                    clientHandler.registerArcCommand(arcCommand)
             }
 
             addedCommandCounter += 1

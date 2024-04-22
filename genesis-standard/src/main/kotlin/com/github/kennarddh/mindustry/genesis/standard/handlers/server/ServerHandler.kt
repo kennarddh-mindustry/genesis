@@ -500,7 +500,7 @@ class ServerHandler : Handler {
         }
     }
 
-    @Command(["playerLimit", "playerlimit"])
+    @Command(["player-limit", "playerlimit"])
     @Description("Set the server player limit. 0 to disable limit")
     suspend fun playerLimit(sender: ServerCommandSender, @GTE(0) limit: Int? = null) {
         if (limit == null)
