@@ -172,8 +172,7 @@ class CommandRegistry {
 
             val senderParameter = functionParameters[0]
 
-            // TODO: Cache createType() result
-            if (!senderParameter.type.isSubtypeOf(CommandSender::class.createType())) {
+            if (!senderParameter.type.isSubtypeOf(CommandSender.type)) {
                 throw InvalidCommandMethodException("Method ${handler::class.qualifiedName}.${function.name} first parameter must be CommandSender or it's subclass.")
             }
 
@@ -182,9 +181,9 @@ class CommandRegistry {
             }
 
             val sides: Set<CommandSide> =
-                if (senderParameter.type == ServerCommandSender::class.createType()) {
+                if (senderParameter.type == ServerCommandSender.type) {
                     setOf(CommandSide.Server)
-                } else if (senderParameter.type.isSubtypeOf(PlayerCommandSender::class.createType())) {
+                } else if (senderParameter.type.isSubtypeOf(PlayerCommandSender.type)) {
                     setOf(CommandSide.Client)
                 } else {
                     setOf(CommandSide.Server, CommandSide.Client)
