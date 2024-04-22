@@ -40,6 +40,8 @@ import kotlin.reflect.full.*
 import kotlin.reflect.jvm.isAccessible
 
 class CommandRegistry {
+    private val commandNameRegex = """[a-z0-9_]""".toRegex()
+
     // TODO: This may not be reliable if any genesis controlled command is removed using Mindustry remove command instead of genesis one
     private val backingCommands: MutableList<CommandData> = mutableListOf()
 
@@ -201,9 +203,8 @@ class CommandRegistry {
                 if (checkedNames.contains(name))
                     throw InvalidCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
 
-                // If using it.isLowerCase() it will fail because '-' is not lower case
-                if (!name.all { !it.isUpperCase() })
-                    throw InvalidCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name but it contains uppercase letter.")
+                if (!name.matches(commandNameRegex))
+                    throw InvalidCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name must matches the regex \"$commandNameRegex\".")
 
                 checkedNames.add(name)
             }
