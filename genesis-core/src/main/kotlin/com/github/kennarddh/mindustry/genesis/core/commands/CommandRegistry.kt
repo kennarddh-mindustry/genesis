@@ -222,10 +222,17 @@ class CommandRegistry {
                     throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} command with validator ${it.annotationClass} is not registered.")
             }
 
-            commandParameters.forEach { commandParameter ->
+            commandParameters.forEachIndexed { index, commandParameter ->
                 val parameterTypeKClass = commandParameter.type.classifier
 
                 val hasVarargAnnotation = commandParameter.hasAnnotation<Vararg>()
+
+
+                if (commandParameters.size != index + 1 && hasVarargAnnotation) {
+                    // If non-last parameter has Vararg annotation
+
+                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandParameter.name} parameter cannot has Vararg annotation because it's not the last parameter.")
+                }
 
                 val parameterTypeFilterResult =
                     backingParameterTypes.filterKeys { (parameterTypeKClass as KClass<*>).isSubclassOf(it) }
