@@ -202,6 +202,7 @@ class CommandRegistry {
                 if (checkedNames.contains(name))
                     throw InvalidCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name command multiple times")
 
+                // If using it.isLowerCase() it will fail because '-' is not lower case
                 if (!name.all { !it.isUpperCase() })
                     throw InvalidCommandNameException("Method ${handler::class.qualifiedName}.${function.name} register $name but it contains uppercase letter.")
 
