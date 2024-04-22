@@ -8,6 +8,7 @@ typealias CommandParameterValidator<T> = suspend (annotation: Annotation, value:
 data class CommandParameterData(
     val kParameter: KParameter,
     val validator: Array<Annotation>,
+    val isVararg: Boolean
 ) {
     val name: String
         get() = kParameter.name ?: "Unknown Parameter"

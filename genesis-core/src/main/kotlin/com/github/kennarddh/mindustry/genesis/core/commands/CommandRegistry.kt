@@ -6,6 +6,7 @@ import arc.util.CommandHandler
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Brief
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Description
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.parameters.Vararg
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidation
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.CommandValidationDescription
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.validations.commandValidationDescriptionAnnotationToString
@@ -224,6 +225,8 @@ class CommandRegistry {
             commandParameters.forEach { commandParameter ->
                 val parameterTypeKClass = commandParameter.type.classifier
 
+                val hasVarargAnnotation = commandParameter.hasAnnotation<Vararg>()
+
                 val parameterTypeFilterResult =
                     backingParameterTypes.filterKeys { (parameterTypeKClass as KClass<*>).isSubclassOf(it) }
 
@@ -242,6 +245,7 @@ class CommandRegistry {
                     CommandParameterData(
                         commandParameter,
                         parameterValidationAnnotations.toTypedArray(),
+                        hasVarargAnnotation
                     )
                 )
             }
