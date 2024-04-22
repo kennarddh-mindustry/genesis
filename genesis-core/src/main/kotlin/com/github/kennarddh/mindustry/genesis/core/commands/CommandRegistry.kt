@@ -559,7 +559,7 @@ class CommandRegistry {
                     } catch (error: CommandParameterParsingException) {
                         errorMessages.add(error.toParametrizedString(parameter.name))
                     } catch (error: Exception) {
-                        Logger.error("Unknown Parameter Command Exception Occurred")
+                        Logger.error("Unknown Parameter Command Exception Occurred", error)
 
                         errorMessages.add("Unknown Error Occurred.")
                     }
