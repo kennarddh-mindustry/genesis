@@ -23,6 +23,8 @@ data class CommandData(
     val validator: Array<Annotation>,
     val senderParameter: KParameter,
 ) {
+    val hasVarargParameter: Boolean
+        get() = parametersType.lastOrNull()?.isVararg == true
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
