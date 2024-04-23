@@ -11,6 +11,7 @@ import com.github.kennarddh.mindustry.genesis.core.Genesis
 import com.github.kennarddh.mindustry.genesis.core.commands.ArcCommand
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Command
 import com.github.kennarddh.mindustry.genesis.core.commands.annotations.Description
+import com.github.kennarddh.mindustry.genesis.core.commands.annotations.parameters.Vararg
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.exceptions.CommandParameterValidationException
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.CommandParameterParsingException
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.validations.ParameterValidationDescription
@@ -58,7 +59,7 @@ class ServerHandler : Handler {
 
     @Command(["help"])
     @Description("Display the command list, or get help for a specific command.")
-    suspend fun help(sender: CommandSender, commandOrPage: String = "1") {
+    suspend fun help(sender: CommandSender, @Vararg commandOrPage: String = "1") {
         val commandsPerPage = 10
 
         var page: Int? = null
@@ -370,7 +371,7 @@ class ServerHandler : Handler {
 
     @Command(["mod", "plugin"])
     @Description("Display information about a loaded mod/plugin.")
-    fun mod(sender: ServerCommandSender, name: String) {
+    fun mod(sender: ServerCommandSender, @Vararg name: String) {
         val output = buildString {
             val mod = mods.list().find { it.meta.name.equals(name, ignoreCase = true) }
 
@@ -393,7 +394,7 @@ class ServerHandler : Handler {
 
     @Command(["javascript", "js"])
     @Description("Run arbitrary Javascript.")
-    suspend fun javascript(sender: ServerCommandSender, script: String) {
+    suspend fun javascript(sender: ServerCommandSender, @Vararg script: String) {
         try {
             val output = runOnMindustryThreadSuspended(5.seconds) {
                 mods.scripts.runConsole(script)
@@ -434,7 +435,7 @@ class ServerHandler : Handler {
         sender: ServerCommandSender,
         type: RulesCommandType = RulesCommandType.list,
         name: String? = null,
-        value: String? = null
+        @Vararg value: String? = null
     ) {
         when (type) {
             RulesCommandType.list -> {
@@ -540,7 +541,7 @@ class ServerHandler : Handler {
         sender: ServerCommandSender,
         type: ConfigCommandType = ConfigCommandType.list,
         name: String? = null,
-        value: String? = null
+        @Vararg value: String? = null
     ) {
         when (type) {
             ConfigCommandType.list -> {
