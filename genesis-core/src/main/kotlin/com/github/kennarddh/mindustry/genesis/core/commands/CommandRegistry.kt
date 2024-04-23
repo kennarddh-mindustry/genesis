@@ -504,18 +504,18 @@ class CommandRegistry {
         val deferredCommandParameters: MutableList<Deferred<Unit>> = mutableListOf()
 
         for (parameter in command.parametersType) {
+            if (!tokensIterator.hasNext()) {
+                if (!parameter.isOptional) {
+                    errorMessages.add("Not enough parameter supplied. Expected ${command.parametersType.size} parameters.")
+                }
+
+                continue
+            }
+
+            val token = tokensIterator.next()
+
             deferredCommandParameters.add(
                 async {
-                    if (!tokensIterator.hasNext()) {
-                        if (!parameter.isOptional) {
-                            errorMessages.add("Not enough parameter supplied. Expected ${command.parametersType.size} parameters.")
-                        }
-
-                        return@async
-                    }
-
-                    val token = tokensIterator.next()
-
                     if (!parameter.isOptional && token is SkipToken) {
                         errorMessages.add("Parameter '${parameter.name}' is required and cannot be skipped.")
                     }
