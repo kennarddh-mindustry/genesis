@@ -225,8 +225,10 @@ class CommandRegistry {
             commandParameters.forEachIndexed { index, commandParameter ->
                 val parameterTypeKClass = commandParameter.type.classifier
 
-                val hasVarargAnnotation = commandParameter.hasAnnotation<Vararg>()
+                if (commandParameter.isVararg)
+                    throw InvalidCommandParameterException("Method ${handler::class.qualifiedName}.${function.name} ${commandParameter.name} parameter cannot has kotlin's vararg.")
 
+                val hasVarargAnnotation = commandParameter.hasAnnotation<Vararg>()
 
                 if (commandParameters.size != index + 1 && hasVarargAnnotation) {
                     // If non-last parameter has Vararg annotation
