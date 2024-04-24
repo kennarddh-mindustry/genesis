@@ -528,7 +528,7 @@ class CommandRegistry {
                         return@async
                     }
 
-                    val tokenString = if (parameter.isVararg)
+                    val tokenString = if (parameter.isVararg && token.toBeParsed.isNotEmpty())
                         "${token.value} ${token.toBeParsed}"
                     else
                         token.value
