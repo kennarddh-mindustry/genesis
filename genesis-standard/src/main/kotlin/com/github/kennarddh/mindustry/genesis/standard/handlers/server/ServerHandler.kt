@@ -71,7 +71,7 @@ class ServerHandler : Handler {
             commandName = commandOrPage
         }
 
-        val isServer = player == null
+        val isServer = sender is ServerCommandSender
 
         val commands = if (isServer)
             Genesis.commandRegistry.serverCommands.toList()
