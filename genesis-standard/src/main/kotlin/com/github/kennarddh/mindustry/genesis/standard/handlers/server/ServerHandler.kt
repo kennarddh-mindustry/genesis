@@ -26,7 +26,7 @@ import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.signed.integer.IntParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.GTE
 import kotlinx.coroutines.TimeoutCancellationException
-import mindustry.Vars.*
+import mindustry.Vars
 import mindustry.core.GameState
 import mindustry.core.Version
 import mindustry.game.Gamemode
@@ -216,7 +216,7 @@ class ServerHandler : Handler {
         gameMode: Gamemode = Gamemode.survival
     ) {
         runOnMindustryThread {
-            if (state.isGame)
+            if (Vars.state.isGame)
                 return@runOnMindustryThread sender.sendError("Already hosting. Type 'stop' to stop hosting first.")
 
             // TODO: When v147 released replace this with ServerControl.instance.cancelPlayTask()
@@ -224,7 +224,7 @@ class ServerHandler : Handler {
 
             val map: Map?
             if (mapName != null) {
-                map = maps.all().find {
+                map = Vars.maps.all().find {
                     it.plainName().replace('_', ' ')
                         .equals(Strings.stripColors(mapName).replace('_', ' '), ignoreCase = true)
                 }
@@ -232,30 +232,30 @@ class ServerHandler : Handler {
                 if (map == null)
                     return@runOnMindustryThread sender.sendError("Map with name $mapName not found.")
             } else {
-                map = maps.shuffleMode.next(gameMode, state.map)
+                map = Vars.maps.shuffleMode.next(gameMode, Vars.state.map)
 
                 Logger.info("Randomized next map to be ${map.plainName()}.")
             }
 
             Logger.info("Loading map...")
 
-            logic.reset()
+            Vars.logic.reset()
 
             ServerControl.instance.lastMode = gameMode
 
             Core.settings.put("lastServerMode", ServerControl.instance.lastMode.name)
 
             try {
-                world.loadMap(map, map.applyRules(ServerControl.instance.lastMode))
-                state.rules = map.applyRules(gameMode)
-                logic.play()
+                Vars.world.loadMap(map, map.applyRules(ServerControl.instance.lastMode))
+                Vars.state.rules = map.applyRules(gameMode)
+                Vars.logic.play()
 
                 Logger.info("Map loaded.")
 
-                netServer.openServer()
+                Vars.netServer.openServer()
 
                 if (Administration.Config.autoPause.bool()) {
-                    state.set(GameState.State.paused)
+                    Vars.state.set(GameState.State.paused)
 
                     Reflect.set(ServerControl.instance, "autoPaused", true)
                 }
@@ -314,11 +314,11 @@ class ServerHandler : Handler {
         }
 
         val output = buildString {
-            if (!maps.all().isEmpty) {
+            if (!Vars.maps.all().isEmpty) {
                 val all: MutableList<Map> = mutableListOf()
 
-                if (showCustom) all.addAll(maps.customMaps())
-                if (showDefault) all.addAll(maps.defaultMaps())
+                if (showCustom) all.addAll(Vars.maps.customMaps())
+                if (showDefault) all.addAll(Vars.maps.defaultMaps())
 
                 if (all.isEmpty() && !showDefault) {
                     appendLine("No custom maps loaded. Set default as the first parameter to show default maps.")
@@ -339,7 +339,7 @@ class ServerHandler : Handler {
                 appendLine("No maps found.")
             }
 
-            appendLine("Map directory: ${customMapDirectory.file().getAbsoluteFile()}")
+            appendLine("Map directory: ${Vars.customMapDirectory.file().getAbsoluteFile()}")
 
             trimEnd('\n')
         }
@@ -351,17 +351,17 @@ class ServerHandler : Handler {
     @Description("Display all loaded mods/plugins.")
     fun mods(sender: ServerCommandSender) {
         val output = buildString {
-            if (!mods.list().isEmpty) {
+            if (!Vars.mods.list().isEmpty) {
                 appendLine("Mods:")
 
-                for (mod in mods.list()) {
+                for (mod in Vars.mods.list()) {
                     appendLine("\t${mod.meta.displayName}: ${mod.meta.name}@${mod.meta.version} ${if (mod.enabled()) "" else " (${mod.state})"}")
                 }
             } else {
                 appendLine("No mods found.")
             }
 
-            appendLine("Mod directory: ${modDirectory.file().getAbsoluteFile()}")
+            appendLine("Mod directory: ${Vars.modDirectory.file().getAbsoluteFile()}")
 
             trimEnd('\n')
         }
@@ -373,7 +373,7 @@ class ServerHandler : Handler {
     @Description("Display information about a loaded mod/plugin.")
     fun mod(sender: ServerCommandSender, @Vararg name: String) {
         val output = buildString {
-            val mod = mods.list().find { it.meta.name.equals(name, ignoreCase = true) }
+            val mod = Vars.mods.list().find { it.meta.name.equals(name, ignoreCase = true) }
 
             if (mod != null) {
                 appendLine("Name: ${mod.meta.displayName}")
@@ -397,7 +397,7 @@ class ServerHandler : Handler {
     suspend fun javascript(sender: ServerCommandSender, @Vararg script: String) {
         try {
             val output = runOnMindustryThreadSuspended(5.seconds) {
-                mods.scripts.runConsole(script)
+                Vars.mods.scripts.runConsole(script)
             }
 
             sender.sendSuccess(output)
@@ -414,12 +414,12 @@ class ServerHandler : Handler {
     @Description("Pause or unpause the game.")
     fun pause(sender: ServerCommandSender, pause: Boolean) {
         runOnMindustryThread {
-            if (state.isMenu)
+            if (Vars.state.isMenu)
                 return@runOnMindustryThread sender.sendError("Cannot pause without a game running.")
 
             Reflect.set(ServerControl.instance, "autoPaused", false)
 
-            state.set(if (state.isPaused) GameState.State.playing else GameState.State.paused)
+            Vars.state.set(if (Vars.state.isPaused) GameState.State.playing else GameState.State.paused)
 
             sender.sendSuccess(if (pause) "Game paused." else "Game unpaused.")
         }
@@ -493,7 +493,7 @@ class ServerHandler : Handler {
 
                     parent.addChild(jsonValue)
 
-                    JsonIO.json.readField(state.rules, jsonValue.name, parent)
+                    JsonIO.json.readField(Vars.state.rules, jsonValue.name, parent)
 
                     if (base.has(jsonValue.name))
                         base.remove(jsonValue.name)
@@ -509,7 +509,7 @@ class ServerHandler : Handler {
 
             Core.settings.put("globalrules", base.toString())
 
-            Call.setRules(state.rules)
+            Call.setRules(Vars.state.rules)
         }
     }
 
@@ -518,11 +518,11 @@ class ServerHandler : Handler {
     suspend fun playerLimit(sender: ServerCommandSender, @GTE(0) limit: Int? = null) {
         if (limit == null)
             return sender.sendError(
-                "Player limit is currently ${netServer.admins.playerLimit}.",
+                "Player limit is currently ${Vars.netServer.admins.playerLimit}.",
             )
 
         runOnMindustryThreadSuspended {
-            netServer.admins.playerLimit = limit
+            Vars.netServer.admins.playerLimit = limit
         }
 
         if (limit == 0)
