@@ -5,6 +5,7 @@ import arc.net.Server.ServerConnectFilter
 import arc.util.Reflect
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
+import com.github.kennarddh.mindustry.genesis.core.commons.runOnMindustryThread
 import com.github.kennarddh.mindustry.genesis.core.filters.annotations.Filter
 import com.github.kennarddh.mindustry.genesis.core.filters.exceptions.InvalidFilterHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
@@ -42,38 +43,40 @@ class FiltersRegistry {
 
         val prevConnectFilter = Reflect.get<ServerConnectFilter>(server, "connectFilter")
 
-        Vars.netServer.admins.addChatFilter { player, message ->
-            runBlocking {
-                var output = message
+        runOnMindustryThread {
+            Vars.netServer.admins.addChatFilter { player, message ->
+                runBlocking {
+                    var output = message
 
-                chatFilters.forEachPrioritized {
-                    output = it.filter(player, output)
-                }
-
-                return@runBlocking output
-            }
-        }
-
-        Vars.netServer.admins.addActionFilter { action ->
-            runBlocking {
-                actionFilters.forEachPrioritized {
-                    if (!it.allow(action))
-                        return@runBlocking false
-                }
-
-                return@runBlocking true
-            }
-        }
-
-        server.setConnectFilter { address ->
-            runBlocking {
-                connectFilters.forEachPrioritized {
-                    if (!it.accept(address)) {
-                        return@runBlocking prevConnectFilter?.accept(address) ?: false
+                    chatFilters.forEachPrioritized {
+                        output = it.filter(player, output)
                     }
-                }
 
-                return@runBlocking true
+                    return@runBlocking output
+                }
+            }
+
+            Vars.netServer.admins.addActionFilter { action ->
+                runBlocking {
+                    actionFilters.forEachPrioritized {
+                        if (!it.allow(action))
+                            return@runBlocking false
+                    }
+
+                    return@runBlocking true
+                }
+            }
+
+            server.setConnectFilter { address ->
+                runBlocking {
+                    connectFilters.forEachPrioritized {
+                        if (!it.accept(address)) {
+                            return@runBlocking prevConnectFilter?.accept(address) ?: false
+                        }
+                    }
+
+                    return@runBlocking true
+                }
             }
         }
     }
