@@ -58,37 +58,25 @@ class FiltersRegistry {
 
         Vars.netServer.admins.addActionFilter { action ->
             runBlocking {
-                var output = true
-
                 actionFilters.forEachPrioritized {
-                    output = it.allow(action)
-
-                    if (!output)
-                        return@forEachPrioritized
+                    if (!it.allow(action))
+                        return@runBlocking false
                 }
 
-                return@runBlocking output
+                return@runBlocking true
             }
         }
 
         CoroutineScopes.Main.launch {
             server.setConnectFilter { address ->
                 runBlocking {
-                    var output = true
-
-                    CoroutineScopes.Main.launch {
-                        connectFilters.forEachPrioritized {
-                            output = it.accept(address)
-
-                            if (!output)
-                                return@forEachPrioritized
+                    connectFilters.forEachPrioritized {
+                        if (!it.accept(address)) {
+                            return@runBlocking prevConnectFilter?.accept(address) ?: false
                         }
                     }
 
-                    if (output)
-                        return@runBlocking true
-
-                    prevConnectFilter?.accept(address) ?: false
+                    return@runBlocking true
                 }
             }
         }
