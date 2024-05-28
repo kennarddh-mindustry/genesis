@@ -3,13 +3,11 @@ package com.github.kennarddh.mindustry.genesis.core.filters
 import arc.net.Server
 import arc.net.Server.ServerConnectFilter
 import arc.util.Reflect
-import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
 import com.github.kennarddh.mindustry.genesis.core.filters.annotations.Filter
 import com.github.kennarddh.mindustry.genesis.core.filters.exceptions.InvalidFilterHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mindustry.Vars
 import mindustry.Vars.net
@@ -67,17 +65,15 @@ class FiltersRegistry {
             }
         }
 
-        CoroutineScopes.Main.launch {
-            server.setConnectFilter { address ->
-                runBlocking {
-                    connectFilters.forEachPrioritized {
-                        if (!it.accept(address)) {
-                            return@runBlocking prevConnectFilter?.accept(address) ?: false
-                        }
+        server.setConnectFilter { address ->
+            runBlocking {
+                connectFilters.forEachPrioritized {
+                    if (!it.accept(address)) {
+                        return@runBlocking prevConnectFilter?.accept(address) ?: false
                     }
-
-                    return@runBlocking true
                 }
+
+                return@runBlocking true
             }
         }
     }
