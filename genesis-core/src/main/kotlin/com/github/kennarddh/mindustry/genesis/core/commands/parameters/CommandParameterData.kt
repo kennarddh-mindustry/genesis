@@ -16,6 +16,9 @@ data class CommandParameterData(
     val isOptional: Boolean
         get() = kParameter.isOptional
 
+    val isRequired: Boolean
+        get() = !isOptional
+
     val kClass: KClass<*>
         get() = kParameter.type.classifier as KClass<*>
 

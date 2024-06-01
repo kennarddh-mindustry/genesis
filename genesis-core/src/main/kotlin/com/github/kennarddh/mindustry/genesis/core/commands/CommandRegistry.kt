@@ -505,7 +505,7 @@ class CommandRegistry {
 
         for (parameter in command.parametersType) {
             if (!tokensIterator.hasNext()) {
-                if (!parameter.isOptional) {
+                if (parameter.isRequired) {
                     errorMessages.add("Not enough parameter supplied. Expected ${command.parametersType.size} parameters.")
                 }
 
@@ -516,8 +516,11 @@ class CommandRegistry {
 
             deferredCommandParameters.add(
                 async {
-                    if (!parameter.isOptional && token is SkipToken) {
-                        errorMessages.add("Parameter '${parameter.name}' is required and cannot be skipped.")
+                    if (token is SkipToken) {
+                        if (parameter.isRequired)
+                            errorMessages.add("Parameter '${parameter.name}' is required and cannot be skipped.")
+
+                        return@async
                     }
 
                     if (token !is StringToken) {
