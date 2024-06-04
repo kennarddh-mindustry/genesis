@@ -1,4 +1,4 @@
-package com.github.kennarddh.mindustry.toast.core.commands.paramaters.types
+package com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types
 
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.CommandParameter
 import com.github.kennarddh.mindustry.genesis.core.commands.parameters.types.CommandParameterParsingException
