@@ -14,10 +14,12 @@ import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.unsigned.integer.ULongParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.types.numbers.unsigned.integer.UShortParameter
 import com.github.kennarddh.mindustry.genesis.standard.commands.parameters.validations.numbers.*
+import com.github.kennarddh.mindustry.toast.core.commands.paramaters.types.ItemParameter
 import com.github.kennarddh.mindustry.toast.core.commands.paramaters.types.TeamParameter
 import com.github.kennarddh.mindustry.toast.core.commands.paramaters.types.UnitTypeParameter
 import mindustry.game.Team
 import mindustry.gen.Player
+import mindustry.type.Item
 import mindustry.type.UnitType
 import kotlin.time.Duration
 
@@ -46,6 +48,7 @@ class CommandsHandler : Handler {
         Genesis.commandRegistry.registerParameterType(Player::class, PlayerParameter())
         Genesis.commandRegistry.registerParameterType(UnitType::class, UnitTypeParameter())
         Genesis.commandRegistry.registerParameterType(Team::class, TeamParameter())
+        Genesis.commandRegistry.registerParameterType(Item::class, ItemParameter())
 
         Genesis.commandRegistry.registerParameterValidationAnnotation(
             GT::class, listOf(
