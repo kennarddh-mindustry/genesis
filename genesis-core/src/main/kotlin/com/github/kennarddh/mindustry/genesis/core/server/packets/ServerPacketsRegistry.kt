@@ -3,14 +3,13 @@ package com.github.kennarddh.mindustry.genesis.core.server.packets
 import arc.func.Cons2
 import arc.struct.ObjectMap
 import arc.util.Reflect
-import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.Priority
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
 import com.github.kennarddh.mindustry.genesis.core.events.exceptions.InvalidServerPacketHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.server.packets.annotations.ServerPacketHandler
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mindustry.Vars.net
 import mindustry.net.NetConnection
 import kotlin.reflect.KClass
@@ -43,7 +42,7 @@ class ServerPacketsRegistry {
             val previousListener = previousListeners.get(packetType.java)
 
             net.handleServer(packetType.java) { connection, packet ->
-                CoroutineScopes.Main.launch {
+                runBlocking {
                     var output = true
 
                     serverListeners[packetType]!!.forEachPrioritized {
