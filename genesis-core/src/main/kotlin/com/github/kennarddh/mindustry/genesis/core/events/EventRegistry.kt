@@ -7,11 +7,11 @@ import com.github.kennarddh.mindustry.genesis.core.events.annotations.EventHandl
 import com.github.kennarddh.mindustry.genesis.core.events.exceptions.InvalidEventHandlerMethodException
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KClass
 import kotlin.reflect.full.callSuspend
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.jvm.isAccessible
 
 class EventRegistry {
@@ -22,7 +22,7 @@ class EventRegistry {
         for (function in handler::class.declaredFunctions) {
             function.isAccessible = true
 
-            if (!function.hasAnnotation<EventHandler>()) continue
+            val eventHandlerAnnotation = function.findAnnotation<EventHandler>() ?: continue
 
             val eventHandlerTriggerAnnotation = function.findAnnotation<EventHandlerTrigger>()
 
@@ -35,15 +35,31 @@ class EventRegistry {
                 throw InvalidEventHandlerMethodException("Method ${handler::class.qualifiedName}.${function.name} must accept exactly one parameter with the event type or use EventHandlerTrigger annotation")
 
             if (eventHandlerTriggerAnnotation != null) {
-                Events.run(eventHandlerTriggerAnnotation.trigger) {
-                    CoroutineScopes.Main.launch {
-                        function.callSuspend(handler)
+                if (eventHandlerAnnotation.runOnCallerThread) {
+                    Events.run(eventHandlerTriggerAnnotation.trigger) {
+                        runBlocking {
+                            function.callSuspend(handler)
+                        }
+                    }
+                } else {
+                    Events.run(eventHandlerTriggerAnnotation.trigger) {
+                        CoroutineScopes.Main.launch {
+                            function.callSuspend(handler)
+                        }
                     }
                 }
             } else {
-                Events.on((functionParameters[0].type.classifier as KClass<*>).java) {
-                    CoroutineScopes.Main.launch {
-                        function.callSuspend(handler, it)
+                if (eventHandlerAnnotation.runOnCallerThread) {
+                    Events.on((functionParameters[0].type.classifier as KClass<*>).java) {
+                        runBlocking {
+                            function.callSuspend(handler, it)
+                        }
+                    }
+                } else {
+                    Events.on((functionParameters[0].type.classifier as KClass<*>).java) {
+                        CoroutineScopes.Main.launch {
+                            function.callSuspend(handler, it)
+                        }
                     }
                 }
             }
