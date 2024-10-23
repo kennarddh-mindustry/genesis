@@ -1,13 +1,12 @@
 package com.github.kennarddh.mindustry.genesis.core.packets
 
-import com.github.kennarddh.mindustry.genesis.core.commons.CoroutineScopes
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.MutablePriorityList
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.Priority
 import com.github.kennarddh.mindustry.genesis.core.commons.priority.PriorityContainer
 import com.github.kennarddh.mindustry.genesis.core.handlers.Handler
 import com.github.kennarddh.mindustry.genesis.core.packets.annotations.PacketHandler
 import com.github.kennarddh.mindustry.genesis.core.packets.exceptions.InvalidPacketHandlerMethodException
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mindustry.Vars.netServer
 import mindustry.gen.Player
 import kotlin.reflect.full.callSuspend
@@ -32,7 +31,7 @@ class PacketRegistry {
             packetListeners[packetType] = MutablePriorityList()
 
             netServer.addPacketHandler(packetType) { player, data ->
-                CoroutineScopes.Main.launch {
+                runBlocking {
                     var output = true
 
                     packetListeners[packetType]!!.forEachPrioritized {
